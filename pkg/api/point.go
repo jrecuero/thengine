@@ -1,0 +1,78 @@
+// point.go contains everything required to identify a point in the screeen or
+// the canvas using the horizontal and vertical position in the canvas.
+package api
+
+import "fmt"
+
+// -----------------------------------------------------------------------------
+//
+// Point
+//
+// -----------------------------------------------------------------------------
+
+// Point structure identifies any position in the screen or canvas by the
+// horizontal and vertical values.
+// X integer with the horizontal location.
+// Y integer with the vertical location.
+type Point struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+
+// NewPoint function creates a new Point instaces based on the given horizontal
+// and vertical locations.
+func NewPoint(x int, y int) *Point {
+	return &Point{
+		X: x,
+		Y: y,
+	}
+}
+
+// ClonePoint functions creates a new Point instances with same attributes as
+// the given Point.
+func ClonePoint(point *Point) *Point {
+	return &Point{
+		X: point.X,
+		Y: point.Y,
+	}
+}
+
+// -----------------------------------------------------------------------------
+// Point public methods
+// -----------------------------------------------------------------------------
+
+// Clone method clones all attributes from the given Point instance.
+func (p *Point) Clone(point *Point) {
+	p.X = point.X
+	p.Y = point.Y
+}
+
+// Set method assigns new horizontal and vertical locations with given values.
+func (p *Point) Set(x int, y int) {
+	p.X = x
+	p.Y = y
+}
+
+// Get method returns horizontal and vertical location for the instance.
+func (p *Point) Get() (int, int) {
+	return p.X, p.Y
+}
+
+// IsEqual method returns if the given Point is equal than the instance, based
+// on the same horizontal and vertival coordinates.
+func (p *Point) IsEqual(point *Point) bool {
+	return (p.X == point.X) && (p.Y == point.Y)
+}
+
+// ToString method returns instance information as a string.
+func (p *Point) ToString() string {
+	return fmt.Sprintf("(%d,%d)", p.X, p.Y)
+}
+
+// SaveToDict method saves the instance information as a map.
+func (p *Point) SaveToDict() map[string]any {
+	result := map[string]any{}
+	result["x"] = p.X
+	result["y"] = p.Y
+	return result
+}
