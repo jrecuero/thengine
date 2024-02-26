@@ -119,6 +119,9 @@ func (c *Canvas) Clone(canvas *Canvas) {
 	if c.Size().IsEqual(canvas.Size()) {
 		for x, row := range canvas.Rows {
 			for y, cell := range row.Cols {
+				if cell == nil {
+					continue
+				}
 				// create a new instance for every cell position.
 				c.Rows[x].Cols[y] = CloneCell(cell)
 			}

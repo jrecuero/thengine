@@ -72,6 +72,9 @@ func renderCell(oldCell *Cell, newCell *Cell) {
 func (s *Screen) drawCanvasInDisplay() {
 	for r, rows := range s.Canvas.Rows {
 		for c, cell := range rows.Cols {
+			if cell == nil {
+				continue
+			}
 			// skip termbox call
 			if !s.DryRun {
 				termbox.SetCell(c, r, cell.Rune, termbox.Attribute(cell.Color.Fg), termbox.Attribute(cell.Color.Bg))
@@ -106,7 +109,9 @@ func (s *Screen) RenderCellAt(point *api.Point, cell *Cell) bool {
 		renderCell(canvasCell, cell)
 		return true
 	}
-	return false
+	// if the cell in the screen was nil, create a new one.
+	s.Canvas.SetCellAt(point, CloneCell(cell))
+	return true
 }
 
 // Size method returns the screen size as width and height.
