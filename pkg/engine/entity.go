@@ -2,7 +2,10 @@
 // in the application. An entity is the basic object that engine handles.
 package engine
 
-import "github.com/jrecuero/thengine/pkg/api"
+import (
+	"github.com/gdamore/tcell"
+	"github.com/jrecuero/thengine/pkg/api"
+)
 
 // -----------------------------------------------------------------------------
 //
@@ -14,16 +17,16 @@ import "github.com/jrecuero/thengine/pkg/api"
 type IEntity interface {
 	Draw()
 	GetCanvas() *Canvas
-	GetColor() *api.Color
 	GetName() string
 	GetPosition() *api.Point
 	GetSize() *api.Size
+	GetStyle() tcell.Style
 	Init()
 	SetCanvas(*Canvas)
-	SetColor(*api.Color)
 	SetName(string)
 	SetPosition(*api.Point)
 	SetSize(*api.Size)
+	SetStyle(tcell.Style)
 	Start()
 	Update()
 }
@@ -41,17 +44,17 @@ type Entity struct {
 	canvas   *Canvas
 	position *api.Point
 	size     *api.Size
-	color    *api.Color
+	style    tcell.Style
 }
 
 // NewEntity function creates a new Entity instance with all given attributes.
-func NewEntity(name string, position *api.Point, size *api.Size, color *api.Color) *Entity {
+func NewEntity(name string, position *api.Point, size *api.Size, style tcell.Style) *Entity {
 	entity := &Entity{
 		name:     name,
 		canvas:   NewCanvas(size),
 		position: position,
 		size:     size,
-		color:    color,
+		style:    style,
 	}
 	return entity
 }
@@ -74,10 +77,6 @@ func (e *Entity) GetCanvas() *Canvas {
 	return e.canvas
 }
 
-func (e *Entity) GetColor() *api.Color {
-	return e.color
-}
-
 func (e *Entity) GetName() string {
 	return e.name
 }
@@ -90,16 +89,16 @@ func (e *Entity) GetSize() *api.Size {
 	return e.size
 }
 
+func (e *Entity) GetStyle() tcell.Style {
+	return e.style
+}
+
 func (e *Entity) Init() {
 
 }
 
 func (e *Entity) SetCanvas(canvas *Canvas) {
 	e.canvas = canvas
-}
-
-func (e *Entity) SetColor(color *api.Color) {
-	e.color = color
 }
 
 func (e *Entity) SetName(name string) {
@@ -112,6 +111,10 @@ func (e *Entity) SetPosition(position *api.Point) {
 
 func (e *Entity) SetSize(size *api.Size) {
 	e.size = size
+}
+
+func (e *Entity) SetStyle(style tcell.Style) {
+	e.style = style
 }
 
 func (e *Entity) Start() {

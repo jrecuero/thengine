@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 )
@@ -10,10 +11,11 @@ import (
 func main() {
 	fmt.Println("ThEngine test")
 	screen := engine.NewScreen(api.NewSize(40, 80))
-	text := engine.NewCanvasFromString("Hello World", api.ColorBlackAndWhite)
+	defaultStyle := tcell.StyleDefault
+	text := engine.NewCanvasFromString("Hello World", &defaultStyle)
 	text.Render(screen)
 	appEngine := engine.NewEngine()
 	appEngine.Init()
-	screen.Draw(true)
+	screen.Draw(true, appEngine.Screen)
 	appEngine.Run()
 }

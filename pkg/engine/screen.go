@@ -4,8 +4,8 @@
 package engine
 
 import (
+	"github.com/gdamore/tcell"
 	"github.com/jrecuero/thengine/pkg/api"
-	"github.com/nsf/termbox-go"
 )
 
 // -----------------------------------------------------------------------------
@@ -16,7 +16,7 @@ import (
 
 // IScreen interface defines all functions a Screen has to implement.
 type IScreen interface {
-	Draw(bool)
+	Draw(bool, tcell.Screen)
 	RenderCellAt(*api.Point, *Cell) bool
 }
 
@@ -55,11 +55,9 @@ func renderCell(oldCell *Cell, newCell *Cell) {
 	if newCell.Rune != 0 {
 		oldCell.Rune = newCell.Rune
 	}
-	if newCell.Color.Fg != api.ColorDefault {
-		oldCell.Color.Fg = newCell.Color.Fg
-	}
-	if newCell.Color.Bg != api.ColorDefault {
-		oldCell.Color.Bg = newCell.Color.Bg
+	if newCell.Style != nil {
+		fg, bg, attrs := newCell.Style.Decompose()
+		_ = oldCell.Style.Foreground(fg).Background(bg).Attributes(attrs)
 	}
 }
 
@@ -69,7 +67,7 @@ func renderCell(oldCell *Cell, newCell *Cell) {
 
 // drawCanvasInDisplay function draws the canvas content into the displays using
 // termbox API.
-func (s *Screen) drawCanvasInDisplay() {
+func (s *Screen) drawCanvasInDisplay(screen tcell.Screen) {
 	for r, rows := range s.Canvas.Rows {
 		for c, cell := range rows.Cols {
 			if cell == nil {
@@ -77,7 +75,11 @@ func (s *Screen) drawCanvasInDisplay() {
 			}
 			// skip termbox call
 			if !s.DryRun {
-				termbox.SetCell(c, r, cell.Rune, termbox.Attribute(cell.Color.Fg), termbox.Attribute(cell.Color.Bg))
+				// style := tcell.StyleDefault.Foreground(tcell.Color(cell.Color.Fg)).Background(tcell.Color(cell.Color.Bg)).Dim(true)
+				style := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite).Blink(true)
+
+				screen.SetContent(c, r, cell.Rune, nil, style)
+				// termbox.SetCell(c, r, cell.Rune, termbox.Attribute(cell.Color.Fg), termbox.Attribute(cell.Color.Bg))
 			}
 		}
 	}
@@ -88,11 +90,12 @@ func (s *Screen) drawCanvasInDisplay() {
 // -----------------------------------------------------------------------------
 
 // Draw method draws the canvas content in the display.
-func (s *Screen) Draw(flush bool) {
+func (s *Screen) Draw(flush bool, screen tcell.Screen) {
 	if flush || !s.OldCanvas.IsEqual(s.Canvas) {
-		s.drawCanvasInDisplay()
+		s.drawCanvasInDisplay(screen)
 		if !s.DryRun {
-			termbox.Flush()
+			// termbox.Flush()
+			screen.Show()
 		}
 		s.OldCanvas = CloneCanvas(s.Canvas)
 	}

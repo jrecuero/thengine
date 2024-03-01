@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/tools"
 )
@@ -75,7 +76,7 @@ func CloneCanvas(canvas *Canvas) *Canvas {
 
 // NewCanvasFromString function creates a new canvas where the content is the
 // given string (multi-line is allowed) with the given color.
-func NewCanvasFromString(str string, color *api.Color) *Canvas {
+func NewCanvasFromString(str string, style *tcell.Style) *Canvas {
 	// Calculate width and height based on the number of lines in the string
 	// and the max length for every line.
 	lines := strings.Split(str, "\n")
@@ -88,10 +89,7 @@ func NewCanvasFromString(str string, color *api.Color) *Canvas {
 	for row, line := range lines {
 		for col, ch := range line {
 			// Use black/white as default color if not provided.
-			if color == nil {
-				color = api.NewColor(api.ColorBlack, api.ColorWhite)
-			}
-			cell := NewCell(color, ch)
+			cell := NewCell(style, ch)
 			canvas.SetCellAt(api.NewPoint(col, row), cell)
 		}
 	}
@@ -100,13 +98,13 @@ func NewCanvasFromString(str string, color *api.Color) *Canvas {
 
 // NewCanvasFromFile function creates a new canvas with the content of the
 // file.
-func NewCanvasFromFile(filename string, color *api.Color) *Canvas {
+func NewCanvasFromFile(filename string, style *tcell.Style) *Canvas {
 	content, err := os.ReadFile(filename)
 	if err != nil {
 		tools.Logger.WithField("module", "canvas").Errorf("Error opening %s Err=%+v", filename, err)
 		return nil
 	}
-	return NewCanvasFromString(string(content), color)
+	return NewCanvasFromString(string(content), style)
 }
 
 // -----------------------------------------------------------------------------
@@ -149,9 +147,9 @@ func (c *Canvas) GetCellAt(point *api.Point) *Cell {
 
 // GetColorAt method returns the Color in the canvas at the given row and
 // column.
-func (c *Canvas) GetColorAt(point *api.Point) *api.Color {
+func (c *Canvas) GetStyleAt(point *api.Point) *tcell.Style {
 	if cell := c.GetCellAt(point); cell != nil {
-		return cell.Color
+		return cell.Style
 	}
 	return nil
 }
@@ -227,6 +225,7 @@ func (c *Canvas) Render(screen IScreen) {
 }
 
 // SaveToDict method saves the instance information as a map.
+// TODO: to be revisited.
 func (c *Canvas) SaveToDict() map[string]any {
 	result := map[string]any{}
 	rows := []map[string]any{}
@@ -248,9 +247,9 @@ func (c *Canvas) SetCellAt(point *api.Point, cell *Cell) bool {
 
 // SetColorAt method sets the given Color to the cell at the given row and
 // column.
-func (c *Canvas) SetColorAt(point *api.Point, color *api.Color) bool {
+func (c *Canvas) SetStyleAt(point *api.Point, style *tcell.Style) bool {
 	if cell := c.GetCellAt(point); cell != nil {
-		cell.Color = color
+		cell.Style = style
 		return true
 	}
 	return false

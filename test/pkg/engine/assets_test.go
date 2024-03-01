@@ -1,7 +1,7 @@
 package engine_test
 
 import (
-	"github.com/jrecuero/thengine/pkg/api"
+	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/engine"
 )
 
@@ -10,27 +10,27 @@ var cells []*engine.Cell
 func createCells() {
 	cells = []*engine.Cell{
 		{
-			Color: api.NewColor(api.ColorBlack, api.ColorWhite),
+			Style: engine.NewStyle(tcell.ColorBlack, tcell.ColorWhite, 0),
 			Rune:  '0',
 		},
 		{
-			Color: api.NewColor(api.ColorBlue, api.ColorRed),
+			Style: engine.NewStyle(tcell.ColorBlue, tcell.ColorRed, 0),
 			Rune:  '1',
 		},
 		{
-			Color: api.NewColor(api.ColorLightBlue, api.ColorDefault),
+			Style: engine.NewStyle(tcell.ColorLightBlue, tcell.ColorDefault, 0),
 			Rune:  '2',
 		},
 		{
-			Color: api.NewColor(api.ColorDefault, api.ColorMagenta),
+			Style: engine.NewStyle(tcell.ColorDefault, tcell.ColorDarkMagenta, 0),
 			Rune:  '3',
 		},
 		{
-			Color: api.NewColor(api.ColorCyan, api.ColorYellow),
+			Style: engine.NewStyle(tcell.ColorDarkCyan, tcell.ColorYellow, 0),
 			Rune:  '4',
 		},
 		{
-			Color: api.NewColor(api.ColorDarkGray, api.ColorLightBlue),
+			Style: engine.NewStyle(tcell.ColorDarkGray, tcell.ColorLightBlue, 0),
 			Rune:  '5',
 		},
 	}
