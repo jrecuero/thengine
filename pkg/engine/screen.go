@@ -4,7 +4,7 @@
 package engine
 
 import (
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 )
 
@@ -31,6 +31,8 @@ type IScreen interface {
 // oldCanvas Canvas instance contains the last canvas being flushed.
 // Canvas Canvas instance contains the latest canvas to be flushed.
 // DryRun bool flag is set true for testing where termbox is not called.
+// TODO: Screen requires an origin point to be used as offset in the engine
+// display tcell.Screen.
 type Screen struct {
 	OldCanvas *Canvas
 	Canvas    *Canvas
@@ -79,7 +81,6 @@ func (s *Screen) drawCanvasInDisplay(screen tcell.Screen) {
 				style := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite).Blink(true)
 
 				screen.SetContent(c, r, cell.Rune, nil, style)
-				// termbox.SetCell(c, r, cell.Rune, termbox.Attribute(cell.Color.Fg), termbox.Attribute(cell.Color.Bg))
 			}
 		}
 	}
@@ -94,7 +95,6 @@ func (s *Screen) Draw(flush bool, screen tcell.Screen) {
 	if flush || !s.OldCanvas.IsEqual(s.Canvas) {
 		s.drawCanvasInDisplay(screen)
 		if !s.DryRun {
-			// termbox.Flush()
 			screen.Show()
 		}
 		s.OldCanvas = CloneCanvas(s.Canvas)

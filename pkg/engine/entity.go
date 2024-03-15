@@ -3,7 +3,7 @@
 package engine
 
 import (
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 )
 
@@ -15,18 +15,18 @@ import (
 
 // IEntity interface defines all methods any Entity structure should implement.
 type IEntity interface {
-	Draw()
+	Draw(IScreen)
 	GetCanvas() *Canvas
 	GetName() string
 	GetPosition() *api.Point
 	GetSize() *api.Size
-	GetStyle() tcell.Style
+	GetStyle() *tcell.Style
 	Init()
 	SetCanvas(*Canvas)
 	SetName(string)
 	SetPosition(*api.Point)
 	SetSize(*api.Size)
-	SetStyle(tcell.Style)
+	SetStyle(*tcell.Style)
 	Start()
 	Update()
 }
@@ -44,11 +44,11 @@ type Entity struct {
 	canvas   *Canvas
 	position *api.Point
 	size     *api.Size
-	style    tcell.Style
+	style    *tcell.Style
 }
 
 // NewEntity function creates a new Entity instance with all given attributes.
-func NewEntity(name string, position *api.Point, size *api.Size, style tcell.Style) *Entity {
+func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.Style) *Entity {
 	entity := &Entity{
 		name:     name,
 		canvas:   NewCanvas(size),
@@ -69,8 +69,8 @@ func NewEmptyEntity() *Entity {
 // Entity public methods
 // -----------------------------------------------------------------------------
 
-func (e *Entity) Draw() {
-
+func (e *Entity) Draw(screen IScreen) {
+	e.canvas.Render(screen)
 }
 
 func (e *Entity) GetCanvas() *Canvas {
@@ -89,7 +89,7 @@ func (e *Entity) GetSize() *api.Size {
 	return e.size
 }
 
-func (e *Entity) GetStyle() tcell.Style {
+func (e *Entity) GetStyle() *tcell.Style {
 	return e.style
 }
 
@@ -113,7 +113,7 @@ func (e *Entity) SetSize(size *api.Size) {
 	e.size = size
 }
 
-func (e *Entity) SetStyle(style tcell.Style) {
+func (e *Entity) SetStyle(style *tcell.Style) {
 	e.style = style
 }
 
