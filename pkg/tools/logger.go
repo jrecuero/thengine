@@ -26,20 +26,32 @@ var (
 )
 
 // -----------------------------------------------------------------------------
+// Package private functions
+// -----------------------------------------------------------------------------
+
+// createLogFile function creates a new logrus.Logger instance from the given
+// filename.
+func createLogFile(filename string) *logrus.Logger {
+	if logFile, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err == nil {
+		logger := logrus.New()
+		logger.SetOutput(logFile)
+		logger.SetLevel(logrus.TraceLevel)
+		return logger
+	} else {
+		panic(fmt.Sprintf("Error creating logfile %s Err=%+v", logFilename, err))
+	}
+}
+
+// -----------------------------------------------------------------------------
 // Init package
 // -----------------------------------------------------------------------------
 
 // init function provides all initialization required for the logger module.
 // It initializes logging file configuration.
 func init() {
-	if _, err := os.Stat(logFilename); err != nil {
+	if _, err := os.Stat(logFilename); err == nil {
+		fmt.Println("removing ", logFilename)
 		os.Remove(logFilename)
-		if logFile, err := os.OpenFile(logFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err == nil {
-			Logger = logrus.New()
-			Logger.SetOutput(logFile)
-			Logger.SetLevel(logrus.TraceLevel)
-		} else {
-			panic(fmt.Sprintf("Error creating logfile %s Err=%+v", logFilename, err))
-		}
 	}
+	Logger = createLogFile(logFilename)
 }

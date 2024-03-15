@@ -19,7 +19,7 @@ func TestScene(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		got := engine.NewScene(c.input, engine.NewScreen(api.NewSize(0, 0)))
+		got := engine.NewScene(c.input, engine.NewScreen(nil, api.NewSize(0, 0)))
 		if got == nil {
 			t.Errorf("[%d] NewScene Error exp:*Scene got:nil", i)
 			continue

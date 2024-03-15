@@ -245,5 +245,8 @@ func (m *SceneManager) Start() {
 }
 
 // Update method is called by the engine to update all scene manager scenes.
-func (m *SceneManager) Udpate() {
+func (m *SceneManager) Update(event tcell.Event) {
+	for _, scene := range m.activeScenes {
+		scene.Update(event)
+	}
 }

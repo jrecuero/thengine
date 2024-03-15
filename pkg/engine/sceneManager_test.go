@@ -29,7 +29,7 @@ func TestSceneManager(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		got := engine.NewSceneManager(engine.NewScreen(api.NewSize(0, 0)))
+		got := engine.NewSceneManager(engine.NewScreen(nil, api.NewSize(0, 0)))
 		if got == nil {
 			t.Errorf("[%d] NewSceneManager Error exp:*SceneManager got:nil", i)
 		}

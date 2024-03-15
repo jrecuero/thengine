@@ -15,20 +15,19 @@ import (
 
 // IEntity interface defines all methods any Entity structure should implement.
 type IEntity interface {
+	IObject
 	Draw(IScreen)
 	GetCanvas() *Canvas
-	GetName() string
 	GetPosition() *api.Point
 	GetSize() *api.Size
 	GetStyle() *tcell.Style
 	Init()
 	SetCanvas(*Canvas)
-	SetName(string)
 	SetPosition(*api.Point)
 	SetSize(*api.Size)
 	SetStyle(*tcell.Style)
 	Start()
-	Update()
+	Update(tcell.Event)
 }
 
 // -----------------------------------------------------------------------------
@@ -40,7 +39,7 @@ type IEntity interface {
 // Entity structure defines all attributes and methods for the basic
 // application object.
 type Entity struct {
-	name     string
+	*EObject
 	canvas   *Canvas
 	position *api.Point
 	size     *api.Size
@@ -50,7 +49,7 @@ type Entity struct {
 // NewEntity function creates a new Entity instance with all given attributes.
 func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.Style) *Entity {
 	entity := &Entity{
-		name:     name,
+		EObject:  NewEObject(name),
 		canvas:   NewCanvas(size),
 		position: position,
 		size:     size,
@@ -70,15 +69,13 @@ func NewEmptyEntity() *Entity {
 // -----------------------------------------------------------------------------
 
 func (e *Entity) Draw(screen IScreen) {
-	e.canvas.RenderAt(screen, e.position)
+	if e.IsVisible() {
+		e.canvas.RenderAt(screen, e.position)
+	}
 }
 
 func (e *Entity) GetCanvas() *Canvas {
 	return e.canvas
-}
-
-func (e *Entity) GetName() string {
-	return e.name
 }
 
 func (e *Entity) GetPosition() *api.Point {
@@ -101,10 +98,6 @@ func (e *Entity) SetCanvas(canvas *Canvas) {
 	e.canvas = canvas
 }
 
-func (e *Entity) SetName(name string) {
-	e.name = name
-}
-
 func (e *Entity) SetPosition(position *api.Point) {
 	e.position = position
 }
@@ -121,8 +114,10 @@ func (e *Entity) Start() {
 
 }
 
-func (e *Entity) Update() {
-
+func (e *Entity) Update(tcell.Event) {
+	if e.IsActive() {
+		//tools.Logger.WithField("module", "entity").WithField("function", "update").Infof("!!!")
+	}
 }
 
 var _ IEntity = (*Entity)(nil)

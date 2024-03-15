@@ -2,6 +2,8 @@
 // scene in the application.
 package engine
 
+import "github.com/gdamore/tcell/v2"
+
 // -----------------------------------------------------------------------------
 //
 // IScene
@@ -16,7 +18,7 @@ type IScene interface {
 	GetEntities() []IEntity
 	GetScreen() IScreen
 	Init()
-	Update()
+	Update(tcell.Event)
 	Start()
 }
 
@@ -84,7 +86,10 @@ func (s *Scene) Start() {
 }
 
 // Update method proceeds to updates all scene resources.
-func (s *Scene) Update() {
+func (s *Scene) Update(event tcell.Event) {
+	for _, entity := range s.entities {
+		entity.Update(event)
+	}
 }
 
 var _ IScene = (*Scene)(nil)
