@@ -70,7 +70,7 @@ func NewEmptyEntity() *Entity {
 // -----------------------------------------------------------------------------
 
 func (e *Entity) Draw(screen IScreen) {
-	e.canvas.Render(screen)
+	e.canvas.RenderAt(screen, e.position)
 }
 
 func (e *Entity) GetCanvas() *Canvas {

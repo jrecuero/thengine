@@ -77,8 +77,8 @@ func (s *Screen) drawCanvasInDisplay(screen tcell.Screen) {
 			}
 			// skip termbox call
 			if !s.DryRun {
-				// style := tcell.StyleDefault.Foreground(tcell.Color(cell.Color.Fg)).Background(tcell.Color(cell.Color.Bg)).Dim(true)
-				style := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite).Blink(true)
+				fg, bg, attrs := cell.Style.Decompose()
+				style := tcell.StyleDefault.Background(bg).Foreground(fg).Attributes(attrs)
 
 				screen.SetContent(c, r, cell.Rune, nil, style)
 			}

@@ -214,11 +214,22 @@ func (c *Canvas) IsInside(point *api.Point) bool {
 	return true
 }
 
-// Reder method render the canvas into the screen.
+// Render method renders the canvas into the screen.
 func (c *Canvas) Render(screen IScreen) {
 	for r, rows := range c.Rows {
 		for c, cell := range rows.Cols {
 			position := api.NewPoint(c, r)
+			screen.RenderCellAt(position, cell)
+		}
+	}
+}
+
+// RenderAt method renders the canvas into the screen at the given position.
+func (c *Canvas) RenderAt(screen IScreen, offset *api.Point) {
+	for r, rows := range c.Rows {
+		for c, cell := range rows.Cols {
+			position := api.NewPoint(c, r)
+			position.Add(offset)
 			screen.RenderCellAt(position, cell)
 		}
 	}

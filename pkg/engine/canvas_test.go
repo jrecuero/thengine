@@ -295,7 +295,7 @@ func TestCanvasNewCanvasFromFile(t *testing.T) {
 				filename string
 				style    *tcell.Style
 			}{
-				filename: "assets/canvasString.01",
+				filename: "assets/test/canvasString.01",
 				style:    engine.NewStyle(tcell.ColorBlue, tcell.ColorRed, 0),
 			},
 			exp: struct {
@@ -315,7 +315,7 @@ func TestCanvasNewCanvasFromFile(t *testing.T) {
 				filename string
 				style    *tcell.Style
 			}{
-				filename: "assets/canvasString.02",
+				filename: "assets/test/canvasString.02",
 				style:    engine.NewStyle(tcell.ColorDarkCyan, tcell.ColorYellow, 0),
 			},
 			exp: struct {
@@ -335,7 +335,7 @@ func TestCanvasNewCanvasFromFile(t *testing.T) {
 				filename string
 				style    *tcell.Style
 			}{
-				filename: "assets/canvasString.03",
+				filename: "assets/test/canvasString.03",
 				style:    engine.NewStyle(tcell.ColorRed, tcell.ColorBlue, 0),
 			},
 			exp: struct {

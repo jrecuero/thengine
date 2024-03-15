@@ -23,12 +23,18 @@ func demoOne() {
 func demoTwo() {
 	fmt.Println("ThEngine demo-two")
 	screen := engine.NewScreen(api.NewSize(40, 80))
-	defaultStyle := tcell.StyleDefault
-	text := engine.NewEntity("text", api.NewPoint(0, 0), api.NewSize(1, 1), &defaultStyle)
-	textCanvas := engine.NewCanvasFromString("Hello World", &defaultStyle)
-	text.SetCanvas(textCanvas)
+	//defaultStyle := tcell.StyleDefault.Foreground(tcell.Color104).Background(tcell.ColorBlack).Attributes(tcell.AttrBlink)
+	styleOne := tcell.StyleDefault.Foreground(tcell.Color100).Background(tcell.ColorBlack)
+	styleTwo := tcell.StyleDefault.Foreground(tcell.Color101).Background(tcell.ColorBlack)
 	scene := engine.NewScene("scene", screen)
-	scene.AddEntity(text)
+	textOne := engine.NewEntity("text-one", api.NewPoint(0, 0), api.NewSize(1, 1), &styleOne)
+	textOneCanvas := engine.NewCanvasFromString("Hello World!!!", &styleOne)
+	textOne.SetCanvas(textOneCanvas)
+	scene.AddEntity(textOne)
+	textTwo := engine.NewEntity("text-two", api.NewPoint(0, 1), api.NewSize(1, 1), &styleTwo)
+	textTwoCanvas := engine.NewCanvasFromString("Hello World******", &styleTwo)
+	textTwo.SetCanvas(textTwoCanvas)
+	scene.AddEntity(textTwo)
 	appEngine := engine.NewEngine(nil)
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
