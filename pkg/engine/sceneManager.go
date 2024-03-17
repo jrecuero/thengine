@@ -9,8 +9,6 @@ import "github.com/gdamore/tcell/v2"
 // -----------------------------------------------------------------------------
 
 const (
-	EngineMainSceneName = "engine/main"
-
 	InvalidSceneIndex = -1
 )
 
@@ -29,16 +27,12 @@ type SceneManager struct {
 }
 
 // NewSceneManager function creates a new SceneManager instance.
-func NewSceneManager(engineScreen IScreen) *SceneManager {
+func NewSceneManager() *SceneManager {
 	mgr := &SceneManager{
 		scenes:        make([]IScene, 0),
 		activeScenes:  make([]IScene, 0),
 		visibleScenes: make([]IScene, 0),
 	}
-	// Create a default scene for the engine that should be always present in
-	// all applications.
-	engineScene := NewScene(EngineMainSceneName, engineScreen)
-	mgr.AddScene(engineScene)
 	return mgr
 }
 

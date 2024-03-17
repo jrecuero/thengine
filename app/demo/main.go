@@ -15,7 +15,7 @@ func demoOne() {
 	defaultStyle := tcell.StyleDefault
 	text := engine.NewCanvasFromString("Hello World", &defaultStyle)
 	text.Render(screen)
-	appEngine := engine.NewEngine(nil)
+	appEngine := engine.NewEngine()
 	appEngine.Init()
 	screen.Draw(true, appEngine.GetDisplay())
 	appEngine.Run(60.0)
@@ -36,7 +36,7 @@ func demoTwo() {
 	textTwoCanvas := engine.NewCanvasFromString("Hello World******", &styleTwo)
 	textTwo.SetCanvas(textTwoCanvas)
 	scene.AddEntity(textTwo)
-	appEngine := engine.NewEngine(nil)
+	appEngine := engine.NewEngine()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}
@@ -60,7 +60,7 @@ func demoThree() {
 	textOneCanvas := engine.NewCanvasFromString("\\ /\n O \n/ \\", &styleOne)
 	textOne.SetCanvas(textOneCanvas)
 	scene.AddEntity(textOne)
-	appEngine := engine.NewEngine(nil)
+	appEngine := engine.NewEngine()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}

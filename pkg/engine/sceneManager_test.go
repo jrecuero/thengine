@@ -3,7 +3,6 @@ package engine_test
 import (
 	"testing"
 
-	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 )
 
@@ -21,7 +20,7 @@ func TestSceneManager(t *testing.T) {
 				active  int
 				visible int
 			}{
-				scenes:  1,
+				scenes:  0,
 				active:  0,
 				visible: 0,
 			},
@@ -29,7 +28,7 @@ func TestSceneManager(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		got := engine.NewSceneManager(engine.NewScreen(nil, api.NewSize(0, 0)))
+		got := engine.NewSceneManager()
 		if got == nil {
 			t.Errorf("[%d] NewSceneManager Error exp:*SceneManager got:nil", i)
 		}

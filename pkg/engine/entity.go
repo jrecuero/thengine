@@ -16,6 +16,7 @@ import (
 // IEntity interface defines all methods any Entity structure should implement.
 type IEntity interface {
 	IObject
+	IFocus
 	Draw(IScreen)
 	GetCanvas() *Canvas
 	GetPosition() *api.Point
@@ -38,18 +39,26 @@ type IEntity interface {
 
 // Entity structure defines all attributes and methods for the basic
 // application object.
+// zLevel represents the z coordinate with allows to prioritize entities to be
+// displayed before.
+// pLevel represents the update priority of the entity which allows to update
+// entities before.
 type Entity struct {
 	*EObject
+	*Focus
 	canvas   *Canvas
 	position *api.Point
 	size     *api.Size
 	style    *tcell.Style
+	zLevel   int
+	pLevel   int
 }
 
 // NewEntity function creates a new Entity instance with all given attributes.
 func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.Style) *Entity {
 	entity := &Entity{
 		EObject:  NewEObject(name),
+		Focus:    NewFocus(NoFocus),
 		canvas:   NewCanvas(size),
 		position: position,
 		size:     size,
@@ -61,12 +70,28 @@ func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.St
 // NewEmptyEntity function creates a new Entity instance with all attributes
 // as default values.
 func NewEmptyEntity() *Entity {
-	return &Entity{}
+	return &Entity{
+		EObject: NewEObject(""),
+		Focus:   NewFocus(NoFocus),
+	}
+}
+
+// NewNamedEntity function creates a new Entity instance with all default
+// attributes but the given name.
+func NewNamedEntity(name string) *Entity {
+	return &Entity{
+		EObject: NewEObject(name),
+		Focus:   NewFocus(NoFocus),
+	}
 }
 
 // -----------------------------------------------------------------------------
 // Entity public methods
 // -----------------------------------------------------------------------------
+
+func (e *Entity) CanHaveFocus() bool {
+	return e.IsFocusEnable() && e.IsVisible() && e.IsActive()
+}
 
 func (e *Entity) Draw(screen IScreen) {
 	if e.IsVisible() {
@@ -120,4 +145,6 @@ func (e *Entity) Update(tcell.Event) {
 	}
 }
 
+var _ IObject = (*Entity)(nil)
+var _ IFocus = (*Entity)(nil)
 var _ IEntity = (*Entity)(nil)

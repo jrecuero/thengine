@@ -3,10 +3,20 @@
 package engine
 
 import (
+	"fmt"
 	"os"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/jrecuero/thengine/pkg/api"
+)
+
+// -----------------------------------------------------------------------------
+// Package global constants
+// -----------------------------------------------------------------------------
+
+const (
+	EngineMainSceneName = "engine/main"
 )
 
 // -----------------------------------------------------------------------------
@@ -26,9 +36,9 @@ type Engine struct {
 }
 
 // NewEngine function creates a new Engine instance.
-func NewEngine(engineScreen IScreen) *Engine {
+func NewEngine() *Engine {
 	engine := &Engine{
-		sceneManager: NewSceneManager(engineScreen),
+		sceneManager: NewSceneManager(),
 		ctrlCh:       make(chan bool, 2),
 		eventCh:      make(chan tcell.Event),
 	}
@@ -65,6 +75,26 @@ func (e *Engine) stopEventPoll() {
 // -----------------------------------------------------------------------------
 // Engine public methods
 // -----------------------------------------------------------------------------
+
+// CreateEngineScene method proceeds to create a new an unique scene owned by
+// the engine. The size of the scene is equal to the size of the tcell.Screen.
+func (e *Engine) CreateEngineScene() error {
+
+	if e.display == nil {
+		return fmt.Errorf("Engine display was not created. Engine.Init() has to be called")
+	}
+
+	// Create a new screen to be used by the engine scene with the same size as
+	// the engine display tcell.Screen.
+	width, height := e.display.Size()
+	engineScreen := NewScreen(nil, api.NewSize(width, height))
+
+	// Create a default scene for the engine that should be always present in
+	// all applications.
+	engineScene := NewScene(EngineMainSceneName, engineScreen)
+	e.sceneManager.AddScene(engineScene)
+	return nil
+}
 
 // Draw method proceeds to draws all entities in visible scenes.
 func (e *Engine) Draw() {

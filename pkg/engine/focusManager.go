@@ -1,0 +1,216 @@
+// focusManager.go contains all data and methods required for handling focus
+// between all application entities.
+package engine
+
+import "fmt"
+
+// -----------------------------------------------------------------------------
+// Package private constants
+// -----------------------------------------------------------------------------
+
+const (
+	entityNotInScene int = -1
+)
+
+// -----------------------------------------------------------------------------
+//
+// FocusManager
+//
+// -----------------------------------------------------------------------------
+
+// FocusManager struct contains all attributes and methods required for
+// handling focus between all application entities.
+type FocusManager struct {
+	entities  map[string][]IEntity
+	withFocus map[string][]IEntity
+	locked    bool
+}
+
+// -----------------------------------------------------------------------------
+// New FocusManager function
+// -----------------------------------------------------------------------------
+
+// NewFocusManager function creates a new FocusManager instance.
+func NewFocusManager() *FocusManager {
+	return &FocusManager{
+		locked:    false,
+		entities:  make(map[string][]IEntity),
+		withFocus: make(map[string][]IEntity),
+	}
+}
+
+// -----------------------------------------------------------------------------
+// FocusManager private methods
+// -----------------------------------------------------------------------------
+
+func (m *FocusManager) indexForEntityInEntities(entity IEntity) (string, int) {
+	for sceneName, entities := range m.entities {
+		for index, ent := range entities {
+			if ent == entity {
+				return sceneName, index
+			}
+		}
+	}
+	return "", entityNotInScene
+}
+
+func (m *FocusManager) indexForEntityInScene(scene IScene, entity IEntity) int {
+	if entitiesInScene, ok := m.entities[scene.GetName()]; ok {
+		for index, ent := range entitiesInScene {
+			if ent == entity {
+				return index
+			}
+		}
+	}
+	return entityNotInScene
+}
+
+func (m *FocusManager) indexForEntityInSceneWithFocus(scene IScene, entity IEntity) int {
+	if entitiesInScene, ok := m.withFocus[scene.GetName()]; ok {
+		for index, ent := range entitiesInScene {
+			if ent == entity {
+				return index
+			}
+		}
+	}
+	return entityNotInScene
+}
+
+func (m *FocusManager) indexForEntityInWithFocus(entity IEntity) (string, int) {
+	for sceneName, entities := range m.withFocus {
+		for index, ent := range entities {
+			if ent == entity {
+				return sceneName, index
+			}
+		}
+	}
+	return "", entityNotInScene
+}
+
+// -----------------------------------------------------------------------------
+// FocusManager public methods
+// -----------------------------------------------------------------------------
+
+// AcquireFocusToEntity method acquire the focus to the given entity.
+func (m *FocusManager) AcquireFocusToEntity(entity IEntity) error {
+	// if focus manager is locked, return.
+	if m.locked {
+		return nil
+	}
+	// if the entity already has focus, return.
+	if _, index := m.indexForEntityInWithFocus(entity); index != entityNotInScene {
+		return nil
+	}
+	if sceneName, index := m.indexForEntityInEntities(entity); index != entityNotInScene {
+		if _, ok := m.withFocus[sceneName]; !ok {
+			m.withFocus[sceneName] = []IEntity{}
+		}
+		m.withFocus[sceneName] = append(m.withFocus[sceneName], entity)
+		entity.AcquireFocus()
+		// Remove the entity from the list of entities so it can not take focus
+		// again.
+		m.entities[sceneName] = append(m.entities[sceneName][:index], m.entities[sceneName][index+1:]...)
+
+	}
+	return fmt.Errorf("entity %s not found", entity.GetName())
+}
+
+// AddEntity method adds a new entity to be handled in the focus manager.
+func (m *FocusManager) AddEntity(scene IScene, entity IEntity) error {
+	if !entity.IsFocusEnable() {
+		return fmt.Errorf("entity %s in scene %s has focus disabled", entity.GetName(), scene.GetName())
+	}
+	m.entities[scene.GetName()] = append(m.entities[scene.GetName()], entity)
+	return nil
+}
+
+// GetEntities method returns all entities in the focus manager.
+func (m *FocusManager) GetEntities() map[string][]IEntity {
+	return m.entities
+}
+
+// GetEntitiesWithFocus method returns all entities with focus.
+func (m *FocusManager) GetEntitiesWithFocus() map[string][]IEntity {
+	return m.withFocus
+}
+
+// IsLocked method checks if the focus manager is locked for switching focus to
+// other entities.
+func (m *FocusManager) IsLocked() bool {
+	return m.locked
+}
+
+// NextEntityWithFocusInScene method looks for the next entity to give focus in
+// the given scene.
+func (m *FocusManager) NextEntityWithFocusInScene(scene IScene) IEntity {
+	if entities, ok := m.entities[scene.GetName()]; ok {
+		for _, entity := range entities {
+			if entity.CanHaveFocus() {
+				return entity
+			}
+		}
+	}
+	return nil
+}
+
+// ReleaseFocusFromEntity method release the focus from the given entity.
+func (m *FocusManager) ReleaseFocusFromEntity(entity IEntity) error {
+	// if focus manager is locked, return.
+	if m.locked {
+		return nil
+	}
+	// if the entity is not the list of entities allowed to have focus, return
+	// with error
+	if _, index := m.indexForEntityInEntities(entity); index == entityNotInScene {
+		return fmt.Errorf("entity %s not found", entity.GetName())
+	}
+	if sceneName, index := m.indexForEntityInWithFocus(entity); index != entityNotInScene {
+		m.withFocus[sceneName] = append(m.withFocus[sceneName][:index], m.withFocus[sceneName][index+1:]...)
+		// Remove the scene entry if there are not any entities there.
+		if len(m.withFocus[sceneName]) == 0 {
+			delete(m.withFocus, sceneName)
+		}
+		entity.ReleaseFocus()
+		// Add the entity to the end of the entities list.
+		m.entities[sceneName] = append(m.entities[sceneName], entity)
+	}
+	return nil
+}
+
+// RemoveEntiry method removes the given entity to be handled in the focus
+// manaer.
+func (m *FocusManager) RemoveEntity(scene IScene, entity IEntity) error {
+	if !entity.IsFocusEnable() {
+		return fmt.Errorf("entity %s in scene %s has focus disabled", entity.GetName(), scene.GetName())
+	}
+	index := m.indexForEntityInScene(scene, entity)
+	if index == entityNotInScene {
+		return fmt.Errorf("entity %s not found in  scene %s", entity.GetName(), scene.GetName())
+	}
+	sceneName := scene.GetName()
+	// Remove the entity from the list of entities in the given scene.
+	m.entities[sceneName] = append(m.entities[sceneName][:index], m.entities[sceneName][index+1:]...)
+	// Remove the scene entry if there are not any entities there.
+	if len(m.entities[sceneName]) == 0 {
+		delete(m.entities, sceneName)
+	}
+
+	// If the entity is in the list of entitied with focus, remove it from
+	// there.
+	if index = m.indexForEntityInSceneWithFocus(scene, entity); index != entityNotInScene {
+		// Be sure the entity release its focus.
+		entity.ReleaseFocus()
+		m.withFocus[sceneName] = append(m.withFocus[sceneName][:index], m.withFocus[sceneName][index+1:]...)
+		// Remove the scene entry if there are not any entities there.
+		if len(m.withFocus[sceneName]) == 0 {
+			delete(m.withFocus, sceneName)
+		}
+	}
+	return nil
+}
+
+// RemoveScene method removes all entities for the given scene.
+func (m *FocusManager) RemoveScene(scene IScene) {
+	delete(m.entities, scene.GetName())
+	delete(m.withFocus, scene.GetName())
+}
