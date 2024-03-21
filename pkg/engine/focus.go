@@ -33,6 +33,7 @@ type IFocus interface {
 	IsFocusEnable() bool
 	ReleaseFocus() (bool, error)
 	SetFocusEnable(bool)
+	SetFocusType(FocusType)
 }
 
 // -----------------------------------------------------------------------------
@@ -117,4 +118,9 @@ func (f *Focus) ReleaseFocus() (bool, error) {
 // SetFocusEnable method sets the enable flag for the focus.
 func (f *Focus) SetFocusEnable(enable bool) {
 	f.enable = enable
+}
+
+// SetFocusType method sets the focus type value.
+func (f *Focus) SetFocusType(focusType FocusType) {
+	f.focusType = focusType
 }
