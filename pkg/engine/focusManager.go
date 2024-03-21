@@ -57,20 +57,6 @@ func (m *FocusManager) acquireFocusToEntityInScene(sceneName string, entity IEnt
 	return nil
 }
 
-// releaseFocusFromEntityInScene method release the focus for the given entity
-// in the given scene with the given index.
-func (m *FocusManager) releaseFocusFromEntityInScene(sceneName string, entity IEntity, index int) error {
-	m.withFocus[sceneName] = append(m.withFocus[sceneName][:index], m.withFocus[sceneName][index+1:]...)
-	// Remove the scene entry if there are not any entities there.
-	if len(m.withFocus[sceneName]) == 0 {
-		delete(m.withFocus, sceneName)
-	}
-	entity.ReleaseFocus()
-	// Add the entity to the end of the entities list.
-	m.entities[sceneName] = append(m.entities[sceneName], entity)
-	return nil
-}
-
 // indexForEntityInEntities method looks for the scene name and the index of
 // the given entity in all lists of entities.
 func (m *FocusManager) indexForEntityInEntities(entity IEntity) (string, int) {
@@ -123,6 +109,20 @@ func (m *FocusManager) indexForEntityInWithFocus(entity IEntity) (string, int) {
 	return "", entityNotInScene
 }
 
+// releaseFocusFromEntityInScene method release the focus for the given entity
+// in the given scene with the given index.
+func (m *FocusManager) releaseFocusFromEntityInScene(sceneName string, entity IEntity, index int) error {
+	m.withFocus[sceneName] = append(m.withFocus[sceneName][:index], m.withFocus[sceneName][index+1:]...)
+	// Remove the scene entry if there are not any entities there.
+	if len(m.withFocus[sceneName]) == 0 {
+		delete(m.withFocus, sceneName)
+	}
+	entity.ReleaseFocus()
+	// Add the entity to the end of the entities list.
+	m.entities[sceneName] = append(m.entities[sceneName], entity)
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 // FocusManager public methods
 // -----------------------------------------------------------------------------
@@ -139,6 +139,7 @@ func (m *FocusManager) AcquireFocusToEntity(entity IEntity) error {
 	}
 	if sceneName, index := m.indexForEntityInEntities(entity); index != entityNotInScene {
 		m.acquireFocusToEntityInScene(sceneName, entity, index)
+		return nil
 	}
 	return fmt.Errorf("entity %s not found", entity.GetName())
 }
@@ -187,20 +188,9 @@ func (m *FocusManager) ReleaseFocusFromEntity(entity IEntity) error {
 	if m.locked {
 		return nil
 	}
-	// if the entity is not the list of entities allowed to have focus, return
-	// with error
-	if _, index := m.indexForEntityInEntities(entity); index == entityNotInScene {
-		return fmt.Errorf("entity %s not found", entity.GetName())
-	}
+	// look for the entity in the list of entities with focus.
 	if sceneName, index := m.indexForEntityInWithFocus(entity); index != entityNotInScene {
-		m.withFocus[sceneName] = append(m.withFocus[sceneName][:index], m.withFocus[sceneName][index+1:]...)
-		// Remove the scene entry if there are not any entities there.
-		if len(m.withFocus[sceneName]) == 0 {
-			delete(m.withFocus, sceneName)
-		}
-		entity.ReleaseFocus()
-		// Add the entity to the end of the entities list.
-		m.entities[sceneName] = append(m.entities[sceneName], entity)
+		m.releaseFocusFromEntityInScene(sceneName, entity, index)
 	}
 	return nil
 }
@@ -211,21 +201,22 @@ func (m *FocusManager) RemoveEntity(scene IScene, entity IEntity) error {
 	if !entity.IsFocusEnable() {
 		return fmt.Errorf("entity %s in scene %s has focus disabled", entity.GetName(), scene.GetName())
 	}
-	index := m.indexForEntityInScene(scene, entity)
-	if index == entityNotInScene {
-		return fmt.Errorf("entity %s not found in  scene %s", entity.GetName(), scene.GetName())
-	}
 	sceneName := scene.GetName()
-	// Remove the entity from the list of entities in the given scene.
-	m.entities[sceneName] = append(m.entities[sceneName][:index], m.entities[sceneName][index+1:]...)
-	// Remove the scene entry if there are not any entities there.
-	if len(m.entities[sceneName]) == 0 {
-		delete(m.entities, sceneName)
+
+	// If the entity is in the list of entities with focus, remove it from
+	// there.
+	if index := m.indexForEntityInScene(scene, entity); index != entityNotInScene {
+		// Remove the entity from the list of entities in the given scene.
+		m.entities[sceneName] = append(m.entities[sceneName][:index], m.entities[sceneName][index+1:]...)
+		// Remove the scene entry if there are not any entities there.
+		if len(m.entities[sceneName]) == 0 {
+			delete(m.entities, sceneName)
+		}
 	}
 
-	// If the entity is in the list of entitied with focus, remove it from
+	// If the entity is in the list of entities with focus, remove it from
 	// there.
-	if index = m.indexForEntityInSceneWithFocus(scene, entity); index != entityNotInScene {
+	if index := m.indexForEntityInSceneWithFocus(scene, entity); index != entityNotInScene {
 		// Be sure the entity release its focus.
 		entity.ReleaseFocus()
 		m.withFocus[sceneName] = append(m.withFocus[sceneName][:index], m.withFocus[sceneName][index+1:]...)

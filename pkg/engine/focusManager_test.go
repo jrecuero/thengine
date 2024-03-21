@@ -109,6 +109,13 @@ func TestFocusManagerAddEntity(t *testing.T) {
 
 func TestFocusManagerRemoveEntity(t *testing.T) {
 
+	entity11.SetFocusEnable(true)
+	entity11.SetFocusType(engine.SingleFocus)
+	entity12.SetFocusEnable(true)
+	entity12.SetFocusType(engine.SingleFocus)
+	entity13.SetFocusEnable(true)
+	entity13.SetFocusType(engine.SingleFocus)
+
 	// Remove entity with focus disable
 	got := engine.NewFocusManager()
 	_ = got.AddEntity(scene1, entity11)
@@ -132,22 +139,56 @@ func TestFocusManagerRemoveEntity(t *testing.T) {
 
 	// Add two entities in same scene and remove the first one.
 	_ = got.AddEntity(scene1, entity11)
-	_ = got.AddEntity(scene1, entity21)
+	_ = got.AddEntity(scene1, entity12)
+	_ = got.AddEntity(scene1, entity13)
 	gotError = got.RemoveEntity(scene1, entity11)
 	gotEntities := got.GetEntities()
 	if len(gotEntities) != 1 {
 		t.Errorf("[3] RemoveEntity Error.GetEntities exp:1 got:%d", len(gotEntities))
 	}
 	if entities, ok := gotEntities[scene1.GetName()]; ok {
-		if len(entities) == 1 {
-			if entities[0] != entity21 {
-				t.Errorf("[3] RemoveEntity Error.Entity exp:%s got:%s", entity21.GetName(), entities[0].GetName())
+		if len(entities) == 2 {
+			if entities[0] != entity12 {
+				t.Errorf("[3] RemoveEntity Error.Entity exp:%s got:%s", entity12.GetName(), entities[0].GetName())
 			}
 		} else {
 			t.Errorf("[3] RemoveEntity Error.Entities exp:1 got:%d", len(entities))
 		}
 	} else {
 		t.Errorf("[3] RemoveEntity Error.Scene exp:%s got:nil", scene1.GetName())
+	}
+
+	// Remove entity that has focus.
+	_ = got.AcquireFocusToEntity(entity12)
+	withFocus := got.GetEntitiesWithFocus()[scene1.GetName()]
+	if len(withFocus) != 1 {
+		t.Errorf("[4] RemoveEntity Error.WithFocus exp:1 got:%d", len(withFocus))
+	}
+	if withFocus[0] != entity12 {
+		t.Errorf("[4] RemoveEntity Error.WithFocusEntity exp:%s got:%s", entity12.GetName(), withFocus[0].GetName())
+	}
+	gotError = got.RemoveEntity(scene1, entity12)
+	if gotError != nil {
+		t.Errorf("[4] RemoveEntity Error exp:nil got:%v", gotError)
+	}
+	gotEntities = got.GetEntities()
+	if len(gotEntities) != 1 {
+		t.Errorf("[4] RemoveEntity Error.GetEntities exp:1 got:%d", len(gotEntities))
+	}
+	if entities, ok := gotEntities[scene1.GetName()]; ok {
+		if len(entities) == 1 {
+			if entities[0] != entity13 {
+				t.Errorf("[4] RemoveEntity Error.Entity exp:%s got:%s", entity13.GetName(), entities[0].GetName())
+			}
+		} else {
+			t.Errorf("[4] RemoveEntity Error.Entities exp:1 got:%d", len(entities))
+		}
+	} else {
+		t.Errorf("[4] RemoveEntity Error.Scene exp:%s got:nil", scene1.GetName())
+	}
+	withFocus = got.GetEntitiesWithFocus()[scene1.GetName()]
+	if len(withFocus) != 0 {
+		t.Errorf("[4] RemoveEntity Error.AfterRemove.WithFocus exp:0 got:%d", len(withFocus))
 	}
 }
 
@@ -393,5 +434,160 @@ func TestFocusManagerUpdateFocusForScene(t *testing.T) {
 	} else {
 		t.Errorf("[6] UpdateFocusForScene Error.Scene exp:[]IEntity got:nil")
 		return
+	}
+}
+
+func TestFocusManagerAcquireFocusToEntity(t *testing.T) {
+	// Update to the proper focus for all entities as single-focus.
+	entity11.SetFocusEnable(true)
+	entity11.SetFocusType(engine.SingleFocus)
+	entity12.SetFocusEnable(true)
+	entity12.SetFocusType(engine.SingleFocus)
+	entity13.SetFocusEnable(true)
+	entity13.SetFocusType(engine.SingleFocus)
+	entity21.SetFocusEnable(true)
+	entity21.SetFocusType(engine.SingleFocus)
+	entity22.SetFocusEnable(true)
+	entity22.SetFocusType(engine.SingleFocus)
+	entity23.SetFocusEnable(true)
+	entity23.SetFocusType(engine.SingleFocus)
+
+	got := engine.NewFocusManager()
+	_ = got.AddEntity(scene1, entity11)
+	_ = got.AddEntity(scene1, entity12)
+	_ = got.AddEntity(scene1, entity13)
+	_ = got.AddEntity(scene2, entity21)
+	_ = got.AddEntity(scene2, entity22)
+	_ = got.AddEntity(scene2, entity23)
+
+	gotError := got.AcquireFocusToEntity(entity11)
+	if gotError != nil {
+		t.Errorf("[1] AcquireFocusToEntity Error exp:nil got:%+v", gotError)
+		return
+	}
+	withFocus := got.GetEntitiesWithFocus()
+	if gotWithFocus, ok := withFocus[scene1.GetName()]; ok {
+		if len(gotWithFocus) != 1 {
+			t.Errorf("[1] AcquireFocusToEntity Error.LenWithFocus exp:1 got:%d", len(gotWithFocus))
+		}
+		if gotWithFocus[0] != entity11 {
+			t.Errorf("[1] AcquireFocusToEntity Error.EntityWitFocus exp:%s got:%s", entity11.GetName(), gotWithFocus[0].GetName())
+		}
+		entities := got.GetEntities()
+		if len(entities[scene1.GetName()]) != 2 {
+			t.Errorf("[1] AcquireFocusToEntity Error.LenEntities exp:2 got:%d", len(entities))
+		}
+		for _, gotEntity := range entities[scene1.GetName()] {
+			if gotEntity.GetName() == entity11.GetName() {
+				t.Errorf("[1] AcquireFocusToEntity Error.Entity exp:nil got:%s", gotEntity.GetName())
+			}
+		}
+	} else {
+		t.Errorf("[1] AcquireFocusToEntity Error.Scene exp:[]IEntity got:nil")
+		return
+	}
+
+	gotError = got.AcquireFocusToEntity(entity12)
+	if gotError != nil {
+		t.Errorf("[2] AcquireFocusToEntity Error exp:nil got:%+v", gotError)
+		return
+	}
+	withFocus = got.GetEntitiesWithFocus()
+	if gotWithFocus, ok := withFocus[scene1.GetName()]; ok {
+		if len(gotWithFocus) != 2 {
+			t.Errorf("[2] AcquireFocusToEntity Error.LenWithFocus exp:2 got:%d", len(gotWithFocus))
+		}
+		if gotWithFocus[0] != entity11 {
+			t.Errorf("[2] AcquireFocusToEntity Error.EntityWitFocus exp:%s got:%s", entity11.GetName(), gotWithFocus[0].GetName())
+		}
+		if gotWithFocus[1] != entity12 {
+			t.Errorf("[2] AcquireFocusToEntity Error.EntityWitFocus exp:%s got:%s", entity12.GetName(), gotWithFocus[1].GetName())
+		}
+		entities := got.GetEntities()
+		if len(entities[scene1.GetName()]) != 1 {
+			t.Errorf("[2] AcquireFocusToEntity Error.LenEntities exp:1 got:%d", len(entities))
+		}
+		for _, gotEntity := range entities[scene1.GetName()] {
+			if gotEntity.GetName() == entity11.GetName() {
+				t.Errorf("[2] AcquireFocusToEntity Error.Entity exp:nil got:%s", gotEntity.GetName())
+			}
+			if gotEntity.GetName() == entity12.GetName() {
+				t.Errorf("[2] AcquireFocusToEntity Error.Entity exp:nil got:%s", gotEntity.GetName())
+			}
+		}
+	} else {
+		t.Errorf("[2] AcquireFocusToEntity Error.Scene exp:[]IEntity got:nil")
+		return
+	}
+}
+
+func TestFocusReleaseFocusFromEntity(t *testing.T) {
+	// Update to the proper focus for all entities as single-focus.
+	entity11.SetFocusEnable(true)
+	entity11.SetFocusType(engine.SingleFocus)
+	entity12.SetFocusEnable(true)
+	entity12.SetFocusType(engine.SingleFocus)
+	entity13.SetFocusEnable(true)
+	entity13.SetFocusType(engine.SingleFocus)
+	entity21.SetFocusEnable(true)
+	entity21.SetFocusType(engine.SingleFocus)
+	entity22.SetFocusEnable(true)
+	entity22.SetFocusType(engine.SingleFocus)
+	entity23.SetFocusEnable(true)
+	entity23.SetFocusType(engine.SingleFocus)
+
+	got := engine.NewFocusManager()
+	_ = got.AddEntity(scene1, entity11)
+	_ = got.AddEntity(scene1, entity12)
+	_ = got.AddEntity(scene1, entity13)
+	_ = got.AddEntity(scene2, entity21)
+	_ = got.AddEntity(scene2, entity22)
+	_ = got.AddEntity(scene2, entity23)
+
+	_ = got.AcquireFocusToEntity(entity11)
+
+	gotError := got.ReleaseFocusFromEntity(entity11)
+	if gotError != nil {
+		t.Errorf("[1] ReleaseFocusFromEntity Error exp:nil got:%+v", gotError)
+		return
+	}
+	withFocus := got.GetEntitiesWithFocus()
+	if gotWithFocus, ok := withFocus[scene1.GetName()]; ok {
+		t.Errorf("[1] ReleaseFocusFromEntity Error.Scene exp:nil got:%+v", gotWithFocus)
+	}
+	entities := got.GetEntities()
+	if len(entities[scene1.GetName()]) != 3 {
+		t.Errorf("[1] ReleaseFocusFromEntity Error.LenEntities exp:3 got:%d", len(entities))
+	}
+	entity := entities[scene1.GetName()][len(entities[scene1.GetName()])-1]
+	if entity != entity11 {
+		t.Errorf("[1] ReleaseFocusFromEntity Error.Entity exp:%s got:%s", entity11.GetName(), entity.GetName())
+	}
+
+	_ = got.AcquireFocusToEntity(entity11)
+	_ = got.AcquireFocusToEntity(entity12)
+
+	gotError = got.ReleaseFocusFromEntity(entity11)
+	if gotError != nil {
+		t.Errorf("[2] ReleaseFocusFromEntity Error exp:nil got:%+v", gotError)
+		return
+	}
+	withFocus = got.GetEntitiesWithFocus()
+	if gotWithFocus, ok := withFocus[scene1.GetName()]; ok {
+		if len(withFocus) != 1 {
+			t.Errorf("[2] ReleaseFocusFromEntity Error.LenWithFocus exp:1 got:%d", len(withFocus))
+		}
+	} else {
+		t.Errorf("[2] ReleaseFocusFromEntity Error.Scene exp:map[string][]Ientity got:%+v", gotWithFocus)
+	}
+	for _, gotEntity := range entities[scene1.GetName()] {
+		if gotEntity.GetName() == entity12.GetName() {
+			t.Errorf("[2] ReleaseFocusFromEntity Error.Entity exp:nil got:%s", gotEntity.GetName())
+		}
+	}
+	entities = got.GetEntities()
+	entity = entities[scene1.GetName()][len(entities[scene1.GetName()])-1]
+	if entity != entity11 {
+		t.Errorf("[1] ReleaseFocusFromEntity Error.Entity exp:%s got:%s", entity11.GetName(), entity.GetName())
 	}
 }
