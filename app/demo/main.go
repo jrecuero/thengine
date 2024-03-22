@@ -7,6 +7,7 @@ import (
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/tools"
+	"github.com/jrecuero/thengine/pkg/widgets"
 )
 
 func demoOne() {
@@ -70,6 +71,25 @@ func demoThree() {
 	appEngine.Run(60.0)
 }
 
+func demoFour(dryRun bool) {
+	tools.Logger.WithField("module", "main").Infof("ThEngine demo-four")
+	fmt.Println("ThEngine demo-four")
+	screen := engine.NewScreen(nil, api.NewSize(40, 80))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	scene := engine.NewScene("scene", screen)
+	textOne := widgets.NewText("text-one", api.NewPoint(0, 0), api.NewSize(3, 3), &styleOne, "Hello\nWorld!")
+	scene.AddEntity(textOne)
+	appEngine := engine.NewEngine()
+	if !appEngine.GetSceneManager().AddScene(scene) {
+		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
+	}
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	// appEngine.SetDryRun(dryRun)
+	appEngine.Init()
+	appEngine.Run(60.0)
+}
+
 func main() {
-	demoThree()
+	demoFour(true)
 }

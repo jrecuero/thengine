@@ -5,10 +5,12 @@ package engine
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
+	"github.com/jrecuero/thengine/pkg/tools"
 )
 
 // -----------------------------------------------------------------------------
@@ -33,6 +35,7 @@ type Engine struct {
 	sceneManager *SceneManager
 	ctrlCh       chan bool
 	eventCh      chan tcell.Event
+	dryRun       bool
 }
 
 // NewEngine function creates a new Engine instance.
@@ -113,16 +116,18 @@ func (e *Engine) GetSceneManager() *SceneManager {
 
 // Init method initializes are resources required to run the engine.
 func (e *Engine) Init() {
-	var err error
-	e.display, err = tcell.NewScreen()
-	if err != nil {
-		panic(err)
+	if !e.dryRun {
+		var err error
+		e.display, err = tcell.NewScreen()
+		if err != nil {
+			panic(err)
+		}
+		if err = e.display.Init(); err != nil {
+			panic(err)
+		}
+		defaultStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
+		e.display.SetStyle(defaultStyle)
 	}
-	if err = e.display.Init(); err != nil {
-		panic(err)
-	}
-	defaultStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
-	e.display.SetStyle(defaultStyle)
 }
 
 // Run method runs the engine in an infinite loop.
@@ -130,11 +135,24 @@ func (e *Engine) Run(fps float64) {
 	var event tcell.Event
 	var isRunning bool = true
 
-	e.startEventPoll()
-	defer e.stopEventPoll()
+	if !e.dryRun {
+		e.startEventPoll()
+		defer e.stopEventPoll()
+
+		// panic handler.
+		defer func() {
+			if err := recover(); err != nil {
+				tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("panic %+v", err)
+				tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("%s", string(debug.Stack()))
+			}
+			if !e.dryRun {
+				e.display.Fini()
+			}
+			os.Exit(0)
+		}()
+	}
 
 	for isRunning {
-		//tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("loop")
 		nowTime := time.Now()
 		select {
 		case event = <-e.eventCh:
@@ -158,8 +176,13 @@ func (e *Engine) Run(fps float64) {
 		timeToSleep := (time.Until(nowTime).Seconds() * 1000.0) + 1000.0/fps
 		time.Sleep(time.Duration(timeToSleep) * time.Millisecond)
 	}
-	e.display.Fini()
-	os.Exit(0)
+}
+
+// SetDryRun method sets the dryRun variable to set dryRun flag which avoid any
+// ncurses call.
+func (e *Engine) SetDryRun(dryRun bool) {
+	e.dryRun = dryRun
+	e.sceneManager.SetDryRun(dryRun)
 }
 
 // Update method proceeds to update all entities in active scenes.

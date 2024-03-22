@@ -13,6 +13,21 @@ import (
 )
 
 // -----------------------------------------------------------------------------
+// iterCanvas
+// -----------------------------------------------------------------------------
+
+// iterCanvas structure defines index required to iterate a canvas.
+type iterCanvas struct {
+	Row int
+	Col int
+}
+
+// newiterCanvas function creates a new iterCanvas instance.
+func newiterCanvas() *iterCanvas {
+	return &iterCanvas{}
+}
+
+// -----------------------------------------------------------------------------
 // Row
 // -----------------------------------------------------------------------------
 
@@ -50,6 +65,7 @@ func (r *Row) SaveToDict() map[string]any {
 // displayed in the screen.
 type Canvas struct {
 	Rows []*Row
+	iter *iterCanvas
 }
 
 // NewCanvas function creates a new Canvas instance with the given number of
@@ -105,6 +121,35 @@ func NewCanvasFromFile(filename string, style *tcell.Style) *Canvas {
 		return nil
 	}
 	return NewCanvasFromString(string(content), style)
+}
+
+// -----------------------------------------------------------------------------
+// Canvas iterator methods.
+// -----------------------------------------------------------------------------
+
+// CreateIter method creates a new canvas iterator.
+func (c *Canvas) CreateIter() {
+	c.iter = newiterCanvas()
+}
+
+// IterHasNext method checks if there are still some entries to iterate.
+func (c *Canvas) IterHasNext() bool {
+	return (c.iter.Col < c.Width()) && (c.iter.Row < c.Height())
+}
+
+// IterGetNext method returns the next entry to iterate and increase iterator
+// counters.
+func (c *Canvas) IterGetNext() (int, int, *Cell) {
+	col := c.iter.Col
+	row := c.iter.Row
+	point := api.NewPoint(col, row)
+	cell := c.GetCellAt(point)
+	c.iter.Col++
+	if c.iter.Col >= c.Width() {
+		c.iter.Col = 0
+		c.iter.Row++
+	}
+	return col, row, cell
 }
 
 // -----------------------------------------------------------------------------
@@ -228,9 +273,11 @@ func (c *Canvas) Render(screen IScreen) {
 func (c *Canvas) RenderAt(screen IScreen, offset *api.Point) {
 	for r, rows := range c.Rows {
 		for c, cell := range rows.Cols {
-			position := api.NewPoint(c, r)
-			position.Add(offset)
-			screen.RenderCellAt(position, cell)
+			if cell != nil {
+				position := api.NewPoint(c, r)
+				position.Add(offset)
+				screen.RenderCellAt(position, cell)
+			}
 		}
 	}
 }

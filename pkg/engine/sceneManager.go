@@ -125,6 +125,36 @@ func (m *SceneManager) GetVisibleSceneIndex(scene IScene) int {
 	return getSceneInSlice(scene, m.visibleScenes)
 }
 
+// Init method is called to initializes all scene manager resources.
+func (m *SceneManager) Init() {
+}
+
+// IsSceneAvailable method finds the given scene in the list of all scenes available.
+func (m *SceneManager) IsSceneAvailable(scene IScene) bool {
+	if index := m.GetSceneIndex(scene); index != InvalidSceneIndex {
+		return true
+	}
+	return false
+}
+
+// IsSceneActive method finds if the given scene is in the list of all active
+// scenes.
+func (m *SceneManager) IsSceneActive(scene IScene) bool {
+	if index := m.GetActiveSceneIndex(scene); index != InvalidSceneIndex {
+		return true
+	}
+	return false
+}
+
+// IsSceneVisible method finds if the given scene in in the list of all visible
+// scenes.
+func (m *SceneManager) IsSceneVisible(scene IScene) bool {
+	if index := m.GetVisibleSceneIndex(scene); index != InvalidSceneIndex {
+		return true
+	}
+	return false
+}
+
 // PushActiveSceneAsFirst method pushes the given scene as the first in the
 // slice of active scenes.
 func (m *SceneManager) PushActiveSceneAsFirst(scene IScene) bool {
@@ -165,36 +195,6 @@ func (m *SceneManager) PushVisibleSceneAsLast(scene IScene) bool {
 	return false
 }
 
-// Init method is called to initializes all scene manager resources.
-func (m *SceneManager) Init() {
-}
-
-// IsSceneAvailable method finds the given scene in the list of all scenes available.
-func (m *SceneManager) IsSceneAvailable(scene IScene) bool {
-	if index := m.GetSceneIndex(scene); index != InvalidSceneIndex {
-		return true
-	}
-	return false
-}
-
-// IsSceneActive method finds if the given scene is in the list of all active
-// scenes.
-func (m *SceneManager) IsSceneActive(scene IScene) bool {
-	if index := m.GetActiveSceneIndex(scene); index != InvalidSceneIndex {
-		return true
-	}
-	return false
-}
-
-// IsSceneVisible method finds if the given scene in in the list of all visible
-// scenes.
-func (m *SceneManager) IsSceneVisible(scene IScene) bool {
-	if index := m.GetVisibleSceneIndex(scene); index != InvalidSceneIndex {
-		return true
-	}
-	return false
-}
-
 // RemoveScene method removes the given scene from all scene slices.
 func (m *SceneManager) RemoveScene(scene IScene) bool {
 	if activeIndex := m.GetActiveSceneIndex(scene); activeIndex != InvalidSceneIndex {
@@ -208,6 +208,15 @@ func (m *SceneManager) RemoveScene(scene IScene) bool {
 		return true
 	}
 	return false
+}
+
+// SetDryRun method sets the dryRun variable to set dryRun flag which avoid any
+// ncurses call.
+func (m *SceneManager) SetDryRun(dryRun bool) {
+	for _, scene := range m.scenes {
+		screen := scene.GetScreen()
+		screen.SetDryRun(dryRun)
+	}
 }
 
 // SetSceneAsActive methos sets the given scene as an active scene.

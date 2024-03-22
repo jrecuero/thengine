@@ -133,6 +133,13 @@ func (e *Entity) SetSize(size *api.Size) {
 
 func (e *Entity) SetStyle(style *tcell.Style) {
 	e.style = style
+	for _, rows := range e.canvas.Rows {
+		for _, cell := range rows.Cols {
+			if cell != nil {
+				cell.Style = e.style
+			}
+		}
+	}
 }
 
 func (e *Entity) Start() {

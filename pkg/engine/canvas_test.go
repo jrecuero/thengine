@@ -6,6 +6,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
+	"github.com/jrecuero/thengine/pkg/tools"
 )
 
 func TestRow(t *testing.T) {
@@ -893,6 +894,134 @@ func TestCanvasGetRect(t *testing.T) {
 		got := canvas.GetRect()
 		if !c.exp.IsEqual(got) {
 			t.Errorf("[%d] GetRect Error exp:%s got:%s", i, c.exp.ToString(), got.ToString())
+		}
+	}
+}
+
+func TestCanvasIterator(t *testing.T) {
+	createCells()
+	size := api.NewSize(2, 3)
+	canvas := engine.NewCanvas(size)
+	index := 0
+	for row := 0; row < size.H; row++ {
+		for col := 0; col < size.W; col++ {
+			canvas.SetCellAt(api.NewPoint(col, row), cells[index])
+			index++
+		}
+	}
+	canvas.CreateIter()
+	index = 0
+	icol := 0
+	irow := 0
+	for canvas.IterHasNext() {
+		col, row, cell := canvas.IterGetNext()
+		if icol != col {
+			t.Errorf("[1] CanvasIterator Error.Col exp:%d got:%d", icol, col)
+		}
+		if irow != row {
+			t.Errorf("[1] CanvasIterator Error.Row exp:%d got:%d", irow, row)
+		}
+		if cell != cells[index] {
+			t.Errorf("[1] CanvasIterator Error.Cell exp:%s got:%s", cells[index].ToString(), cell.ToString())
+		}
+		// Increase all counters.
+		index++
+		icol++
+		if icol >= size.W {
+			icol = 0
+			irow++
+		}
+	}
+}
+
+func TestCanvasGetStylAt(t *testing.T) {
+	createCells()
+	cases := []struct {
+		input [][]*engine.Cell
+		exp   []*tcell.Style
+	}{
+		{
+			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			exp:   []*tcell.Style{cells[0].Style, cells[1].Style, cells[2].Style, cells[3].Style, cells[4].Style, cells[5].Style},
+		},
+	}
+	for i, c := range cases {
+		canvas := engine.NewCanvas(api.NewSize(len(c.input[0]), len(c.input)))
+		for x, rows := range c.input {
+			copy(canvas.Rows[x].Cols, rows)
+		}
+		canvas.CreateIter()
+		index := 0
+		for canvas.IterHasNext() {
+			col, row, _ := canvas.IterGetNext()
+			point := api.NewPoint(col, row)
+			got := canvas.GetStyleAt(point)
+			if !tools.IsEqualStyle(got, c.exp[index]) {
+				t.Errorf("[%d] GetStyleAt Error exp:%+v got:%+v", i, c.exp[index], got)
+			}
+			index++
+		}
+	}
+}
+
+func TestCanvasSetStyleAt(t *testing.T) {
+	createCells()
+	cases := []struct {
+		input [][]*engine.Cell
+		cell  *tcell.Style
+		exp   *tcell.Style
+	}{
+		{
+			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}},
+			cell:  cells[5].Style,
+			exp:   cells[5].Style,
+		},
+	}
+	for i, c := range cases {
+		canvas := engine.NewCanvas(api.NewSize(len(c.input[0]), len(c.input)))
+		for x, rows := range c.input {
+			copy(canvas.Rows[x].Cols, rows)
+		}
+		canvas.CreateIter()
+		for canvas.IterHasNext() {
+			col, row, _ := canvas.IterGetNext()
+			point := api.NewPoint(col, row)
+			canvas.SetStyleAt(point, c.cell)
+		}
+		for canvas.CreateIter(); canvas.IterHasNext(); {
+			_, _, cell := canvas.IterGetNext()
+			if !tools.IsEqualStyle(c.exp, cell.Style) {
+				t.Errorf("[%d] SetStyleAt Error exp:%+v got:%+v", i, c.exp, cell.Style)
+			}
+		}
+	}
+}
+
+func TestCanvasFillWithCell(t *testing.T) {
+	createCells()
+	cases := []struct {
+		input [][]*engine.Cell
+		cell  *engine.Cell
+		exp   *engine.Cell
+	}{
+		{
+			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}},
+			cell:  cells[5],
+			exp:   cells[5],
+		},
+	}
+	for i, c := range cases {
+		canvas := engine.NewCanvas(api.NewSize(len(c.input[0]), len(c.input)))
+		for x, rows := range c.input {
+			copy(canvas.Rows[x].Cols, rows)
+		}
+		canvas.FillWithCell(c.cell)
+		canvas.CreateIter()
+		for canvas.IterHasNext() {
+			_, _, cell := canvas.IterGetNext()
+			if !c.exp.IsEqual(cell) {
+				t.Errorf("[%d] FillWithCell Error.Cell exp:%s got:%s", i, c.exp.ToString(), cell.ToString())
+			}
 		}
 	}
 }
