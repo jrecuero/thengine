@@ -22,6 +22,27 @@ const (
 )
 
 // -----------------------------------------------------------------------------
+// Package global variables
+// -----------------------------------------------------------------------------
+
+var (
+	EngineSingleton *Engine
+)
+
+// -----------------------------------------------------------------------------
+// Package global functions
+// -----------------------------------------------------------------------------
+
+// GetEngine funcion return the Engine instance singleton if it exists or
+// creates the singleton instance.
+func GetEngine() *Engine {
+	if EngineSingleton == nil {
+		EngineSingleton = newEngine()
+	}
+	return EngineSingleton
+}
+
+// -----------------------------------------------------------------------------
 //
 // Engine
 //
@@ -39,8 +60,8 @@ type Engine struct {
 	dryRun       bool
 }
 
-// NewEngine function creates a new Engine instance.
-func NewEngine() *Engine {
+// newEngine function creates a new Engine instance.
+func newEngine() *Engine {
 	engine := &Engine{
 		sceneManager: NewSceneManager(),
 		focusManager: NewFocusManager(),
@@ -146,6 +167,11 @@ func (e *Engine) Run(fps float64) {
 		e.startEventPoll()
 		defer e.stopEventPoll()
 
+		// Enable Mouse & Focus.
+		//e.display.EnableMouse()
+		//e.display.EnableFocus()
+		e.display.Clear()
+
 		// panic handler.
 		defer func() {
 			if err := recover(); err != nil {
@@ -166,13 +192,15 @@ func (e *Engine) Run(fps float64) {
 			switch ev := event.(type) {
 			case *tcell.EventResize:
 				e.display.Sync()
+			case *tcell.EventMouse:
+				tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("mouse %+v", event)
 			case *tcell.EventKey:
 				switch ev.Key() {
 				case tcell.KeyEscape:
 					isRunning = false
 				case tcell.KeyTab:
 					tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("tab update focus")
-					e.sceneManager.UpdateFocus(e.focusManager)
+					e.sceneManager.UpdateFocus()
 				case tcell.KeyRune:
 					tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("%s", string(ev.Rune()))
 				default:

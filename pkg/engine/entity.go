@@ -58,7 +58,7 @@ type Entity struct {
 func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.Style) *Entity {
 	entity := &Entity{
 		EObject:  NewEObject(name),
-		Focus:    NewFocus(NoFocus),
+		Focus:    NewDisableFocus(),
 		canvas:   NewCanvas(size),
 		position: position,
 		size:     size,

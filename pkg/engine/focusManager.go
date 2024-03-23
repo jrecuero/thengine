@@ -2,7 +2,11 @@
 // between all application entities.
 package engine
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/jrecuero/thengine/pkg/tools"
+)
 
 // -----------------------------------------------------------------------------
 // Package private constants
@@ -50,6 +54,8 @@ func (m *FocusManager) acquireFocusToEntityInScene(sceneName string, entity IEnt
 		m.withFocus[sceneName] = []IEntity{}
 	}
 	m.withFocus[sceneName] = append(m.withFocus[sceneName], entity)
+	tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("withFocus %+v", m.withFocus)
+	tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("entity %s", entity.GetName())
 	entity.AcquireFocus()
 	// Remove the entity from the list of entities so it can not take focus
 	// again.
@@ -249,7 +255,7 @@ func (m *FocusManager) UpdateFocusForScene(scene IScene) error {
 		}
 		// look for all multi-focus entities in the given scene.
 		for index, entity := range entities {
-			if entity.GetFocusType() == MultiFocus {
+			if entity.CanHaveFocus() && (entity.GetFocusType() == MultiFocus) {
 				m.acquireFocusToEntityInScene(sceneName, entity, index)
 			}
 		}
@@ -257,6 +263,7 @@ func (m *FocusManager) UpdateFocusForScene(scene IScene) error {
 		// for the given scene.
 		for index, entity := range m.withFocus[sceneName] {
 			if entity.GetFocusType() == SingleFocus {
+				tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("release-focus entity %s", entity.GetName())
 				m.releaseFocusFromEntityInScene(sceneName, entity, index)
 				break
 			}
@@ -267,7 +274,9 @@ func (m *FocusManager) UpdateFocusForScene(scene IScene) error {
 			m.acquireFocusToEntityInScene(sceneName, entity, index)
 		}
 	} else {
-		return fmt.Errorf("scene %s not found", sceneName)
+		message := fmt.Sprintf("scene %s not found", sceneName)
+		tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Errorf(message)
+		return fmt.Errorf(message)
 	}
 	return nil
 }

@@ -53,6 +53,8 @@ func NewScene(name string, screen IScreen) *Scene {
 // AddEntity methods adds a new entity to the scene.
 func (s *Scene) AddEntity(entity IEntity) error {
 	s.entities = append(s.entities, entity)
+	focusManager := GetEngine().GetFocusManager()
+	focusManager.AddEntity(s, entity)
 	return nil
 }
 

@@ -104,7 +104,6 @@ func NewCanvasFromString(str string, style *tcell.Style) *Canvas {
 	canvas := NewCanvas(api.NewSize(width, height))
 	for row, line := range lines {
 		for col, ch := range line {
-			// Use black/white as default color if not provided.
 			cell := NewCell(style, ch)
 			canvas.SetCellAt(api.NewPoint(col, row), cell)
 		}
@@ -351,4 +350,22 @@ func (c *Canvas) Width() int {
 		return 0
 	}
 	return len(c.Rows[0].Cols)
+}
+
+// WriteStringInCanvas method writes the given string in the canvas. Any
+// character exciding the canvas size is missed.
+func (c *Canvas) WriteStringInCanvas(str string, style *tcell.Style) {
+	lines := strings.Split(str, "\n")
+	for row, line := range lines {
+		if row >= c.Height() {
+			break
+		}
+		for col, ch := range line {
+			if col >= c.Width() {
+				break
+			}
+			cell := NewCell(style, ch)
+			c.SetCellAt(api.NewPoint(col, row), cell)
+		}
+	}
 }

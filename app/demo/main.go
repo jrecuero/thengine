@@ -16,7 +16,7 @@ func demoOne() {
 	defaultStyle := tcell.StyleDefault
 	text := engine.NewCanvasFromString("Hello World", &defaultStyle)
 	text.Render(screen)
-	appEngine := engine.NewEngine()
+	appEngine := engine.GetEngine()
 	appEngine.Init()
 	screen.Draw(true, appEngine.GetDisplay())
 	appEngine.Run(60.0)
@@ -37,7 +37,7 @@ func demoTwo() {
 	textTwoCanvas := engine.NewCanvasFromString("Hello World******", &styleTwo)
 	textTwo.SetCanvas(textTwoCanvas)
 	scene.AddEntity(textTwo)
-	appEngine := engine.NewEngine()
+	appEngine := engine.GetEngine()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}
@@ -61,7 +61,7 @@ func demoThree() {
 	textOneCanvas := engine.NewCanvasFromString("\\ /\n O \n/ \\", &styleOne)
 	textOne.SetCanvas(textOneCanvas)
 	scene.AddEntity(textOne)
-	appEngine := engine.NewEngine()
+	appEngine := engine.GetEngine()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}
@@ -79,7 +79,7 @@ func demoFour(dryRun bool) {
 	scene := engine.NewScene("scene", screen)
 	textOne := widgets.NewText("text-one", api.NewPoint(0, 0), api.NewSize(3, 3), &styleOne, "Hello\nWorld!")
 	scene.AddEntity(textOne)
-	appEngine := engine.NewEngine()
+	appEngine := engine.GetEngine()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}
@@ -90,6 +90,64 @@ func demoFour(dryRun bool) {
 	appEngine.Run(60.0)
 }
 
+func demoFive(dryRun bool) {
+	tools.Logger.WithField("module", "main").Infof("ThEngine demo-five")
+	fmt.Println("ThEngine demo-five")
+	screen := engine.NewScreen(nil, api.NewSize(40, 80))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
+	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	styleThree := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorRed)
+	scene := engine.NewScene("scene", screen)
+	textOne := widgets.NewText("text-one", api.NewPoint(0, 0), api.NewSize(1, 1), &styleOne, "Name:")
+	scene.AddEntity(textOne)
+	inputOne := widgets.NewTextInput("input-one", api.NewPoint(6, 0), api.NewSize(30, 1), &styleTwo, "Jose Carlos Recuero")
+	scene.AddEntity(inputOne)
+	appEngine := engine.GetEngine()
+	if !appEngine.GetSceneManager().AddScene(scene) {
+		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
+	}
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	// appEngine.SetDryRun(dryRun)
+	appEngine.Init()
+	display := appEngine.GetDisplay()
+	//style := tcell.StyleDefault
+	display.SetStyle(styleThree)
+	display.SetCursorStyle(tcell.CursorStyleBlinkingBlock)
+	//display.SetStyle(style)
+	display.ShowCursor(0, 0)
+	appEngine.Run(60.0)
+}
+
+func demoSix(dryRun bool) {
+	tools.Logger.WithField("module", "main").Infof("ThEngine demo-six")
+	fmt.Println("ThEngine demo-six")
+	screen := engine.NewScreen(nil, api.NewSize(40, 80))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
+	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	scene := engine.NewScene("scene", screen)
+	textFirstName := widgets.NewText("text-first-name", api.NewPoint(0, 0), api.NewSize(1, 1), &styleOne, "First Name:")
+	scene.AddEntity(textFirstName)
+	textLastName := widgets.NewText("text-last-name", api.NewPoint(0, 1), api.NewSize(1, 1), &styleOne, "Last Name:")
+	scene.AddEntity(textLastName)
+	textAge := widgets.NewText("text-age", api.NewPoint(0, 2), api.NewSize(1, 1), &styleOne, "Age:")
+	scene.AddEntity(textAge)
+	inputFirstName := widgets.NewTextInput("input-first-name", api.NewPoint(12, 0), api.NewSize(30, 1), &styleTwo, "Jose Carlos")
+	scene.AddEntity(inputFirstName)
+	inputLastName := widgets.NewTextInput("input-last-name", api.NewPoint(12, 1), api.NewSize(30, 1), &styleTwo, "Recuero Arias")
+	scene.AddEntity(inputLastName)
+	inputAge := widgets.NewTextInput("input-age", api.NewPoint(12, 2), api.NewSize(30, 1), &styleTwo, "57")
+	scene.AddEntity(inputAge)
+	appEngine := engine.GetEngine()
+	if !appEngine.GetSceneManager().AddScene(scene) {
+		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
+	}
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.Init()
+	appEngine.Run(60.0)
+}
+
 func main() {
-	demoFour(true)
+	demoSix(true)
 }

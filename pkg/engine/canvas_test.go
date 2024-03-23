@@ -278,6 +278,181 @@ func TestCanvasNewCanvasFromString(t *testing.T) {
 	}
 }
 
+func TestCanvasWriteStringInCanvas(t *testing.T) {
+	cases := []struct {
+		input struct {
+			size  *api.Size
+			str   string
+			style *tcell.Style
+		}
+		exp struct {
+			width  int
+			height int
+			str    []string
+			style  *tcell.Style
+		}
+	}{
+		{
+			input: struct {
+				size  *api.Size
+				str   string
+				style *tcell.Style
+			}{
+				size:  api.NewSize(10, 1),
+				str:   "Hello",
+				style: engine.NewStyle(tcell.ColorBlue, tcell.ColorRed, 0),
+			},
+			exp: struct {
+				width  int
+				height int
+				str    []string
+				style  *tcell.Style
+			}{
+				width:  10,
+				height: 1,
+				str:    []string{"Hello"},
+				style:  engine.NewStyle(tcell.ColorBlue, tcell.ColorRed, 0),
+			},
+		},
+		{
+			input: struct {
+				size  *api.Size
+				str   string
+				style *tcell.Style
+			}{
+				size:  api.NewSize(20, 2),
+				str:   "Hello\nDeveloper",
+				style: engine.NewStyle(tcell.ColorLightBlue, tcell.ColorYellow, 0),
+			},
+			exp: struct {
+				width  int
+				height int
+				str    []string
+				style  *tcell.Style
+			}{
+				width:  20,
+				height: 2,
+				str:    []string{"Hello", "Developer"},
+				style:  engine.NewStyle(tcell.ColorLightBlue, tcell.ColorYellow, 0),
+			},
+		},
+		{
+			input: struct {
+				size  *api.Size
+				str   string
+				style *tcell.Style
+			}{
+				size:  api.NewSize(20, 3),
+				str:   "Have\nA great\n day",
+				style: nil,
+			},
+			exp: struct {
+				width  int
+				height int
+				str    []string
+				style  *tcell.Style
+			}{
+				width:  20,
+				height: 3,
+				str:    []string{"Have", "A great", " day"},
+				style:  engine.NewStyle(tcell.ColorDefault, tcell.ColorDefault, 0),
+			},
+		},
+		{
+			input: struct {
+				size  *api.Size
+				str   string
+				style *tcell.Style
+			}{
+				size:  api.NewSize(10, 1),
+				str:   "Have A great day",
+				style: nil,
+			},
+			exp: struct {
+				width  int
+				height int
+				str    []string
+				style  *tcell.Style
+			}{
+				width:  10,
+				height: 1,
+				str:    []string{"Have A gre"},
+				style:  engine.NewStyle(tcell.ColorDefault, tcell.ColorDefault, 0),
+			},
+		},
+		{
+			input: struct {
+				size  *api.Size
+				str   string
+				style *tcell.Style
+			}{
+				size:  api.NewSize(20, 2),
+				str:   "Have\nA great\n day",
+				style: nil,
+			},
+			exp: struct {
+				width  int
+				height int
+				str    []string
+				style  *tcell.Style
+			}{
+				width:  20,
+				height: 2,
+				str:    []string{"Have", "A great"},
+				style:  engine.NewStyle(tcell.ColorDefault, tcell.ColorDefault, 0),
+			},
+		},
+		{
+			input: struct {
+				size  *api.Size
+				str   string
+				style *tcell.Style
+			}{
+				size:  api.NewSize(3, 2),
+				str:   "Have\nA great\n day",
+				style: nil,
+			},
+			exp: struct {
+				width  int
+				height int
+				str    []string
+				style  *tcell.Style
+			}{
+				width:  3,
+				height: 2,
+				str:    []string{"Hav", "A g"},
+				style:  engine.NewStyle(tcell.ColorDefault, tcell.ColorDefault, 0),
+			},
+		},
+	}
+	for i, c := range cases {
+		got := engine.NewCanvas(c.input.size)
+		got.WriteStringInCanvas(c.input.str, c.input.style)
+		if c.exp.width != got.Width() {
+			t.Errorf("[%d] NewCanvasFromString Width Error exp:%d, got:%d", i, c.exp.width, got.Width())
+		}
+		if c.exp.height != got.Height() {
+			t.Errorf("[%d] NewCanvasFromString Height Error exp:%d got:%d", i, c.exp.height, got.Height())
+		}
+		for row, line := range c.exp.str {
+			for col, ch := range line {
+				cell := got.GetCellAt(api.NewPoint(col, row))
+				if cell == nil {
+					t.Errorf("[%d] NewCanvasFromString (%d,%d) Cell exp:*Cell got:nil", i, col, row)
+					continue
+				}
+				if !engine.CompareStyle(c.exp.style, cell.Style) {
+					t.Errorf("[%d] NewCanvasFromString (%d,%d) Style exp:%s got:%s",
+						i, col, row, engine.StyleToString(c.exp.style), engine.StyleToString(cell.Style))
+				}
+				if ch != cell.Rune {
+					t.Errorf("[%d] NewCanvasFromString (%d,%d) Rune exp:%c got:%c", i, col, row, ch, cell.Rune)
+				}
+			}
+		}
+	}
+}
+
 func TestCanvasNewCanvasFromFile(t *testing.T) {
 	cases := []struct {
 		input struct {

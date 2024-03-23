@@ -2,7 +2,10 @@
 // application.
 package engine
 
-import "github.com/gdamore/tcell/v2"
+import (
+	"github.com/gdamore/tcell/v2"
+	"github.com/jrecuero/thengine/pkg/tools"
+)
 
 // -----------------------------------------------------------------------------
 // Package global constants
@@ -255,9 +258,11 @@ func (m *SceneManager) Update(event tcell.Event) {
 }
 
 // UpdateFocus method updates focus in the last active scenes.
-func (m *SceneManager) UpdateFocus(fm *FocusManager) {
+func (m *SceneManager) UpdateFocus() {
 	if lenActiveScenes := len(m.activeScenes); lenActiveScenes != 0 {
 		lastActiveScene := m.activeScenes[lenActiveScenes-1]
-		fm.UpdateFocusForScene(lastActiveScene)
+		tools.Logger.WithField("module", "scene-manager").WithField("function", "UpdateFocus").Debugf("scene %s", lastActiveScene.GetName())
+		focusManager := GetEngine().GetFocusManager()
+		focusManager.UpdateFocusForScene(lastActiveScene)
 	}
 }
