@@ -33,6 +33,7 @@ const (
 type Engine struct {
 	display      tcell.Screen
 	sceneManager *SceneManager
+	focusManager *FocusManager
 	ctrlCh       chan bool
 	eventCh      chan tcell.Event
 	dryRun       bool
@@ -42,6 +43,7 @@ type Engine struct {
 func NewEngine() *Engine {
 	engine := &Engine{
 		sceneManager: NewSceneManager(),
+		focusManager: NewFocusManager(),
 		ctrlCh:       make(chan bool, 2),
 		eventCh:      make(chan tcell.Event),
 	}
@@ -109,7 +111,12 @@ func (e *Engine) GetDisplay() tcell.Screen {
 	return e.display
 }
 
-// GetSceneManager method returns the SceneManager instance.
+// GetFocusManager method returns the focus manager instance.
+func (e *Engine) GetFocusManager() *FocusManager {
+	return e.focusManager
+}
+
+// GetSceneManager method returns the scene manager instance.
 func (e *Engine) GetSceneManager() *SceneManager {
 	return e.sceneManager
 }
@@ -160,8 +167,15 @@ func (e *Engine) Run(fps float64) {
 			case *tcell.EventResize:
 				e.display.Sync()
 			case *tcell.EventKey:
-				if ev.Key() == tcell.KeyEscape {
+				switch ev.Key() {
+				case tcell.KeyEscape:
 					isRunning = false
+				case tcell.KeyTab:
+					tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("tab update focus")
+					e.sceneManager.UpdateFocus(e.focusManager)
+				case tcell.KeyRune:
+					tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("%s", string(ev.Rune()))
+				default:
 				}
 			}
 		default:

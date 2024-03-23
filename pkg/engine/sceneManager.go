@@ -253,3 +253,11 @@ func (m *SceneManager) Update(event tcell.Event) {
 		scene.Update(event)
 	}
 }
+
+// UpdateFocus method updates focus in the last active scenes.
+func (m *SceneManager) UpdateFocus(fm *FocusManager) {
+	if lenActiveScenes := len(m.activeScenes); lenActiveScenes != 0 {
+		lastActiveScene := m.activeScenes[lenActiveScenes-1]
+		fm.UpdateFocusForScene(lastActiveScene)
+	}
+}

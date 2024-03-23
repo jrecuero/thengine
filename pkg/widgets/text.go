@@ -23,14 +23,16 @@ type Runes []rune
 // Text structure defines all attributes and method for any basic and common
 // text widget.
 type Text struct {
-	*engine.Entity
+	//*engine.Entity
+	*Widget
 	str string
 }
 
 // NewText function creates a new Text instance widget.
 func NewText(name string, position *api.Point, size *api.Size, style *tcell.Style, str string) *Text {
 	text := &Text{
-		Entity: engine.NewEntity(name, position, size, style),
+		//Entity: engine.NewEntity(name, position, size, style),
+		Widget: NewWidget(name, position, size, style),
 		str:    str,
 	}
 	text.updateCanvas()
