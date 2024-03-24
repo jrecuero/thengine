@@ -49,20 +49,25 @@ func (t *TextInput) updateCanvas() {
 	canvas.WriteStringInCanvas(t.inputStr, t.GetStyle())
 }
 
+// updateCursor method updates the cursor position inside the input text.
+func (t *TextInput) updateCursor() {
+	lenInputStr := len(t.inputStr)
+	col := t.GetPosition().X + lenInputStr
+	row := t.GetPosition().Y
+	display := engine.GetEngine().GetDisplay()
+	display.ShowCursor(col, row)
+}
+
 // -----------------------------------------------------------------------------
 // TextInput public methods
 // -----------------------------------------------------------------------------
 
 // AcquireFocus method acquires focus for the entity.
 func (t *TextInput) AcquireFocus() (bool, error) {
-	tools.Logger.WithField("module", "input-text").WithField("function", "AcquireFocus").Infof("%s", t.GetName())
+	tools.Logger.WithField("module", "text-input").WithField("function", "AcquireFocus").Infof("%s", t.GetName())
 	ok, err := t.Entity.AcquireFocus()
 	if err == nil {
-		lenInputStr := len(t.inputStr)
-		col := t.GetPosition().X + lenInputStr
-		row := t.GetPosition().Y
-		display := engine.GetEngine().GetDisplay()
-		display.ShowCursor(col, row)
+		t.updateCursor()
 	}
 	return ok, err
 }
@@ -90,7 +95,19 @@ func (t *TextInput) SetInputText(str string) {
 
 // Update method runs every cycle to update the text input.
 func (t *TextInput) Update(event tcell.Event) {
-	tools.Logger.WithField("module", "input-text").WithField("function", "Update").Debugf("%s %+v", t.GetName(), event)
+	if !t.HasFocus() {
+		return
+	}
+	if str, ok, run := t.HandleKeyboardInputForString(t.inputStr, event); ok {
+		if run {
+			tools.Logger.WithField("module", "text-input").
+				WithField("function", "AcquireFocus").
+				Debugf("execute command")
+		}
+		t.inputStr = str
+		t.updateCanvas()
+		t.updateCursor()
+	}
 }
 
 var _ engine.IEntity = (*TextInput)(nil)

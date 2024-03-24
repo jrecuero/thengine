@@ -34,6 +34,12 @@ var (
 func createLogFile(filename string) *logrus.Logger {
 	if logFile, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644); err == nil {
 		logger := logrus.New()
+
+		Formatter := new(logrus.TextFormatter)
+		Formatter.TimestampFormat = "2006-01-02T15:04:05.999999Z07:00"
+		Formatter.FullTimestamp = true
+		//Formatter.ForceColors = true
+		logger.SetFormatter(Formatter)
 		logger.SetOutput(logFile)
 		logger.SetLevel(logrus.TraceLevel)
 		return logger

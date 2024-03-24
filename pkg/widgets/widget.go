@@ -53,6 +53,33 @@ func (w *Widget) GetWidgetCallbackArgs() WidgetArgs {
 	return w.callbackArgs
 }
 
+// HandleKeyboardInputForString method handles keyboard input affecting the given
+// string.
+// - Any rune entered is added to the string.
+// - Any delete removes the last characted in the string.
+func (w *Widget) HandleKeyboardInputForString(str string, event tcell.Event) (string, bool, bool) {
+	switch ev := event.(type) {
+	case *tcell.EventKey:
+		switch ev.Key() {
+		case tcell.KeyDEL:
+			fallthrough
+		case tcell.KeyBackspace:
+			if lenInputStr := len(str); lenInputStr > 0 {
+				str = str[:lenInputStr-1]
+				return str, true, false
+			}
+		case tcell.KeyRune:
+			inputRune := string(ev.Rune())
+			str += inputRune
+			return str, true, false
+		case tcell.KeyEnter:
+			return str, true, true
+		default:
+		}
+	}
+	return str, false, false
+}
+
 // RunCallback method executes the widget callback. If not any arguments are
 // provided, it used those in the widget arguments attributes.
 func (w *Widget) RunCallback(args ...any) bool {

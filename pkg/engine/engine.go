@@ -187,26 +187,36 @@ func (e *Engine) Run(fps float64) {
 
 	for isRunning {
 		nowTime := time.Now()
+		event = nil
 		select {
 		case event = <-e.eventCh:
 			switch ev := event.(type) {
 			case *tcell.EventResize:
 				e.display.Sync()
 			case *tcell.EventMouse:
-				tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("mouse %+v", event)
+				tools.Logger.WithField("module", "engine").
+					WithField("function", "Run").
+					Debugf("mouse %+v", event)
 			case *tcell.EventKey:
 				switch ev.Key() {
 				case tcell.KeyEscape:
 					isRunning = false
 				case tcell.KeyTab:
-					tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("tab update focus")
+					tools.Logger.WithField("module", "engine").
+						WithField("function", "Run").
+						Debugf("tab update focus")
 					e.sceneManager.UpdateFocus()
 				case tcell.KeyRune:
-					tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("%s", string(ev.Rune()))
+					tools.Logger.WithField("module", "engine").
+						WithField("function", "Run").
+						Debugf("rune %s", string(ev.Rune()))
 				default:
 				}
 			}
 		default:
+			//tools.Logger.WithField("module", "engine").
+			//    WithField("function", "Run").
+			//    Debugf("default %+v", event)
 		}
 
 		// update all engine resources.
