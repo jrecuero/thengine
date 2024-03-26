@@ -98,7 +98,7 @@ func (t *TextInput) Update(event tcell.Event) {
 	if !t.HasFocus() {
 		return
 	}
-	if str, ok, run := t.HandleKeyboardInputForString(t.inputStr, event); ok {
+	if str, ok, run := t.HandleKeyboardInputForString(event, t.inputStr); ok {
 		if run {
 			tools.Logger.WithField("module", "text-input").
 				WithField("function", "AcquireFocus").

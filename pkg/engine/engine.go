@@ -124,6 +124,7 @@ func (e *Engine) CreateEngineScene() error {
 
 // Draw method proceeds to draws all entities in visible scenes.
 func (e *Engine) Draw() {
+	e.display.Clear()
 	e.sceneManager.Draw(e.display)
 }
 
@@ -181,6 +182,7 @@ func (e *Engine) Run(fps float64) {
 			if !e.dryRun {
 				e.display.Fini()
 			}
+			fmt.Printf("%s", string(debug.Stack()))
 			os.Exit(0)
 		}()
 	}
@@ -211,6 +213,19 @@ func (e *Engine) Run(fps float64) {
 						WithField("function", "Run").
 						Debugf("rune %s", string(ev.Rune()))
 				default:
+					movement := map[tcell.Key]bool{
+						tcell.KeyUp:    true,
+						tcell.KeyDown:  true,
+						tcell.KeyLeft:  false,
+						tcell.KeyRight: false,
+					}
+					for k, ok := range movement {
+						if ev.Key() == k {
+							tools.Logger.WithField("module", "engine").
+								WithField("function", "Run").
+								Debugf("key %s is %t", ev.Name(), ok)
+						}
+					}
 				}
 			}
 		default:

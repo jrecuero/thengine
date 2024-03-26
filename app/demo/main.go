@@ -10,6 +10,54 @@ import (
 	"github.com/jrecuero/thengine/pkg/widgets"
 )
 
+type Player struct {
+	*widgets.Widget
+}
+
+func NewPlayer(name string, position *api.Point, size *api.Size, style *tcell.Style) *Player {
+	player := &Player{
+		Widget: widgets.NewWidget(name, position, size, style),
+	}
+	player.SetFocusType(engine.SingleFocus)
+	player.SetFocusEnable(true)
+	return player
+
+}
+func (p *Player) Move(args ...any) {
+	steps := args[0].(int)
+	direction := args[1].(string)
+	tools.Logger.WithField("module", "main").
+		WithField("struct", "Player").
+		WithField("function", "Move").
+		Debugf("stets %d direction %s", steps, direction)
+	if direction == "up" {
+		x, y := p.GetPosition().Get()
+		p.SetPosition(api.NewPoint(x, y-1))
+	} else if direction == "down" {
+		x, y := p.GetPosition().Get()
+		p.SetPosition(api.NewPoint(x, y+1))
+	}
+}
+
+func (p *Player) Update(event tcell.Event) {
+	if !p.HasFocus() {
+		return
+	}
+	actions := []*widgets.KeyboardAction{
+		{
+			Key:      tcell.KeyUp,
+			Callback: p.Move,
+			Args:     []any{1, "up"},
+		},
+		{
+			Key:      tcell.KeyDown,
+			Callback: p.Move,
+			Args:     []any{1, "down"},
+		},
+	}
+	p.HandleKeyboardForActions(event, actions)
+}
+
 func demoOne() {
 	fmt.Println("ThEngine demo-one")
 	screen := engine.NewScreen(nil, api.NewSize(40, 80))
@@ -148,6 +196,26 @@ func demoSix(dryRun bool) {
 	appEngine.Run(60.0)
 }
 
+func demoSeven(dryRun bool) {
+	tools.Logger.WithField("module", "main").Infof("ThEngine demo-seven")
+	fmt.Println("ThEngine demo-seven")
+	screen := engine.NewScreen(nil, api.NewSize(40, 80))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	scene := engine.NewScene("scene", screen)
+	player := NewPlayer("player", api.NewPoint(0, 0), api.NewSize(3, 3), &styleOne)
+	playerCanvas := engine.NewCanvasFromString("\\ /\n O \n/ \\", &styleOne)
+	player.SetCanvas(playerCanvas)
+	scene.AddEntity(player)
+	appEngine := engine.GetEngine()
+	if !appEngine.GetSceneManager().AddScene(scene) {
+		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
+	}
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.Init()
+	appEngine.Run(60.0)
+}
+
 func main() {
-	demoSix(true)
+	demoSeven(true)
 }

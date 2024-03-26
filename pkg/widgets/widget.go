@@ -18,6 +18,15 @@ type WidgetCallback func(entity engine.IEntity, args ...any) bool
 // callback.
 type WidgetArgs []any
 
+// KeyboardAction structure identifies the information to be passed for
+// handling keyboard input actions.
+type KeyboardAction struct {
+	Key      tcell.Key
+	Rune     rune
+	Callback func(...any)
+	Args     []any
+}
+
 // -----------------------------------------------------------------------------
 //
 // Widget
@@ -53,11 +62,29 @@ func (w *Widget) GetWidgetCallbackArgs() WidgetArgs {
 	return w.callbackArgs
 }
 
+// HandleKeyboardInputForActions method handles keyboard inputs related with
+// the given information provided. Input parameters provide the keys that have
+// to be handled and the callbacks for each of them.
+func (w *Widget) HandleKeyboardForActions(event tcell.Event, actions []*KeyboardAction) {
+	switch ev := event.(type) {
+	case *tcell.EventKey:
+		for _, action := range actions {
+			if (action.Key != 0) && (ev.Key() == action.Key) {
+				action.Callback(action.Args...)
+				return
+			} else if (action.Rune != 0) && (ev.Rune() == action.Rune) {
+				action.Callback(action.Args...)
+				return
+			}
+		}
+	}
+}
+
 // HandleKeyboardInputForString method handles keyboard input affecting the given
 // string.
 // - Any rune entered is added to the string.
 // - Any delete removes the last characted in the string.
-func (w *Widget) HandleKeyboardInputForString(str string, event tcell.Event) (string, bool, bool) {
+func (w *Widget) HandleKeyboardInputForString(event tcell.Event, str string) (string, bool, bool) {
 	switch ev := event.(type) {
 	case *tcell.EventKey:
 		switch ev.Key() {
