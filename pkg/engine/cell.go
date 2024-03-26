@@ -6,7 +6,7 @@ package engine
 import (
 	"fmt"
 
-	"github.com/jrecuero/thengine/pkg/api"
+	"github.com/gdamore/tcell/v2"
 )
 
 // -----------------------------------------------------------------------------
@@ -16,18 +16,20 @@ import (
 // -----------------------------------------------------------------------------
 
 // Cell structure defines a cell that is drawn in the canvas.
-// Color *Color instance identifies the color (foreground and background
-// colors) of the character in the cell.
+// Style instance identifies color and other attributes.
 // Ch Rune identifies the character to be displayed in the cell.
 type Cell struct {
-	Color *api.Color
+	Style *tcell.Style
 	Rune  rune
 }
 
 // NewCell function creates a new Cell instance with the given color and rune.
-func NewCell(color *api.Color, ch rune) *Cell {
+func NewCell(style *tcell.Style, ch rune) *Cell {
+	if style == nil {
+		style = &tcell.StyleDefault
+	}
 	return &Cell{
-		Color: color,
+		Style: style,
 		Rune:  ch,
 	}
 }
@@ -41,7 +43,7 @@ func NewEmptyCell() *Cell {
 // given Cell instance.
 func CloneCell(cell *Cell) *Cell {
 	return &Cell{
-		Color: api.CloneColor(cell.Color),
+		Style: cell.Style,
 		Rune:  cell.Rune,
 	}
 }
@@ -52,25 +54,26 @@ func CloneCell(cell *Cell) *Cell {
 
 // Clone method clones all attributes from the given Cell in to the instance.
 func (c *Cell) Clone(cell *Cell) {
-	c.Color = api.CloneColor(cell.Color)
+	c.Style = cell.Style
 	c.Rune = cell.Rune
 }
 
 // IsEqual method checks if the given Cell is equal to the instance, where Color
 // and Rune should be the same.
 func (c *Cell) IsEqual(cell *Cell) bool {
-	return c.Color.IsEqual(cell.Color) && (c.Rune == cell.Rune)
+	return CompareStyle(c.Style, cell.Style) && (c.Rune == cell.Rune)
 }
 
 // ToString method returns the cell instance information as a string.
 func (c *Cell) ToString() string {
-	return fmt.Sprintf("[%c]%s", c.Rune, c.Color.ToString())
+	return fmt.Sprintf("[%c]%s", c.Rune, StyleToString(c.Style))
 }
 
 // SaveToDict method saves the instance information as a map.
+// TODO: to be revisited.
 func (c *Cell) SaveToDict() map[string]any {
 	result := map[string]any{}
-	result["color"] = c.Color.SaveToDict()
+	result["style"] = c.Style
 	result["rune"] = c.Rune
 	return result
 }

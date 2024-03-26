@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"math"
 	"testing"
 
 	"github.com/jrecuero/thengine/pkg/api"
@@ -208,6 +209,79 @@ func TestPointIsEqual(t *testing.T) {
 		got = p2.IsEqual(p1)
 		if c.exp != got {
 			t.Errorf("[%d] IsEqual (reverse) Error exp:%t got:%t", i, c.exp, got)
+		}
+	}
+}
+
+func TestPointAdd(t *testing.T) {
+	cases := []struct {
+		input []int
+		exp   []int
+	}{
+		{
+			input: []int{0, 0, 0, 0},
+			exp:   []int{0, 0},
+		},
+		{
+			input: []int{1, 0, 1, 0},
+			exp:   []int{2, 0},
+		},
+		{
+			input: []int{0, 1, 0, 1},
+			exp:   []int{0, 2},
+		},
+		{
+			input: []int{1, 2, 3, 4},
+			exp:   []int{4, 6},
+		},
+	}
+	for i, c := range cases {
+		got := api.NewPoint(c.input[0], c.input[1])
+		p2 := api.NewPoint(c.input[2], c.input[3])
+		got.Add(p2)
+		if c.exp[0] != got.X {
+			t.Errorf("[%d] Add-X Error exp:%d got:%d", i, c.exp[0], got.X)
+		}
+		if c.exp[1] != got.Y {
+			t.Errorf("[%d] Add-Y Error exp:%d got:%d", i, c.exp[1], got.Y)
+		}
+	}
+}
+
+func TestPointDistance(t *testing.T) {
+	cases := []struct {
+		input []int
+		exp   []any
+	}{
+		{
+			input: []int{0, 0, 0, 0},
+			exp:   []any{0.0, 0, 0},
+		},
+		{
+			input: []int{0, 0, 2, 2},
+			exp:   []any{math.Sqrt(8), 2, 2},
+		},
+		{
+			input: []int{5, 4, 2, 1},
+			exp:   []any{math.Sqrt(18), -3, -3},
+		},
+		{
+			input: []int{5, 1, 2, 5},
+			exp:   []any{5.0, -3, 4},
+		},
+	}
+	for i, c := range cases {
+		p1 := api.NewPoint(c.input[0], c.input[1])
+		p2 := api.NewPoint(c.input[2], c.input[3])
+		gotDistance, gotX, gotY := p1.Distance(p2)
+		if c.exp[0] != gotDistance {
+			t.Errorf("[%d] Distance Error exp:%f got:%f", i, c.exp[0], gotDistance)
+		}
+		if c.exp[1] != gotX {
+			t.Errorf("[%d] Distance-X Error exp:%d got:%d", i, c.exp[1], gotX)
+		}
+		if c.exp[2] != gotY {
+			t.Errorf("[%d] Distance-Y Error exp:%d got:%d", i, c.exp[2], gotY)
 		}
 	}
 }

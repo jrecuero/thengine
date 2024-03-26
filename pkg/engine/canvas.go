@@ -7,9 +7,25 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/tools"
 )
+
+// -----------------------------------------------------------------------------
+// iterCanvas
+// -----------------------------------------------------------------------------
+
+// iterCanvas structure defines index required to iterate a canvas.
+type iterCanvas struct {
+	Row int
+	Col int
+}
+
+// newiterCanvas function creates a new iterCanvas instance.
+func newiterCanvas() *iterCanvas {
+	return &iterCanvas{}
+}
 
 // -----------------------------------------------------------------------------
 // Row
@@ -49,6 +65,7 @@ func (r *Row) SaveToDict() map[string]any {
 // displayed in the screen.
 type Canvas struct {
 	Rows []*Row
+	iter *iterCanvas
 }
 
 // NewCanvas function creates a new Canvas instance with the given number of
@@ -75,7 +92,7 @@ func CloneCanvas(canvas *Canvas) *Canvas {
 
 // NewCanvasFromString function creates a new canvas where the content is the
 // given string (multi-line is allowed) with the given color.
-func NewCanvasFromString(str string, color *api.Color) *Canvas {
+func NewCanvasFromString(str string, style *tcell.Style) *Canvas {
 	// Calculate width and height based on the number of lines in the string
 	// and the max length for every line.
 	lines := strings.Split(str, "\n")
@@ -87,11 +104,7 @@ func NewCanvasFromString(str string, color *api.Color) *Canvas {
 	canvas := NewCanvas(api.NewSize(width, height))
 	for row, line := range lines {
 		for col, ch := range line {
-			// Use black/white as default color if not provided.
-			if color == nil {
-				color = api.NewColor(api.ColorBlack, api.ColorWhite)
-			}
-			cell := NewCell(color, ch)
+			cell := NewCell(style, ch)
 			canvas.SetCellAt(api.NewPoint(col, row), cell)
 		}
 	}
@@ -100,13 +113,42 @@ func NewCanvasFromString(str string, color *api.Color) *Canvas {
 
 // NewCanvasFromFile function creates a new canvas with the content of the
 // file.
-func NewCanvasFromFile(filename string, color *api.Color) *Canvas {
+func NewCanvasFromFile(filename string, style *tcell.Style) *Canvas {
 	content, err := os.ReadFile(filename)
 	if err != nil {
 		tools.Logger.WithField("module", "canvas").Errorf("Error opening %s Err=%+v", filename, err)
 		return nil
 	}
-	return NewCanvasFromString(string(content), color)
+	return NewCanvasFromString(string(content), style)
+}
+
+// -----------------------------------------------------------------------------
+// Canvas iterator methods.
+// -----------------------------------------------------------------------------
+
+// CreateIter method creates a new canvas iterator.
+func (c *Canvas) CreateIter() {
+	c.iter = newiterCanvas()
+}
+
+// IterHasNext method checks if there are still some entries to iterate.
+func (c *Canvas) IterHasNext() bool {
+	return (c.iter.Col < c.Width()) && (c.iter.Row < c.Height())
+}
+
+// IterGetNext method returns the next entry to iterate and increase iterator
+// counters.
+func (c *Canvas) IterGetNext() (int, int, *Cell) {
+	col := c.iter.Col
+	row := c.iter.Row
+	point := api.NewPoint(col, row)
+	cell := c.GetCellAt(point)
+	c.iter.Col++
+	if c.iter.Col >= c.Width() {
+		c.iter.Col = 0
+		c.iter.Row++
+	}
+	return col, row, cell
 }
 
 // -----------------------------------------------------------------------------
@@ -119,6 +161,9 @@ func (c *Canvas) Clone(canvas *Canvas) {
 	if c.Size().IsEqual(canvas.Size()) {
 		for x, row := range canvas.Rows {
 			for y, cell := range row.Cols {
+				if cell == nil {
+					continue
+				}
 				// create a new instance for every cell position.
 				c.Rows[x].Cols[y] = CloneCell(cell)
 			}
@@ -146,9 +191,9 @@ func (c *Canvas) GetCellAt(point *api.Point) *Cell {
 
 // GetColorAt method returns the Color in the canvas at the given row and
 // column.
-func (c *Canvas) GetColorAt(point *api.Point) *api.Color {
+func (c *Canvas) GetStyleAt(point *api.Point) *tcell.Style {
 	if cell := c.GetCellAt(point); cell != nil {
-		return cell.Color
+		return cell.Style
 	}
 	return nil
 }
@@ -213,7 +258,7 @@ func (c *Canvas) IsInside(point *api.Point) bool {
 	return true
 }
 
-// Reder method render the canvas into the screen.
+// Render method renders the canvas into the screen.
 func (c *Canvas) Render(screen IScreen) {
 	for r, rows := range c.Rows {
 		for c, cell := range rows.Cols {
@@ -223,7 +268,21 @@ func (c *Canvas) Render(screen IScreen) {
 	}
 }
 
+// RenderAt method renders the canvas into the screen at the given position.
+func (c *Canvas) RenderAt(screen IScreen, offset *api.Point) {
+	for r, rows := range c.Rows {
+		for c, cell := range rows.Cols {
+			if cell != nil {
+				position := api.NewPoint(c, r)
+				position.Add(offset)
+				screen.RenderCellAt(position, cell)
+			}
+		}
+	}
+}
+
 // SaveToDict method saves the instance information as a map.
+// TODO: to be revisited.
 func (c *Canvas) SaveToDict() map[string]any {
 	result := map[string]any{}
 	rows := []map[string]any{}
@@ -245,9 +304,9 @@ func (c *Canvas) SetCellAt(point *api.Point, cell *Cell) bool {
 
 // SetColorAt method sets the given Color to the cell at the given row and
 // column.
-func (c *Canvas) SetColorAt(point *api.Point, color *api.Color) bool {
+func (c *Canvas) SetStyleAt(point *api.Point, style *tcell.Style) bool {
 	if cell := c.GetCellAt(point); cell != nil {
-		cell.Color = color
+		cell.Style = style
 		return true
 	}
 	return false
@@ -291,4 +350,22 @@ func (c *Canvas) Width() int {
 		return 0
 	}
 	return len(c.Rows[0].Cols)
+}
+
+// WriteStringInCanvas method writes the given string in the canvas. Any
+// character exciding the canvas size is missed.
+func (c *Canvas) WriteStringInCanvas(str string, style *tcell.Style) {
+	lines := strings.Split(str, "\n")
+	for row, line := range lines {
+		if row >= c.Height() {
+			break
+		}
+		for col, ch := range line {
+			if col >= c.Width() {
+				break
+			}
+			cell := NewCell(style, ch)
+			c.SetCellAt(api.NewPoint(col, row), cell)
+		}
+	}
 }

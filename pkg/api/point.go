@@ -2,7 +2,10 @@
 // the canvas using the horizontal and vertical position in the canvas.
 package api
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // -----------------------------------------------------------------------------
 //
@@ -41,16 +44,24 @@ func ClonePoint(point *Point) *Point {
 // Point public methods
 // -----------------------------------------------------------------------------
 
+// Add method adds the given point coordinates to the point instance.
+func (p *Point) Add(point *Point) {
+	p.X += point.X
+	p.Y += point.Y
+}
+
 // Clone method clones all attributes from the given Point instance.
 func (p *Point) Clone(point *Point) {
 	p.X = point.X
 	p.Y = point.Y
 }
 
-// Set method assigns new horizontal and vertical locations with given values.
-func (p *Point) Set(x int, y int) {
-	p.X = x
-	p.Y = y
+// Distance method returns the distance with the given point.
+func (p *Point) Distance(point *Point) (float64, int, int) {
+	dx := point.X - p.X
+	dy := point.Y - p.Y
+	distance := math.Sqrt(float64(dx*dx + dy*dy))
+	return distance, dx, dy
 }
 
 // Get method returns horizontal and vertical location for the instance.
@@ -64,15 +75,21 @@ func (p *Point) IsEqual(point *Point) bool {
 	return (p.X == point.X) && (p.Y == point.Y)
 }
 
-// ToString method returns instance information as a string.
-func (p *Point) ToString() string {
-	return fmt.Sprintf("(%d,%d)", p.X, p.Y)
-}
-
 // SaveToDict method saves the instance information as a map.
 func (p *Point) SaveToDict() map[string]any {
 	result := map[string]any{}
 	result["x"] = p.X
 	result["y"] = p.Y
 	return result
+}
+
+// Set method assigns new horizontal and vertical locations with given values.
+func (p *Point) Set(x int, y int) {
+	p.X = x
+	p.Y = y
+}
+
+// ToString method returns instance information as a string.
+func (p *Point) ToString() string {
+	return fmt.Sprintf("(%d,%d)", p.X, p.Y)
 }
