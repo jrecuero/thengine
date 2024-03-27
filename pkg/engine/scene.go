@@ -17,7 +17,7 @@ type IScene interface {
 	Draw()
 	GetEntities() []IEntity
 	GetScreen() IScreen
-	Init()
+	Init(tcell.Screen)
 	Update(tcell.Event)
 	Start()
 }
@@ -80,7 +80,11 @@ func (s *Scene) GetScreen() IScreen {
 }
 
 // Init method proceeds to initialize all scene resources.
-func (s *Scene) Init() {
+func (s *Scene) Init(display tcell.Screen) {
+	s.screen.Init(display)
+	for _, entity := range s.entities {
+		entity.Init(display)
+	}
 }
 
 // Start method proceeds to starts all scene resources.

@@ -18,6 +18,7 @@ import (
 type IScreen interface {
 	Draw(bool, tcell.Screen)
 	GetOrigin() *api.Point
+	Init(tcell.Screen)
 	RenderCellAt(*api.Point, *Cell) bool
 	SetDryRun(bool)
 }
@@ -36,10 +37,10 @@ type IScreen interface {
 // TODO: Screen requires an origin point to be used as offset in the engine
 // display tcell.Screen.
 type Screen struct {
-	origin    *api.Point
-	oldCanvas *Canvas
-	canvas    *Canvas
-	dryRun    bool
+	origin  *api.Point
+	size    *api.Size
+	display tcell.Screen
+	dryRun  bool
 }
 
 // NewScreen function creates a new screen with the given width and height.
@@ -48,9 +49,9 @@ func NewScreen(origin *api.Point, size *api.Size) *Screen {
 		origin = api.NewPoint(0, 0)
 	}
 	return &Screen{
-		origin:    origin,
-		oldCanvas: NewCanvas(size),
-		canvas:    NewCanvas(size),
+		origin:  origin,
+		size:    size,
+		display: nil,
 	}
 }
 
@@ -58,40 +59,9 @@ func NewScreen(origin *api.Point, size *api.Size) *Screen {
 // Package private methods
 // -----------------------------------------------------------------------------
 
-// renderCell function updates a cell in the canvas based on the previous value
-// for that cell in the canvas.
-func renderCell(oldCell *Cell, newCell *Cell) {
-	if newCell.Rune != 0 {
-		oldCell.Rune = newCell.Rune
-	}
-	if newCell.Style != nil {
-		fg, bg, attrs := newCell.Style.Decompose()
-		_ = oldCell.Style.Foreground(fg).Background(bg).Attributes(attrs)
-	}
-}
-
 // -----------------------------------------------------------------------------
 // Screen private methods
 // -----------------------------------------------------------------------------
-
-// drawCanvasInDisplay function draws the canvas content into the displays using
-// termbox API.
-func (s *Screen) drawCanvasInDisplay(screen tcell.Screen) {
-	for r, rows := range s.canvas.Rows {
-		for c, cell := range rows.Cols {
-			if cell == nil {
-				continue
-			}
-			// skip termbox call
-			if !s.dryRun {
-				fg, bg, attrs := cell.Style.Decompose()
-				style := tcell.StyleDefault.Background(bg).Foreground(fg).Attributes(attrs)
-
-				screen.SetContent(c+s.origin.X, r+s.origin.Y, cell.Rune, nil, style)
-			}
-		}
-	}
-}
 
 // -----------------------------------------------------------------------------
 // Screen public methods
@@ -99,25 +69,11 @@ func (s *Screen) drawCanvasInDisplay(screen tcell.Screen) {
 
 // Draw method draws the canvas content in the display.
 func (s *Screen) Draw(flush bool, screen tcell.Screen) {
-	if flush || !s.oldCanvas.IsEqual(s.canvas) {
-		s.drawCanvasInDisplay(screen)
+	if flush {
 		if !s.dryRun {
-			screen.Show()
+			s.display.Show()
 		}
-		s.oldCanvas = CloneCanvas(s.canvas)
 	}
-}
-
-// GetCanvas method returns the screen canvas.
-func (s *Screen) GetCanvas() *Canvas {
-	return s.canvas
-}
-
-// GetRect method returns the rectangule for the screen.
-func (s *Screen) GetRect() *api.Rect {
-	rect := s.canvas.GetRect()
-	rect.SetOrigin(s.origin)
-	return rect
 }
 
 // GetOrigin method returns the origin point for the screen.
@@ -125,14 +81,24 @@ func (s *Screen) GetOrigin() *api.Point {
 	return s.origin
 }
 
+// GetSize method returns the size for the screen.
+func (s *Screen) GetSize() *api.Size {
+	return s.size
+}
+
+// Init method initializes the screen instance.
+func (s *Screen) Init(display tcell.Screen) {
+	s.display = display
+}
+
 // RenderCellAt method renders the cell in the screen canvas.
 func (s *Screen) RenderCellAt(point *api.Point, cell *Cell) bool {
-	if canvasCell := s.canvas.GetCellAt(point); canvasCell != nil {
-		renderCell(canvasCell, cell)
-		return true
+	if !s.dryRun {
+		col, row := point.Get()
+		fg, bg, attrs := cell.Style.Decompose()
+		style := tcell.StyleDefault.Background(bg).Foreground(fg).Attributes(attrs)
+		s.display.SetContent(col+s.origin.X, row+s.origin.Y, cell.Rune, nil, style)
 	}
-	// if the cell in the screen was nil, create a new one.
-	s.canvas.SetCellAt(point, CloneCell(cell))
 	return true
 }
 
@@ -140,11 +106,6 @@ func (s *Screen) RenderCellAt(point *api.Point, cell *Cell) bool {
 // ncurses call.
 func (s *Screen) SetDryRun(dryRun bool) {
 	s.dryRun = dryRun
-}
-
-// Size method returns the screen size as width and height.
-func (s *Screen) Size() *api.Size {
-	return s.canvas.Size()
 }
 
 var _ IScreen = (*Screen)(nil)

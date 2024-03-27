@@ -145,6 +145,7 @@ func (e *Engine) GetSceneManager() *SceneManager {
 
 // Init method initializes are resources required to run the engine.
 func (e *Engine) Init() {
+	// Initialize tcell Screen.
 	if !e.dryRun {
 		var err error
 		e.display, err = tcell.NewScreen()
@@ -157,6 +158,7 @@ func (e *Engine) Init() {
 		defaultStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
 		e.display.SetStyle(defaultStyle)
 	}
+	e.sceneManager.Init(e.display)
 }
 
 // Run method runs the engine in an infinite loop.
@@ -175,14 +177,18 @@ func (e *Engine) Run(fps float64) {
 
 		// panic handler.
 		defer func() {
+			recoverStack := false
 			if err := recover(); err != nil {
 				tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("panic %+v", err)
 				tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("%s", string(debug.Stack()))
+				recoverStack = true
 			}
 			if !e.dryRun {
 				e.display.Fini()
 			}
-			fmt.Printf("%s", string(debug.Stack()))
+			if recoverStack {
+				fmt.Printf("%s", string(debug.Stack()))
+			}
 			os.Exit(0)
 		}()
 	}

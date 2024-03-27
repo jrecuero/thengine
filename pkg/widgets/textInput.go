@@ -54,8 +54,7 @@ func (t *TextInput) updateCursor() {
 	lenInputStr := len(t.inputStr)
 	col := t.GetPosition().X + lenInputStr
 	row := t.GetPosition().Y
-	display := engine.GetEngine().GetDisplay()
-	display.ShowCursor(col, row)
+	t.GetDisplay().ShowCursor(col, row)
 }
 
 // -----------------------------------------------------------------------------
@@ -81,8 +80,7 @@ func (t *TextInput) GetInputText() string {
 func (t *TextInput) ReleaseFocus() (bool, error) {
 	ok, err := t.Entity.ReleaseFocus()
 	if err == nil {
-		display := engine.GetEngine().GetDisplay()
-		display.HideCursor()
+		t.GetDisplay().HideCursor()
 	}
 	return ok, err
 }

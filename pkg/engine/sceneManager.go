@@ -129,7 +129,10 @@ func (m *SceneManager) GetVisibleSceneIndex(scene IScene) int {
 }
 
 // Init method is called to initializes all scene manager resources.
-func (m *SceneManager) Init() {
+func (m *SceneManager) Init(display tcell.Screen) {
+	for _, scene := range m.scenes {
+		scene.Init(display)
+	}
 }
 
 // IsSceneAvailable method finds the given scene in the list of all scenes available.

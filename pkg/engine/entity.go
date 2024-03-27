@@ -22,7 +22,7 @@ type IEntity interface {
 	GetPosition() *api.Point
 	GetSize() *api.Size
 	GetStyle() *tcell.Style
-	Init()
+	Init(tcell.Screen)
 	SetCanvas(*Canvas)
 	SetPosition(*api.Point)
 	SetSize(*api.Size)
@@ -50,6 +50,7 @@ type Entity struct {
 	position *api.Point
 	size     *api.Size
 	style    *tcell.Style
+	display  tcell.Screen
 	zLevel   int
 	pLevel   int
 }
@@ -111,12 +112,16 @@ func (e *Entity) GetSize() *api.Size {
 	return e.size
 }
 
+func (e *Entity) GetDisplay() tcell.Screen {
+	return e.display
+}
+
 func (e *Entity) GetStyle() *tcell.Style {
 	return e.style
 }
 
-func (e *Entity) Init() {
-
+func (e *Entity) Init(display tcell.Screen) {
+	e.display = display
 }
 
 func (e *Entity) SetCanvas(canvas *Canvas) {

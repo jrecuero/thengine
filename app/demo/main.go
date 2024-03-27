@@ -120,7 +120,7 @@ func demoThree() {
 }
 
 func demoFour(dryRun bool) {
-	tools.Logger.WithField("module", "main").Infof("ThEngine demo-four")
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-four")
 	fmt.Println("ThEngine demo-four")
 	screen := engine.NewScreen(nil, api.NewSize(40, 80))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
@@ -139,7 +139,7 @@ func demoFour(dryRun bool) {
 }
 
 func demoFive(dryRun bool) {
-	tools.Logger.WithField("module", "main").Infof("ThEngine demo-five")
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-five")
 	fmt.Println("ThEngine demo-five")
 	screen := engine.NewScreen(nil, api.NewSize(40, 80))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
@@ -168,11 +168,11 @@ func demoFive(dryRun bool) {
 }
 
 func demoSix(dryRun bool) {
-	tools.Logger.WithField("module", "main").Infof("ThEngine demo-six")
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-six")
 	fmt.Println("ThEngine demo-six")
 	screen := engine.NewScreen(nil, api.NewSize(40, 80))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
-	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorLightBlue)
 	scene := engine.NewScene("scene", screen)
 	textFirstName := widgets.NewText("text-first-name", api.NewPoint(0, 0), api.NewSize(1, 1), &styleOne, "First Name:")
 	scene.AddEntity(textFirstName)
@@ -193,11 +193,14 @@ func demoSix(dryRun bool) {
 	appEngine.GetSceneManager().SetSceneAsActive(scene)
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
 	appEngine.Init()
+	display := appEngine.GetDisplay()
+	//display.SetCursorStyle(tcell.CursorStyleBlinkingBlock)
+	display.SetCursorStyle(tcell.CursorStyleSteadyBlock)
 	appEngine.Run(60.0)
 }
 
 func demoSeven(dryRun bool) {
-	tools.Logger.WithField("module", "main").Infof("ThEngine demo-seven")
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-seven")
 	fmt.Println("ThEngine demo-seven")
 	screen := engine.NewScreen(nil, api.NewSize(40, 80))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
