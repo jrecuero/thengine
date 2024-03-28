@@ -91,7 +91,7 @@ func demoOne() {
 	text.Render(camera)
 	appEngine := engine.GetEngine()
 	appEngine.Init()
-	camera.Draw(true, appEngine.GetDisplay())
+	camera.Draw(true, appEngine.GetScreen())
 	appEngine.Run(60.0)
 }
 
@@ -183,12 +183,12 @@ func demoFive(dryRun bool) {
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
 	// appEngine.SetDryRun(dryRun)
 	appEngine.Init()
-	display := appEngine.GetDisplay()
+	screen := appEngine.GetScreen()
 	//style := tcell.StyleDefault
-	display.SetStyle(styleThree)
-	display.SetCursorStyle(tcell.CursorStyleBlinkingBlock)
-	//display.SetStyle(style)
-	display.ShowCursor(0, 0)
+	screen.SetStyle(styleThree)
+	screen.SetCursorStyle(tcell.CursorStyleBlinkingBlock)
+	//screen.SetStyle(style)
+	screen.ShowCursor(0, 0)
 	appEngine.Run(60.0)
 }
 
@@ -218,9 +218,9 @@ func demoSix(dryRun bool) {
 	appEngine.GetSceneManager().SetSceneAsActive(scene)
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
 	appEngine.Init()
-	display := appEngine.GetDisplay()
-	//display.SetCursorStyle(tcell.CursorStyleBlinkingBlock)
-	display.SetCursorStyle(tcell.CursorStyleSteadyBlock)
+	screen := appEngine.GetScreen()
+	//screen.SetCursorStyle(tcell.CursorStyleBlinkingBlock)
+	screen.SetCursorStyle(tcell.CursorStyleSteadyBlock)
 	appEngine.Run(60.0)
 }
 

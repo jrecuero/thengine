@@ -37,10 +37,10 @@ type ICamera interface {
 // TODO: Camera requires an origin point to be used as offset in the engine
 // display tcell.Screen.
 type Camera struct {
-	origin  *api.Point
-	size    *api.Size
-	display tcell.Screen
-	dryRun  bool
+	origin *api.Point
+	size   *api.Size
+	screen tcell.Screen
+	dryRun bool
 }
 
 // NewCamera function creates a new camera with the given width and height.
@@ -49,9 +49,9 @@ func NewCamera(origin *api.Point, size *api.Size) *Camera {
 		origin = api.NewPoint(0, 0)
 	}
 	return &Camera{
-		origin:  origin,
-		size:    size,
-		display: nil,
+		origin: origin,
+		size:   size,
+		screen: nil,
 	}
 }
 
@@ -67,11 +67,11 @@ func NewCamera(origin *api.Point, size *api.Size) *Camera {
 // Camera public methods
 // -----------------------------------------------------------------------------
 
-// Draw method draws the canvas content in the display.
+// Draw method draws the canvas content in the screen.
 func (s *Camera) Draw(flush bool, screen tcell.Screen) {
 	if flush {
 		if !s.dryRun {
-			s.display.Show()
+			s.screen.Show()
 		}
 	}
 }
@@ -87,8 +87,8 @@ func (s *Camera) GetSize() *api.Size {
 }
 
 // Init method initializes the camera instance.
-func (s *Camera) Init(display tcell.Screen) {
-	s.display = display
+func (s *Camera) Init(screen tcell.Screen) {
+	s.screen = screen
 }
 
 // RenderCellAt method renders the cell in the camera canvas.
@@ -97,7 +97,7 @@ func (s *Camera) RenderCellAt(point *api.Point, cell *Cell) bool {
 		col, row := point.Get()
 		fg, bg, attrs := cell.Style.Decompose()
 		style := tcell.StyleDefault.Background(bg).Foreground(fg).Attributes(attrs)
-		s.display.SetContent(col+s.origin.X, row+s.origin.Y, cell.Rune, nil, style)
+		s.screen.SetContent(col+s.origin.X, row+s.origin.Y, cell.Rune, nil, style)
 	}
 	return true
 }

@@ -54,7 +54,7 @@ type Entity struct {
 	position *api.Point
 	size     *api.Size
 	style    *tcell.Style
-	display  tcell.Screen
+	screen   tcell.Screen
 	zLevel   int
 	pLevel   int
 }
@@ -108,8 +108,8 @@ func (e *Entity) GetCanvas() *Canvas {
 	return e.canvas
 }
 
-func (e *Entity) GetDisplay() tcell.Screen {
-	return e.display
+func (e *Entity) GetScreen() tcell.Screen {
+	return e.screen
 }
 
 func (e *Entity) GetPLevel() int {
@@ -132,8 +132,8 @@ func (e *Entity) GetZLevel() int {
 	return e.zLevel
 }
 
-func (e *Entity) Init(display tcell.Screen) {
-	e.display = display
+func (e *Entity) Init(screen tcell.Screen) {
+	e.screen = screen
 }
 
 func (e *Entity) SetCanvas(canvas *Canvas) {

@@ -50,9 +50,9 @@ func GetEngine() *Engine {
 
 // Engine struct contains all attributes required for handling the appplication
 // engine.
-// display tcell.Screen instance used to display any application object.
+// screen tcell.Screen instance used to display any application object.
 type Engine struct {
-	display      tcell.Screen
+	screen       tcell.Screen
 	sceneManager *SceneManager
 	focusManager *FocusManager
 	ctrlCh       chan bool
@@ -83,7 +83,7 @@ loop:
 		case <-e.ctrlCh:
 			break loop
 		default:
-			e.eventCh <- e.display.PollEvent()
+			e.eventCh <- e.screen.PollEvent()
 		}
 	}
 }
@@ -106,13 +106,13 @@ func (e *Engine) stopEventPoll() {
 // the engine. The size of the scene is equal to the size of the tcell.Screen.
 func (e *Engine) CreateEngineScene() error {
 
-	if e.display == nil {
-		return fmt.Errorf("Engine display was not created. Engine.Init() has to be called")
+	if e.screen == nil {
+		return fmt.Errorf("Engine screen was not created. Engine.Init() has to be called")
 	}
 
 	// Create a new screen to be used by the engine scene with the same size as
-	// the engine display tcell.Screen.
-	width, height := e.display.Size()
+	// the engine screen tcell.Screen.
+	width, height := e.screen.Size()
 	engineCamera := NewCamera(nil, api.NewSize(width, height))
 
 	// Create a default scene for the engine that should be always present in
@@ -124,13 +124,13 @@ func (e *Engine) CreateEngineScene() error {
 
 // Draw method proceeds to draws all entities in visible scenes.
 func (e *Engine) Draw() {
-	e.display.Clear()
-	e.sceneManager.Draw(e.display)
+	e.screen.Clear()
+	e.sceneManager.Draw(e.screen)
 }
 
-// GetDisplay method returns the tcell.Screen used by the engine.
-func (e *Engine) GetDisplay() tcell.Screen {
-	return e.display
+// GetScreen method returns the tcell.Screen used by the engine.
+func (e *Engine) GetScreen() tcell.Screen {
+	return e.screen
 }
 
 // GetFocusManager method returns the focus manager instance.
@@ -148,17 +148,17 @@ func (e *Engine) Init() {
 	// Initialize tcell Screen.
 	if !e.dryRun {
 		var err error
-		e.display, err = tcell.NewScreen()
+		e.screen, err = tcell.NewScreen()
 		if err != nil {
 			panic(err)
 		}
-		if err = e.display.Init(); err != nil {
+		if err = e.screen.Init(); err != nil {
 			panic(err)
 		}
 		defaultStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
-		e.display.SetStyle(defaultStyle)
+		e.screen.SetStyle(defaultStyle)
 	}
-	e.sceneManager.Init(e.display)
+	e.sceneManager.Init(e.screen)
 }
 
 // Run method runs the engine in an infinite loop.
@@ -171,9 +171,9 @@ func (e *Engine) Run(fps float64) {
 		defer e.stopEventPoll()
 
 		// Enable Mouse & Focus.
-		//e.display.EnableMouse()
-		//e.display.EnableFocus()
-		e.display.Clear()
+		//e.screen.EnableMouse()
+		//e.screen.EnableFocus()
+		e.screen.Clear()
 
 		// panic handler.
 		defer func() {
@@ -184,7 +184,7 @@ func (e *Engine) Run(fps float64) {
 				recoverStack = true
 			}
 			if !e.dryRun {
-				e.display.Fini()
+				e.screen.Fini()
 			}
 			if recoverStack {
 				fmt.Printf("%s", string(debug.Stack()))
@@ -200,7 +200,7 @@ func (e *Engine) Run(fps float64) {
 		case event = <-e.eventCh:
 			switch ev := event.(type) {
 			case *tcell.EventResize:
-				e.display.Sync()
+				e.screen.Sync()
 			case *tcell.EventMouse:
 				tools.Logger.WithField("module", "engine").
 					WithField("function", "Run").
