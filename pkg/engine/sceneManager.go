@@ -69,7 +69,7 @@ func (m *SceneManager) AddScene(scene IScene) bool {
 func (m *SceneManager) Draw(display tcell.Screen) {
 	for _, scene := range m.visibleScenes {
 		scene.Draw()
-		scene.GetScreen().Draw(true, display)
+		scene.GetCamera().Draw(true, display)
 	}
 }
 
@@ -220,7 +220,7 @@ func (m *SceneManager) RemoveScene(scene IScene) bool {
 // ncurses call.
 func (m *SceneManager) SetDryRun(dryRun bool) {
 	for _, scene := range m.scenes {
-		screen := scene.GetScreen()
+		screen := scene.GetCamera()
 		screen.SetDryRun(dryRun)
 	}
 }

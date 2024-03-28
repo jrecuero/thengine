@@ -17,7 +17,7 @@ import (
 type IEntity interface {
 	IObject
 	IFocus
-	Draw(IScreen)
+	Draw(ICamera)
 	GetCanvas() *Canvas
 	GetPLevel() int
 	GetPosition() *api.Point
@@ -98,7 +98,7 @@ func (e *Entity) CanHaveFocus() bool {
 	return e.IsFocusEnable() && e.IsVisible() && e.IsActive()
 }
 
-func (e *Entity) Draw(screen IScreen) {
+func (e *Entity) Draw(screen ICamera) {
 	if e.IsVisible() {
 		e.canvas.RenderAt(screen, e.position)
 	}

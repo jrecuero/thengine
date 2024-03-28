@@ -7,7 +7,7 @@ import (
 	"github.com/jrecuero/thengine/pkg/engine"
 )
 
-func TestScreen(t *testing.T) {
+func TestCamera(t *testing.T) {
 	cases := []struct {
 		input struct {
 			origin *api.Point
@@ -51,27 +51,27 @@ func TestScreen(t *testing.T) {
 		},
 	}
 	for i, c := range cases {
-		got := engine.NewScreen(c.input.origin, c.input.size)
+		got := engine.NewCamera(c.input.origin, c.input.size)
 		if got == nil {
-			t.Errorf("[%d] NewScreen Error exp:*Screen got:nil", i)
+			t.Errorf("[%d] NewCamera Error exp:*Camera got:nil", i)
 			continue
 		}
 		if c.exp.origin.X != got.GetOrigin().X {
-			t.Errorf("[%d] NewScreen Canvas.X exp:%d got:%d", i, c.exp.origin.X, got.GetOrigin().X)
+			t.Errorf("[%d] NewCamera Canvas.X exp:%d got:%d", i, c.exp.origin.X, got.GetOrigin().X)
 		}
 		if c.exp.origin.Y != got.GetOrigin().Y {
-			t.Errorf("[%d] NewScreen Canvas.Y exp:%d got:%d", i, c.exp.origin.Y, got.GetOrigin().Y)
+			t.Errorf("[%d] NewCamera Canvas.Y exp:%d got:%d", i, c.exp.origin.Y, got.GetOrigin().Y)
 		}
 		if c.exp.size.W != got.GetSize().W {
-			t.Errorf("[%d] NewScreen Canvas.Width exp:%d got:%d", i, c.exp.size.W, got.GetSize().W)
+			t.Errorf("[%d] NewCamera Canvas.Width exp:%d got:%d", i, c.exp.size.W, got.GetSize().W)
 		}
 		if c.exp.size.H != got.GetSize().H {
-			t.Errorf("[%d] NewScreen Canvas.Height exp:%d got:%d", i, c.exp.size.H, got.GetSize().H)
+			t.Errorf("[%d] NewCamera Canvas.Height exp:%d got:%d", i, c.exp.size.H, got.GetSize().H)
 		}
 	}
 }
 
-func TestScreenGetRect(t *testing.T) {
+func TestCameraGetRect(t *testing.T) {
 	cases := []struct {
 		input struct {
 			origin *api.Point
@@ -115,8 +115,8 @@ func TestScreenGetRect(t *testing.T) {
 		},
 	}
 	for i, c := range cases {
-		screen := engine.NewScreen(c.input.origin, c.input.size)
-		got := screen.GetSize()
+		camera := engine.NewCamera(c.input.origin, c.input.size)
+		got := camera.GetSize()
 		if got == nil {
 			t.Errorf("[%d] GetRect Error exp:*Rect got:nil", i)
 			continue
@@ -127,7 +127,7 @@ func TestScreenGetRect(t *testing.T) {
 	}
 }
 
-func TestScreenGetOrigin(t *testing.T) {
+func TestCameraGetOrigin(t *testing.T) {
 	cases := []struct {
 		input struct {
 			origin *api.Point
@@ -156,8 +156,8 @@ func TestScreenGetOrigin(t *testing.T) {
 		},
 	}
 	for i, c := range cases {
-		screen := engine.NewScreen(c.input.origin, c.input.size)
-		got := screen.GetOrigin()
+		camera := engine.NewCamera(c.input.origin, c.input.size)
+		got := camera.GetOrigin()
 		if got == nil {
 			t.Errorf("[%d] GetOrigin Error exp:*Rect got:nil", i)
 			continue
@@ -171,7 +171,7 @@ func TestScreenGetOrigin(t *testing.T) {
 	}
 }
 
-// func TestScreenSize(t *testing.T) {
+// func TestCameraSize(t *testing.T) {
 // 	cases := []struct {
 // 		input *api.Size
 // 		exp   *api.Size
@@ -186,8 +186,8 @@ func TestScreenGetOrigin(t *testing.T) {
 // 		},
 // 	}
 // 	for i, c := range cases {
-// 		screen := engine.NewScreen(c.input)
-// 		got := screen.Size()
+// 		camera := engine.NewCamera(c.input)
+// 		got := camera.Size()
 // 		if got == nil {
 // 			t.Errorf("[%d] Size Error exp:*Rect got:nil", i)
 // 			continue
@@ -198,7 +198,7 @@ func TestScreenGetOrigin(t *testing.T) {
 // 	}
 // }
 
-// func TestScreenRenderCellAt(t *testing.T) {
+// func TestCameraRenderCellAt(t *testing.T) {
 // 	createCells()
 // 	cases := []struct {
 // 		input struct {
@@ -267,9 +267,9 @@ func TestScreenGetOrigin(t *testing.T) {
 // 		},
 // 	}
 // 	for i, c := range cases {
-// 		screen := engine.NewScreen(c.input.size)
-// 		screen.Canvas.FillWithCell(cells[1])
-// 		got := screen.RenderCellAt(c.input.point, c.input.cell)
+// 		camera := engine.NewCamera(c.input.size)
+// 		camera.Canvas.FillWithCell(cells[1])
+// 		got := camera.RenderCellAt(c.input.point, c.input.cell)
 // 		if c.exp.ok != got {
 // 			t.Errorf("[%d] RenderCellAt Error exp:%t got:%t", i, c.exp.ok, got)
 // 			continue
@@ -277,16 +277,16 @@ func TestScreenGetOrigin(t *testing.T) {
 // 		if c.exp.ok == false {
 // 			continue
 // 		}
-// 		gotCell := screen.Canvas.GetCellAt(c.input.point)
+// 		gotCell := camera.Canvas.GetCellAt(c.input.point)
 // 		if !c.exp.cell.IsEqual(gotCell) {
 // 			t.Errorf("[%d] RenderCellAt Cell Error exp:%s got:%s", i, c.exp.cell.ToString(), gotCell.ToString())
 // 		}
-// 		if gotEqual := screen.OldCanvas.IsEqual(screen.Canvas); gotEqual {
+// 		if gotEqual := camera.OldCanvas.IsEqual(camera.Canvas); gotEqual {
 // 			t.Errorf("[%d] RenderCellAt OldCanvas Error exp:%t got:%t", i, false, gotEqual)
 // 		}
 // 	}
 // }
-// func TestScreenDraw(t *testing.T) {
+// func TestCameraDraw(t *testing.T) {
 // 	createCells()
 // 	cases := []struct {
 // 		input struct {
@@ -362,11 +362,11 @@ func TestScreenGetOrigin(t *testing.T) {
 // 		},
 // 	}
 // 	for i, c := range cases {
-// 		screen := engine.NewScreen(c.input.size)
-// 		screen.DryRun = true // run in test mode.
-// 		screen.Canvas.FillWithCell(cells[1])
-// 		screen.Draw(true)
-// 		got := screen.RenderCellAt(c.input.point, c.input.cell)
+// 		camera := engine.NewCamera(c.input.size)
+// 		camera.DryRun = true // run in test mode.
+// 		camera.Canvas.FillWithCell(cells[1])
+// 		camera.Draw(true)
+// 		got := camera.RenderCellAt(c.input.point, c.input.cell)
 // 		if c.exp.ok != got {
 // 			t.Errorf("[%d] RenderCellAt Error exp:%t got:%t", i, c.exp.ok, got)
 // 			continue
@@ -374,11 +374,11 @@ func TestScreenGetOrigin(t *testing.T) {
 // 		if c.exp.ok == false {
 // 			continue
 // 		}
-// 		gotCell := screen.Canvas.GetCellAt(c.input.point)
+// 		gotCell := camera.Canvas.GetCellAt(c.input.point)
 // 		if !c.exp.cell.IsEqual(gotCell) {
 // 			t.Errorf("[%d] RenderCellAt Cell Error exp:%s got:%s", i, c.exp.cell.ToString(), gotCell.ToString())
 // 		}
-// 		gotEqual := screen.OldCanvas.IsEqual(screen.Canvas)
+// 		gotEqual := camera.OldCanvas.IsEqual(camera.Canvas)
 // 		if c.exp.canvas != gotEqual {
 // 			t.Errorf("[%d] RenderCellAt OldCanvas Error exp:%t got:%t", i, c.exp.canvas, gotEqual)
 // 		}

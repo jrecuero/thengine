@@ -28,7 +28,7 @@ type IScene interface {
 	AddEntity(IEntity) error
 	Draw()
 	GetEntities() []IEntity
-	GetScreen() IScreen
+	GetCamera() ICamera
 	Init(tcell.Screen)
 	Update(tcell.Event)
 	Start()
@@ -47,17 +47,17 @@ type Scene struct {
 	entities       []IEntity
 	zLevelEntities []IEntity
 	pLevelEntities []IEntity
-	screen         IScreen
+	camera         ICamera
 }
 
-// NewScreen function creates a new Scene instance.
-func NewScene(name string, screen IScreen) *Scene {
+// NewCamera function creates a new Scene instance.
+func NewScene(name string, camera ICamera) *Scene {
 	scene := &Scene{
 		EObject:        NewEObject(name),
 		entities:       []IEntity{},
 		zLevelEntities: []IEntity{},
 		pLevelEntities: []IEntity{},
-		screen:         screen,
+		camera:         camera,
 	}
 	return scene
 }
@@ -113,14 +113,14 @@ func (s *Scene) AddEntity(entity IEntity) error {
 }
 
 // Draw method proceeds to draw all entities registered and visible in the
-// scene at the scene screen.
+// scene at the scene camera.
 func (s *Scene) Draw() {
-	if s.screen == nil {
+	if s.camera == nil {
 		return
 	}
 	// Draw entites by its zLevel.
 	for _, entity := range s.zLevelEntities {
-		entity.Draw(s.screen)
+		entity.Draw(s.camera)
 	}
 }
 
@@ -129,14 +129,14 @@ func (s *Scene) GetEntities() []IEntity {
 	return s.entities
 }
 
-// GetScreeen method returns the screen instance related to the scene.
-func (s *Scene) GetScreen() IScreen {
-	return s.screen
+// GetScreeen method returns the camera instance related to the scene.
+func (s *Scene) GetCamera() ICamera {
+	return s.camera
 }
 
 // Init method proceeds to initialize all scene resources.
 func (s *Scene) Init(display tcell.Screen) {
-	s.screen.Init(display)
+	s.camera.Init(display)
 	for _, entity := range s.entities {
 		entity.Init(display)
 	}

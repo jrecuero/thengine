@@ -113,11 +113,11 @@ func (e *Engine) CreateEngineScene() error {
 	// Create a new screen to be used by the engine scene with the same size as
 	// the engine display tcell.Screen.
 	width, height := e.display.Size()
-	engineScreen := NewScreen(nil, api.NewSize(width, height))
+	engineCamera := NewCamera(nil, api.NewSize(width, height))
 
 	// Create a default scene for the engine that should be always present in
 	// all applications.
-	engineScene := NewScene(EngineMainSceneName, engineScreen)
+	engineScene := NewScene(EngineMainSceneName, engineCamera)
 	e.sceneManager.AddScene(engineScene)
 	return nil
 }

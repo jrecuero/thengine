@@ -1,6 +1,6 @@
 // canvas.go contains required structures and method for handling any canvas
 // in the application. A canvas represents a sequence of characters to be
-// displayed in the screen in a given sequence of coordinates.
+// displayed in the camera in a given sequence of coordinates.
 package engine
 
 import (
@@ -62,7 +62,7 @@ func (r *Row) SaveToDict() map[string]any {
 // -----------------------------------------------------------------------------
 
 // Canvas struct defines all rows and columns for the characters to be
-// displayed in the screen.
+// displayed in the camera.
 type Canvas struct {
 	Rows []*Row
 	iter *iterCanvas
@@ -258,24 +258,24 @@ func (c *Canvas) IsInside(point *api.Point) bool {
 	return true
 }
 
-// Render method renders the canvas into the screen.
-func (c *Canvas) Render(screen IScreen) {
+// Render method renders the canvas into the camera.
+func (c *Canvas) Render(camera ICamera) {
 	for r, rows := range c.Rows {
 		for c, cell := range rows.Cols {
 			position := api.NewPoint(c, r)
-			screen.RenderCellAt(position, cell)
+			camera.RenderCellAt(position, cell)
 		}
 	}
 }
 
-// RenderAt method renders the canvas into the screen at the given position.
-func (c *Canvas) RenderAt(screen IScreen, offset *api.Point) {
+// RenderAt method renders the canvas into the camera at the given position.
+func (c *Canvas) RenderAt(camera ICamera, offset *api.Point) {
 	for r, rows := range c.Rows {
 		for c, cell := range rows.Cols {
 			if cell != nil {
 				position := api.NewPoint(c, r)
 				position.Add(offset)
-				screen.RenderCellAt(position, cell)
+				camera.RenderCellAt(position, cell)
 			}
 		}
 	}
