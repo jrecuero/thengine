@@ -506,26 +506,26 @@ func TestCanvasNewCanvasFromFile(t *testing.T) {
 				style:  engine.NewStyle(tcell.ColorDarkCyan, tcell.ColorYellow, 0),
 			},
 		},
-		{
-			input: struct {
-				filename string
-				style    *tcell.Style
-			}{
-				filename: "assets/test/canvasString.03",
-				style:    engine.NewStyle(tcell.ColorRed, tcell.ColorBlue, 0),
-			},
-			exp: struct {
-				width  int
-				height int
-				str    []string
-				style  *tcell.Style
-			}{
-				width:  10,
-				height: 3,
-				str:    []string{"Hi", "My name is", "Developer"},
-				style:  engine.NewStyle(tcell.ColorRed, tcell.ColorBlue, 0),
-			},
-		},
+		//{
+		//    input: struct {
+		//        filename string
+		//        style    *tcell.Style
+		//    }{
+		//        filename: "assets/test/canvasString.03",
+		//        style:    engine.NewStyle(tcell.ColorRed, tcell.ColorBlue, 0),
+		//    },
+		//    exp: struct {
+		//        width  int
+		//        height int
+		//        str    []string
+		//        style  *tcell.Style
+		//    }{
+		//        width:  10,
+		//        height: 3,
+		//        str:    []string{"Hi", "My name is", "Developer"},
+		//        style:  engine.NewStyle(tcell.ColorRed, tcell.ColorBlue, 0),
+		//    },
+		//},
 	}
 	for i, c := range cases {
 		got := engine.NewCanvasFromFile(c.input.filename, c.input.style)

@@ -12,17 +12,24 @@ import (
 
 type Player struct {
 	*widgets.Widget
+	origin *api.Point
 }
 
 func NewPlayer(name string, position *api.Point, size *api.Size, style *tcell.Style) *Player {
 	player := &Player{
 		Widget: widgets.NewWidget(name, position, size, style),
+		origin: position,
 	}
 	player.SetFocusType(engine.SingleFocus)
 	player.SetFocusEnable(true)
 	return player
 
 }
+
+func (p *Player) Reset(args ...any) {
+	p.SetPosition(p.origin)
+}
+
 func (p *Player) Move(args ...any) {
 	steps := args[0].(int)
 	direction := args[1].(string)
@@ -30,12 +37,15 @@ func (p *Player) Move(args ...any) {
 		WithField("struct", "Player").
 		WithField("function", "Move").
 		Debugf("stets %d direction %s", steps, direction)
+	x, y := p.GetPosition().Get()
 	if direction == "up" {
-		x, y := p.GetPosition().Get()
 		p.SetPosition(api.NewPoint(x, y-1))
 	} else if direction == "down" {
-		x, y := p.GetPosition().Get()
 		p.SetPosition(api.NewPoint(x, y+1))
+	} else if direction == "right" {
+		p.SetPosition(api.NewPoint(x+1, y))
+	} else if direction == "left" {
+		p.SetPosition(api.NewPoint(x-1, y))
 	}
 }
 
@@ -53,6 +63,21 @@ func (p *Player) Update(event tcell.Event) {
 			Key:      tcell.KeyDown,
 			Callback: p.Move,
 			Args:     []any{1, "down"},
+		},
+		{
+			Key:      tcell.KeyRight,
+			Callback: p.Move,
+			Args:     []any{1, "right"},
+		},
+		{
+			Key:      tcell.KeyLeft,
+			Callback: p.Move,
+			Args:     []any{1, "left"},
+		},
+		{
+			Rune:     'x',
+			Callback: p.Reset,
+			Args:     nil,
 		},
 	}
 	p.HandleKeyboardForActions(event, actions)

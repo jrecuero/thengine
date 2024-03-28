@@ -19,14 +19,18 @@ type IEntity interface {
 	IFocus
 	Draw(IScreen)
 	GetCanvas() *Canvas
+	GetPLevel() int
 	GetPosition() *api.Point
 	GetSize() *api.Size
 	GetStyle() *tcell.Style
+	GetZLevel() int
 	Init(tcell.Screen)
 	SetCanvas(*Canvas)
+	SetPLevel(int)
 	SetPosition(*api.Point)
 	SetSize(*api.Size)
 	SetStyle(*tcell.Style)
+	SetZLevel(int)
 	Start()
 	Update(tcell.Event)
 }
@@ -104,6 +108,14 @@ func (e *Entity) GetCanvas() *Canvas {
 	return e.canvas
 }
 
+func (e *Entity) GetDisplay() tcell.Screen {
+	return e.display
+}
+
+func (e *Entity) GetPLevel() int {
+	return e.pLevel
+}
+
 func (e *Entity) GetPosition() *api.Point {
 	return e.position
 }
@@ -112,12 +124,12 @@ func (e *Entity) GetSize() *api.Size {
 	return e.size
 }
 
-func (e *Entity) GetDisplay() tcell.Screen {
-	return e.display
-}
-
 func (e *Entity) GetStyle() *tcell.Style {
 	return e.style
+}
+
+func (e *Entity) GetZLevel() int {
+	return e.zLevel
 }
 
 func (e *Entity) Init(display tcell.Screen) {
@@ -126,6 +138,10 @@ func (e *Entity) Init(display tcell.Screen) {
 
 func (e *Entity) SetCanvas(canvas *Canvas) {
 	e.canvas = canvas
+}
+
+func (e *Entity) SetPLevel(level int) {
+	e.pLevel = level
 }
 
 func (e *Entity) SetPosition(position *api.Point) {
@@ -145,6 +161,10 @@ func (e *Entity) SetStyle(style *tcell.Style) {
 			}
 		}
 	}
+}
+
+func (e *Entity) SetZLevel(level int) {
+	e.zLevel = level
 }
 
 func (e *Entity) Start() {

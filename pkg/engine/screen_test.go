@@ -56,20 +56,17 @@ func TestScreen(t *testing.T) {
 			t.Errorf("[%d] NewScreen Error exp:*Screen got:nil", i)
 			continue
 		}
-		if got.GetCanvas() == nil {
-			t.Errorf("[%d] NewScreen Canvas exp:*Canvas got:nil", i)
-		}
 		if c.exp.origin.X != got.GetOrigin().X {
 			t.Errorf("[%d] NewScreen Canvas.X exp:%d got:%d", i, c.exp.origin.X, got.GetOrigin().X)
 		}
 		if c.exp.origin.Y != got.GetOrigin().Y {
 			t.Errorf("[%d] NewScreen Canvas.Y exp:%d got:%d", i, c.exp.origin.Y, got.GetOrigin().Y)
 		}
-		if c.exp.size.W != got.GetCanvas().Width() {
-			t.Errorf("[%d] NewScreen Canvas.Width exp:%d got:%d", i, c.exp.size.W, got.GetCanvas().Width())
+		if c.exp.size.W != got.GetSize().W {
+			t.Errorf("[%d] NewScreen Canvas.Width exp:%d got:%d", i, c.exp.size.W, got.GetSize().W)
 		}
-		if c.exp.size.H != got.GetCanvas().Height() {
-			t.Errorf("[%d] NewScreen Canvas.Height exp:%d got:%d", i, c.exp.size.H, got.GetCanvas().Height())
+		if c.exp.size.H != got.GetSize().H {
+			t.Errorf("[%d] NewScreen Canvas.Height exp:%d got:%d", i, c.exp.size.H, got.GetSize().H)
 		}
 	}
 }
@@ -119,16 +116,13 @@ func TestScreenGetRect(t *testing.T) {
 	}
 	for i, c := range cases {
 		screen := engine.NewScreen(c.input.origin, c.input.size)
-		got := screen.GetRect()
+		got := screen.GetSize()
 		if got == nil {
 			t.Errorf("[%d] GetRect Error exp:*Rect got:nil", i)
 			continue
 		}
-		if !c.exp.origin.IsEqual(got.Origin) {
-			t.Errorf("[%d] GetRect Error.Origin exp:%s got:%s", i, c.exp.origin.ToString(), got.Origin.ToString())
-		}
-		if !c.exp.size.IsEqual(got.Size) {
-			t.Errorf("[%d] GetRect Error.Size exp:%s, got:%s", i, c.exp.size.ToString(), got.Size.ToString())
+		if !c.exp.size.IsEqual(got) {
+			t.Errorf("[%d] GetRect Error.Size exp:%s, got:%s", i, c.exp.size.ToString(), got.ToString())
 		}
 	}
 }

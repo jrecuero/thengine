@@ -26,6 +26,8 @@ func TestEntityNewEntity(t *testing.T) {
 			position *api.Point
 			size     *api.Size
 			style    *tcell.Style
+			zLevel   int
+			pLevel   int
 		}
 	}{
 		{
@@ -45,11 +47,15 @@ func TestEntityNewEntity(t *testing.T) {
 				position *api.Point
 				size     *api.Size
 				style    *tcell.Style
+				zLevel   int
+				pLevel   int
 			}{
 				name:     "entity-one",
 				position: api.NewPoint(0, 0),
 				size:     api.NewSize(1, 1),
 				style:    &styleOne,
+				zLevel:   0,
+				pLevel:   0,
 			},
 		},
 	}
@@ -80,6 +86,14 @@ func TestEntityNewEntity(t *testing.T) {
 		}
 		if gotCanvas.Height() != c.exp.size.H {
 			t.Errorf("[%d] NewEntity Error.Canvas.H exp:%d got:%d", i, c.exp.size.H, gotCanvas.Height())
+		}
+		gotZLevel := got.GetZLevel()
+		if gotZLevel != c.exp.zLevel {
+			t.Errorf("[%d] NewEntity Error.ZLevel exp:%d got:%d", i, c.exp.zLevel, gotZLevel)
+		}
+		gotPLevel := got.GetPLevel()
+		if gotPLevel != c.exp.pLevel {
+			t.Errorf("[%d] NewEntity Error.PLevel exp:%d got:%d", i, c.exp.pLevel, gotPLevel)
 		}
 	}
 }
