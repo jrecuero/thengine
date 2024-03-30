@@ -35,23 +35,47 @@ func NewTileMap(name string, position *api.Point, size *api.Size, style *tcell.S
 }
 
 // -----------------------------------------------------------------------------
+// TileMap private methods
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
 // TileMap public methods
 // -----------------------------------------------------------------------------
 
-func (t *TileMap) DistanceToTileMapEdgesX(tileMapPos *api.Point) (int, int) {
-	return tileMapPos.X, t.GetSize().W - tileMapPos.X
+func (t *TileMap) DistanceToTileMapEdgesX(tileMapPos *api.Point) (bool, int, int) {
+	var x, y int
+	ok := t.IsTileMapPosInside(tileMapPos)
+	if ok {
+		x, y = tileMapPos.X, t.GetSize().W-tileMapPos.X
+	}
+	return ok, x, y
 }
 
-func (t *TileMap) DistanceToTileMapEdgesY(tileMapPos *api.Point) (int, int) {
-	return tileMapPos.Y, t.GetSize().H - tileMapPos.Y
+func (t *TileMap) DistanceToTileMapEdgesY(tileMapPos *api.Point) (bool, int, int) {
+	var x, y int
+	ok := t.IsTileMapPosInside(tileMapPos)
+	if ok {
+		x, y = tileMapPos.Y, t.GetSize().H-tileMapPos.Y
+	}
+	return ok, x, y
 }
 
-func (t *TileMap) DistanceToCameraEdgesX(tileMapPos *api.Point) (int, int) {
-	return tileMapPos.X - t.cameraOffset.X, t.cameraOffset.X + t.cameraSize.W - tileMapPos.X
+func (t *TileMap) DistanceToCameraEdgesX(tileMapPos *api.Point) (bool, int, int) {
+	var x, y int
+	ok := t.IsTileMapPosInside(tileMapPos)
+	if ok {
+		x, y = tileMapPos.X-t.cameraOffset.X, t.cameraOffset.X+t.cameraSize.W-tileMapPos.X
+	}
+	return ok, x, y
 }
 
-func (t *TileMap) DistanceToCameraEdgesY(tileMapPos *api.Point) (int, int) {
-	return tileMapPos.Y - t.cameraOffset.Y, t.cameraOffset.Y + t.cameraSize.H - tileMapPos.Y
+func (t *TileMap) DistanceToCameraEdgesY(tileMapPos *api.Point) (bool, int, int) {
+	var x, y int
+	ok := t.IsTileMapPosInside(tileMapPos)
+	if ok {
+		x, y = tileMapPos.Y-t.cameraOffset.Y, t.cameraOffset.Y+t.cameraSize.H-tileMapPos.Y
+	}
+	return ok, x, y
 }
 
 func (t *TileMap) GetCameraOffset() *api.Point {
@@ -65,18 +89,38 @@ func (t *TileMap) GetCameraSize() *api.Size {
 func (t *TileMap) GetTileMapPosFromScreenPos(position *api.Point) *api.Point {
 	screenX, screenY := position.Get()
 	tileMapOriginX, tileMapOriginY := t.GetPosition().Get()
+	if (screenX < tileMapOriginX) || (screenY < tileMapOriginY) {
+		return nil
+	}
 	offsetX, offsetY := t.cameraOffset.Get()
-	return api.NewPoint(screenX-tileMapOriginX+offsetX, screenY-tileMapOriginY+offsetY)
+	x := screenX - tileMapOriginX + offsetX
+	y := screenY - tileMapOriginY + offsetY
+	if (x >= t.GetSize().W) || (y >= t.GetSize().H) {
+		return nil
+	}
+	return api.NewPoint(x, y)
 }
 
 func (t *TileMap) GetScreenPosFromTileMapPos(position *api.Point) *api.Point {
-	tileMapPosX, tileMapPosY := position.Get()
-	offsetX, offsetY := t.cameraOffset.Get()
-	if (tileMapPosX < offsetX) || (tileMapPosY < offsetY) {
+	if !t.IsTileMapPosInside(position) {
 		return nil
 	}
+	tileMapPosX, tileMapPosY := position.Get()
+	offsetX, offsetY := t.cameraOffset.Get()
 	tileMapOriginX, tileMapOriginY := t.GetPosition().Get()
 	return api.NewPoint(tileMapPosX-offsetX+tileMapOriginX, tileMapPosY-offsetY+tileMapOriginY)
+}
+
+func (t *TileMap) IsTileMapPosInside(tileMapPos *api.Point) bool {
+	tileMapPosX, tileMapPosY := tileMapPos.Get()
+	offsetX, offsetY := t.cameraOffset.Get()
+	if (tileMapPosX < offsetX) || (tileMapPosY < offsetY) {
+		return false
+	}
+	if (tileMapPosX >= t.GetSize().W) || (tileMapPosY >= t.GetSize().H) {
+		return false
+	}
+	return true
 }
 
 func (t *TileMap) Draw(camera engine.ICamera) {

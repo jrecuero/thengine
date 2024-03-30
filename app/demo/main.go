@@ -280,7 +280,7 @@ func demoEight(dryRun bool) {
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(10, 5))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
 	scene := engine.NewScene("scene", camera)
-	tileMap := widgets.NewTileMap("tile-map", api.NewPoint(0, 0), api.NewSize(20, 5), &styleOne, api.NewPoint(0, 0), api.NewSize(10, 5))
+	tileMap := widgets.NewTileMap("tile-map", api.NewPoint(5, 5), api.NewSize(20, 5), &styleOne, api.NewPoint(0, 0), api.NewSize(10, 5))
 	cell := engine.NewCell(&styleOne, '|')
 	tileMap.GetCanvas().WriteStringInCanvasAt("01234567890123456789", &styleOne, api.NewPoint(0, 0))
 	tileMap.GetCanvas().SetCellAt(api.NewPoint(0, 1), cell)
@@ -291,7 +291,7 @@ func demoEight(dryRun bool) {
 	tileMap.GetCanvas().SetCellAt(api.NewPoint(19, 3), cell)
 	tileMap.GetCanvas().WriteStringInCanvasAt("01234567890123456789", &styleOne, api.NewPoint(0, 4))
 	scene.AddEntity(tileMap)
-	player := NewPlayer("player", api.NewPoint(3, 3), api.NewSize(1, 1), &styleOne)
+	player := NewPlayer("player", api.NewPoint(7, 7), api.NewSize(1, 1), &styleOne)
 	playerCanvas := engine.NewCanvasFromString("x", &styleOne)
 	player.SetCanvas(playerCanvas)
 	player.TileMap = tileMap
