@@ -268,6 +268,20 @@ func (c *Canvas) Render(camera ICamera) {
 	}
 }
 
+// RenderRectAt method renders part of the canvas defines by the given
+// rectangle at the given position.
+func (c *Canvas) RenderRectAt(camera ICamera, rectOffset *api.Point, rectSize *api.Size, offset *api.Point) {
+	for row := 0; row < rectSize.H; row++ {
+		for col := 0; col < rectSize.W; col++ {
+			canvasRow := row + rectOffset.Y
+			canvasCol := col + rectOffset.X
+			if cell := c.GetCellAt(api.NewPoint(canvasCol, canvasRow)); cell != nil {
+				camera.RenderCellAt(api.NewPoint(offset.X+col, offset.Y+row), cell)
+			}
+		}
+	}
+}
+
 // RenderAt method renders the canvas into the camera at the given position.
 func (c *Canvas) RenderAt(camera ICamera, offset *api.Point) {
 	for r, rows := range c.Rows {
@@ -361,6 +375,26 @@ func (c *Canvas) WriteStringInCanvas(str string, style *tcell.Style) {
 			break
 		}
 		for col, ch := range line {
+			if col >= c.Width() {
+				break
+			}
+			cell := NewCell(style, ch)
+			c.SetCellAt(api.NewPoint(col, row), cell)
+		}
+	}
+}
+
+// WriteStringInCanvasAt method writes the given string in the canvas at the
+// give position. Any character exciding the canvas size is missed.
+func (c *Canvas) WriteStringInCanvasAt(str string, style *tcell.Style, position *api.Point) {
+	lines := strings.Split(str, "\n")
+	for rowLine, line := range lines {
+		row := rowLine + position.Y
+		if row >= c.Height() {
+			break
+		}
+		for colLine, ch := range line {
+			col := colLine + position.X
 			if col >= c.Width() {
 				break
 			}

@@ -95,12 +95,13 @@ func NewNamedEntity(name string) *Entity {
 // -----------------------------------------------------------------------------
 
 func (e *Entity) CanHaveFocus() bool {
-	return e.IsFocusEnable() && e.IsVisible() && e.IsActive()
+	//return e.IsFocusEnable() && e.IsVisible() && e.IsActive()
+	return e.IsFocusEnable() && e.IsActive()
 }
 
-func (e *Entity) Draw(screen ICamera) {
+func (e *Entity) Draw(camera ICamera) {
 	if e.IsVisible() {
-		e.canvas.RenderAt(screen, e.position)
+		e.canvas.RenderAt(camera, e.position)
 	}
 }
 

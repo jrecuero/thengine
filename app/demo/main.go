@@ -12,7 +12,8 @@ import (
 
 type Player struct {
 	*widgets.Widget
-	origin *api.Point
+	origin  *api.Point
+	TileMap *widgets.TileMap
 }
 
 func NewPlayer(name string, position *api.Point, size *api.Size, style *tcell.Style) *Player {
@@ -40,12 +41,28 @@ func (p *Player) Move(args ...any) {
 	x, y := p.GetPosition().Get()
 	if direction == "up" {
 		p.SetPosition(api.NewPoint(x, y-1))
+		if p.TileMap != nil {
+			offsetX, offsetY := p.TileMap.GetCameraOffset().Get()
+			p.TileMap.SetCameraOffset(api.NewPoint(offsetX, offsetY-1))
+		}
 	} else if direction == "down" {
 		p.SetPosition(api.NewPoint(x, y+1))
+		if p.TileMap != nil {
+			offsetX, offsetY := p.TileMap.GetCameraOffset().Get()
+			p.TileMap.SetCameraOffset(api.NewPoint(offsetX, offsetY+1))
+		}
 	} else if direction == "right" {
 		p.SetPosition(api.NewPoint(x+1, y))
+		if p.TileMap != nil {
+			offsetX, offsetY := p.TileMap.GetCameraOffset().Get()
+			p.TileMap.SetCameraOffset(api.NewPoint(offsetX+1, offsetY))
+		}
 	} else if direction == "left" {
 		p.SetPosition(api.NewPoint(x-1, y))
+		if p.TileMap != nil {
+			offsetX, offsetY := p.TileMap.GetCameraOffset().Get()
+			p.TileMap.SetCameraOffset(api.NewPoint(offsetX-1, offsetY))
+		}
 	}
 }
 
@@ -81,6 +98,19 @@ func (p *Player) Update(event tcell.Event) {
 		},
 	}
 	p.HandleKeyboardForActions(event, actions)
+}
+
+type demoEightController struct {
+	*widgets.Widget
+}
+
+func (w *demoEightController) newDemoEightController() *demoEightController {
+	controller := &demoEightController{
+		Widget: widgets.NewWidget("demo-8-controller", nil, nil, nil),
+	}
+	controller.SetFocusType(engine.SingleFocus)
+	controller.SetFocusEnable(true)
+	return controller
 }
 
 func demoOne() {
@@ -227,7 +257,7 @@ func demoSix(dryRun bool) {
 func demoSeven(dryRun bool) {
 	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-seven")
 	fmt.Println("ThEngine demo-seven")
-	camera := engine.NewCamera(nil, api.NewSize(40, 80))
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(40, 80))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
 	scene := engine.NewScene("scene", camera)
 	player := NewPlayer("player", api.NewPoint(0, 0), api.NewSize(3, 3), &styleOne)
@@ -244,6 +274,36 @@ func demoSeven(dryRun bool) {
 	appEngine.Run(60.0)
 }
 
+func demoEight(dryRun bool) {
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-eight")
+	fmt.Println("ThEngine demo-eight")
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(10, 5))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	scene := engine.NewScene("scene", camera)
+	tileMap := widgets.NewTileMap("tile-map", api.NewPoint(0, 0), api.NewSize(20, 5), &styleOne, api.NewPoint(0, 0), api.NewSize(10, 5))
+	cell := engine.NewCell(&styleOne, '|')
+	tileMap.GetCanvas().WriteStringInCanvasAt("01234567890123456789", &styleOne, api.NewPoint(0, 0))
+	tileMap.GetCanvas().SetCellAt(api.NewPoint(0, 1), cell)
+	tileMap.GetCanvas().SetCellAt(api.NewPoint(0, 2), cell)
+	tileMap.GetCanvas().SetCellAt(api.NewPoint(0, 3), cell)
+	tileMap.GetCanvas().SetCellAt(api.NewPoint(19, 1), cell)
+	tileMap.GetCanvas().SetCellAt(api.NewPoint(19, 2), cell)
+	tileMap.GetCanvas().SetCellAt(api.NewPoint(19, 3), cell)
+	tileMap.GetCanvas().WriteStringInCanvasAt("01234567890123456789", &styleOne, api.NewPoint(0, 4))
+	scene.AddEntity(tileMap)
+	player := NewPlayer("player", api.NewPoint(3, 3), api.NewSize(1, 1), &styleOne)
+	playerCanvas := engine.NewCanvasFromString("x", &styleOne)
+	player.SetCanvas(playerCanvas)
+	player.TileMap = tileMap
+	scene.AddEntity(player)
+	appEngine := engine.GetEngine()
+	appEngine.GetSceneManager().AddScene(scene)
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.Init()
+	appEngine.Run(60.0)
+}
+
 func main() {
-	demoSeven(true)
+	demoEight(true)
 }
