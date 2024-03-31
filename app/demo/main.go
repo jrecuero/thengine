@@ -37,7 +37,7 @@ func (p *Player) Move(args ...any) {
 	tools.Logger.WithField("module", "main").
 		WithField("struct", "Player").
 		WithField("function", "Move").
-		Debugf("stets %d direction %s", steps, direction)
+		Debugf("steps %d direction %s", steps, direction)
 	x, y := p.GetPosition().Get()
 	if direction == "up" {
 		p.SetPosition(api.NewPoint(x, y-1))
@@ -100,17 +100,117 @@ func (p *Player) Update(event tcell.Event) {
 	p.HandleKeyboardForActions(event, actions)
 }
 
-type demoEightController struct {
+const (
+	DemoNineMoveTopic = "demo/nine/topic"
+)
+
+type ninePlayer struct {
 	*widgets.Widget
+	origin  *api.Point
+	mailbox *engine.Mailbox
 }
 
-func (w *demoEightController) newDemoEightController() *demoEightController {
-	controller := &demoEightController{
-		Widget: widgets.NewWidget("demo-8-controller", nil, nil, nil),
+func newNinePlayer(name string, position *api.Point, size *api.Size, style *tcell.Style) *ninePlayer {
+	player := &ninePlayer{
+		Widget:  widgets.NewWidget(name, position, size, style),
+		origin:  position,
+		mailbox: engine.GetMailbox(),
 	}
-	controller.SetFocusType(engine.SingleFocus)
-	controller.SetFocusEnable(true)
-	return controller
+	player.mailbox.Subscribe(DemoNineMoveTopic, name)
+	return player
+}
+
+func (p *ninePlayer) Reset(args ...any) {
+	p.SetPosition(p.origin)
+}
+
+func (p *ninePlayer) Move(args ...any) {
+	steps := args[0].(int)
+	direction := args[1].(string)
+	tools.Logger.WithField("module", "main").
+		WithField("struct", "ninePlayer").
+		WithField("function", "Move").
+		Debugf("steps %d direction %s", steps, direction)
+	x, y := p.GetPosition().Get()
+	if direction == "up" {
+		p.SetPosition(api.NewPoint(x, y-steps))
+	} else if direction == "down" {
+		p.SetPosition(api.NewPoint(x, y+steps))
+	} else if direction == "right" {
+		p.SetPosition(api.NewPoint(x+steps, y))
+	} else if direction == "left" {
+		p.SetPosition(api.NewPoint(x-steps, y))
+	}
+}
+
+func (p *ninePlayer) Update(event tcell.Event) {
+}
+
+func (p *ninePlayer) Consume() {
+	if message, _ := p.mailbox.Consume(DemoNineMoveTopic, p.GetName()); message != nil {
+		tools.Logger.WithField("module", "main").
+			WithField("struct", "ninePlayer").
+			WithField("function", "Consume").
+			Debugf("message %+v", message)
+		content := message.Content.([]any)
+		p.Move(content...)
+	}
+}
+
+type nineHandler struct {
+	*widgets.Widget
+	mailbox *engine.Mailbox
+}
+
+func newNineHandler() *nineHandler {
+	h := &nineHandler{
+		Widget:  widgets.NewWidget("nine-handler", nil, nil, nil),
+		mailbox: engine.GetMailbox(),
+	}
+	h.SetFocusType(engine.SingleFocus)
+	h.SetFocusEnable(true)
+	h.mailbox.CreateTopic(DemoNineMoveTopic)
+	return h
+}
+
+func (h *nineHandler) Move(args ...any) {
+	tools.Logger.WithField("module", "main").
+		WithField("struct", "nineHandler").
+		WithField("function", "Update").
+		Debugf("args %+v", args)
+	message := &engine.Message{
+		Topic:   DemoNineMoveTopic,
+		Src:     h.GetName(),
+		Dst:     "broadcast",
+		Content: args,
+	}
+	h.mailbox.Publish(DemoNineMoveTopic, message)
+}
+
+func (h *nineHandler) Update(event tcell.Event) {
+	actions := []*widgets.KeyboardAction{
+		{
+			Key:      tcell.KeyUp,
+			Callback: h.Move,
+			Args:     []any{1, "up"},
+		},
+		{
+			Key:      tcell.KeyDown,
+			Callback: h.Move,
+			Args:     []any{1, "down"},
+		},
+		{
+			Key:      tcell.KeyRight,
+			Callback: h.Move,
+			Args:     []any{1, "right"},
+		},
+		{
+			Key:      tcell.KeyLeft,
+			Callback: h.Move,
+			Args:     []any{1, "left"},
+		},
+	}
+	h.HandleKeyboardForActions(event, actions)
 }
 
 func demoOne() {
@@ -304,6 +404,26 @@ func demoEight(dryRun bool) {
 	appEngine.Run(60.0)
 }
 
+func demoNine(dryRun bool) {
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-nine")
+	fmt.Println("ThEngine demo-nine")
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(20, 10))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	scene := engine.NewScene("scene", camera)
+	handler := newNineHandler()
+	scene.AddEntity(handler)
+	player := newNinePlayer("player", api.NewPoint(7, 7), api.NewSize(1, 1), &styleOne)
+	playerCanvas := engine.NewCanvasFromString("x", &styleOne)
+	player.SetCanvas(playerCanvas)
+	scene.AddEntity(player)
+	appEngine := engine.GetEngine()
+	appEngine.GetSceneManager().AddScene(scene)
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.Init()
+	appEngine.Run(60.0)
+}
+
 func main() {
-	demoEight(true)
+	demoNine(false)
 }

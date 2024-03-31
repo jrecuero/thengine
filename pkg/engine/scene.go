@@ -26,6 +26,7 @@ const (
 type IScene interface {
 	IObject
 	AddEntity(IEntity) error
+	Consume()
 	Draw()
 	GetEntities() []IEntity
 	GetCamera() ICamera
@@ -110,6 +111,14 @@ func (s *Scene) AddEntity(entity IEntity) error {
 	focusManager := GetEngine().GetFocusManager()
 	focusManager.AddEntity(s, entity)
 	return nil
+}
+
+// Consume method calls all entity instances to consume all messages from
+// the mailbox.
+func (s *Scene) Consume() {
+	for _, entity := range s.pLevelEntities {
+		entity.Consume()
+	}
 }
 
 // Draw method proceeds to draw all entities registered and visible in the

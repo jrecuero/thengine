@@ -71,6 +71,9 @@ type Canvas struct {
 // NewCanvas function creates a new Canvas instance with the given number of
 // columns and rows.
 func NewCanvas(size *api.Size) *Canvas {
+	if size == nil {
+		return nil
+	}
 	cols, rows := size.Get()
 	canvas := Canvas{
 		Rows: make([]*Row, rows),

@@ -17,6 +17,7 @@ import (
 type IEntity interface {
 	IObject
 	IFocus
+	Consume()
 	Draw(ICamera)
 	GetCanvas() *Canvas
 	GetPLevel() int
@@ -100,9 +101,13 @@ func (e *Entity) CanHaveFocus() bool {
 }
 
 func (e *Entity) Draw(camera ICamera) {
-	if e.IsVisible() {
+	if e.IsVisible() && e.GetCanvas() != nil {
 		e.canvas.RenderAt(camera, e.position)
 	}
+}
+
+// Consume method consume all messages from the mailbox.
+func (e *Entity) Consume() {
 }
 
 func (e *Entity) GetCanvas() *Canvas {

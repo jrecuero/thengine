@@ -102,6 +102,12 @@ func (e *Engine) stopEventPoll() {
 // Engine public methods
 // -----------------------------------------------------------------------------
 
+// Consume method calls all underneath instances to consume all messages from
+// the mailbox.
+func (e *Engine) Consume() {
+	e.sceneManager.Consume()
+}
+
 // CreateEngineScene method proceeds to create a new an unique scene owned by
 // the engine. The size of the scene is equal to the size of the tcell.Screen.
 func (e *Engine) CreateEngineScene() error {
@@ -242,6 +248,9 @@ func (e *Engine) Run(fps float64) {
 
 		// update all engine resources.
 		e.Update(event)
+
+		// consume all message in the mailbox
+		e.Consume()
 
 		// draw all engine resources.
 		e.Draw()

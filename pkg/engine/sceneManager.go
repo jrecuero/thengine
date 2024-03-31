@@ -64,6 +64,14 @@ func (m *SceneManager) AddScene(scene IScene) bool {
 	return true
 }
 
+// Consume method calls all scene instances to consume all messages from
+// the mailbox.
+func (m *SceneManager) Consume() {
+	for _, scene := range m.activeScenes {
+		scene.Consume()
+	}
+}
+
 // Draw method is called by the engine to draw all visible scenes in the scene
 // manager.
 func (m *SceneManager) Draw(display tcell.Screen) {
