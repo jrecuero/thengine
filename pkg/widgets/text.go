@@ -22,14 +22,14 @@ type Runes []rune
 // text widget.
 type Text struct {
 	*Widget
-	str string
+	label string
 }
 
 // NewText function creates a new Text instance widget.
-func NewText(name string, position *api.Point, size *api.Size, style *tcell.Style, str string) *Text {
+func NewText(name string, position *api.Point, size *api.Size, style *tcell.Style, label string) *Text {
 	text := &Text{
 		Widget: NewWidget(name, position, size, style),
-		str:    str,
+		label:  label,
 	}
 	text.updateCanvas()
 	return text
@@ -42,7 +42,7 @@ func NewText(name string, position *api.Point, size *api.Size, style *tcell.Styl
 // updateCanvas method updates the text widget canvas with the string
 // information.
 func (t *Text) updateCanvas() {
-	canvas := engine.NewCanvasFromString(t.str, t.GetStyle())
+	canvas := engine.NewCanvasFromString(t.label, t.GetStyle())
 	t.SetCanvas(canvas)
 }
 
@@ -52,12 +52,12 @@ func (t *Text) updateCanvas() {
 
 // GetText method returns the Text instance string.
 func (t *Text) GetText() string {
-	return t.str
+	return t.label
 }
 
 // SetText method sets the Text instance string.
-func (t *Text) SetText(str string) {
-	t.str = str
+func (t *Text) SetText(label string) {
+	t.label = label
 	t.updateCanvas()
 }
 
