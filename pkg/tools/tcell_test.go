@@ -42,3 +42,32 @@ func TestIsSameStyle(t *testing.T) {
 		}
 	}
 }
+
+func TestReverseStyle(t *testing.T) {
+	cases := []struct {
+		input *tcell.Style
+		exp   *tcell.Style
+	}{
+		{
+			input: engine.NewStyle(tcell.ColorBlack, tcell.ColorWhite, 0),
+			exp:   engine.NewStyle(tcell.ColorWhite, tcell.ColorBlack, 0),
+		},
+		{
+			input: engine.NewStyle(tcell.ColorRed, tcell.ColorDefault, 0),
+			exp:   engine.NewStyle(tcell.ColorDefault, tcell.ColorRed, 0),
+		},
+		{
+			input: nil,
+			exp:   nil,
+		},
+	}
+	for i, c := range cases {
+		got := tools.ReverseStyle(c.input)
+		if (c.exp == nil) && (c.exp != got) {
+			t.Errorf("[%d] ReverseStyle Error exp:nil got:%+v", i, got)
+		}
+		if (c.exp != nil) && !tools.IsEqualStyle(c.exp, got) {
+			t.Errorf("[%d] ReverseStyle Error exp:%+v got:%+v", i, c.exp, got)
+		}
+	}
+}

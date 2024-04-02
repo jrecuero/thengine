@@ -13,3 +13,14 @@ func IsEqualStyle(style1, style2 *tcell.Style) bool {
 	fg2, bg2, attrs2 := style2.Decompose()
 	return (fg1 == fg2) && (bg1 == bg2) && (attrs1 == attrs2)
 }
+
+// ReverseStyle function reverses the style switching foreground with
+// background colors.
+func ReverseStyle(style *tcell.Style) *tcell.Style {
+	if style == nil {
+		return nil
+	}
+	fg, bg, attrs := style.Decompose()
+	reversed := tcell.StyleDefault.Foreground(bg).Background(fg).Attributes(attrs)
+	return &reversed
+}

@@ -424,6 +424,27 @@ func demoNine(dryRun bool) {
 	appEngine.Run(60.0)
 }
 
+func demoTen(dryRun bool) {
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-ten")
+	fmt.Println("ThEngine demo-ten")
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(20, 10))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorWhite)
+	scene := engine.NewScene("scene", camera)
+	buttonOne := widgets.NewButton("button/1", api.NewPoint(1, 1), api.NewSize(20, 1), &styleOne, "button-one")
+	buttonOne.SetWidgetCallbackArgs("pushed", "one")
+	scene.AddEntity(buttonOne)
+	buttonTwo := widgets.NewButton("button/2", api.NewPoint(1, 2), api.NewSize(20, 1), &styleTwo, "button-two")
+	buttonTwo.SetWidgetCallbackArgs("PUSHED", 2, "active")
+	scene.AddEntity(buttonTwo)
+	appEngine := engine.GetEngine()
+	appEngine.GetSceneManager().AddScene(scene)
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.Init()
+	appEngine.Run(60.0)
+}
+
 func main() {
-	demoNine(false)
+	demoTen(false)
 }
