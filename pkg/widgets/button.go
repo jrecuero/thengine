@@ -47,7 +47,7 @@ func NewButton(name string, position *api.Point, size *api.Size, style *tcell.St
 // -----------------------------------------------------------------------------
 
 func (b *Button) execute(args ...any) {
-	tools.Logger.WithField("module", "button").WithField("function", "execute").Infof("%s %+v", b.GetName(), args)
+	tools.Logger.WithField("module", "button").WithField("function", "execute").Debugf("%s %+v", b.GetName(), args)
 	if b.GetWidgetCallback() != nil {
 		b.GetWidgetCallback()(b, args...)
 	}
@@ -66,7 +66,7 @@ func (b *Button) updateCanvas() {
 
 // AcquireFocus method acquires focus for the entity.
 func (b *Button) AcquireFocus() (bool, error) {
-	tools.Logger.WithField("module", "button").WithField("function", "AcquireFocus").Infof("%s", b.GetName())
+	tools.Logger.WithField("module", "button").WithField("function", "AcquireFocus").Debugf("%s", b.GetName())
 	ok, err := b.Entity.AcquireFocus()
 	if err == nil {
 		reverseStyle := tools.ReverseStyle(b.GetStyle())
