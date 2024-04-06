@@ -85,3 +85,151 @@ func TestScrollerHorizontal(t *testing.T) {
 		}
 	}
 }
+
+func TestScrollerIterVertical(t *testing.T) {
+	cases := []struct {
+		setup []int
+		input int
+		exp   [][]int
+	}{
+		{
+			setup: []int{4, 4},
+			input: 0,
+			exp:   [][]int{{0, 0}, {1, 1}, {2, 2}, {3, 3}},
+		},
+		{
+			setup: []int{4, 4},
+			input: 1,
+			exp:   [][]int{{0, 0}, {1, 1}, {2, 2}, {3, 3}},
+		},
+		{
+			setup: []int{4, 4},
+			input: 2,
+			exp:   [][]int{{0, 0}, {1, 1}, {2, 2}, {3, 3}},
+		},
+		{
+			setup: []int{4, 4},
+			input: 3,
+			exp:   [][]int{{0, 0}, {1, 1}, {2, 2}, {3, 3}},
+		},
+		{
+			setup: []int{5, 3},
+			input: 0,
+			exp:   [][]int{{0, 0}, {1, 1}, {2, 2}},
+		},
+		{
+			setup: []int{5, 3},
+			input: 1,
+			exp:   [][]int{{0, 0}, {1, 1}, {2, 2}},
+		},
+		{
+			setup: []int{5, 3},
+			input: 2,
+			exp:   [][]int{{0, 0}, {1, 1}, {2, 2}},
+		},
+		{
+			setup: []int{5, 3},
+			input: 3,
+			exp:   [][]int{{1, 1}, {2, 2}, {3, 3}},
+		},
+		{
+			setup: []int{5, 3},
+			input: 4,
+			exp:   [][]int{{2, 2}, {3, 3}, {4, 4}},
+		},
+	}
+	for i, c := range cases {
+		got := widgets.NewVerticalScroller(c.setup[0], c.setup[1])
+		if got == nil {
+			t.Errorf("[%d] NewVerticalScroller Error exp:*Scroller got:nil", i)
+			return
+		}
+		got.Update(c.input)
+		got.CreateIter()
+		j := 0
+		for got.IterHasNext() {
+			gotIndex, gotOffset := got.IterGetNext()
+			if c.exp[j][0] != gotIndex {
+				t.Errorf("[%d] IterGetNext [%d]Error.Index input:%d exp:%d got:%d", i, j, c.input, c.exp[j][0], gotIndex)
+			}
+			if c.exp[j][1] != gotOffset {
+				t.Errorf("[%d] IterGetNext [%d]Error.Offset input:%d exp:%d got:%d", i, j, c.input, c.exp[j][1], gotOffset)
+			}
+			j++
+		}
+	}
+}
+
+func TestScrollerIterHorizontal(t *testing.T) {
+	cases := []struct {
+		setup []int
+		input int
+		exp   [][]int
+	}{
+		{
+			setup: []int{16, 16, 4},
+			input: 0,
+			exp:   [][]int{{0, 0}, {1, 4}, {2, 8}, {3, 12}},
+		},
+		{
+			setup: []int{16, 16, 4},
+			input: 1,
+			exp:   [][]int{{0, 0}, {1, 4}, {2, 8}, {3, 12}},
+		},
+		{
+			setup: []int{16, 16, 4},
+			input: 2,
+			exp:   [][]int{{0, 0}, {1, 4}, {2, 8}, {3, 12}},
+		},
+		{
+			setup: []int{16, 16, 4},
+			input: 3,
+			exp:   [][]int{{0, 0}, {1, 4}, {2, 8}, {3, 12}},
+		},
+		{
+			setup: []int{20, 12, 4},
+			input: 0,
+			exp:   [][]int{{0, 0}, {1, 4}, {2, 8}},
+		},
+		{
+			setup: []int{20, 12, 4},
+			input: 1,
+			exp:   [][]int{{0, 0}, {1, 4}, {2, 8}},
+		},
+		{
+			setup: []int{20, 12, 4},
+			input: 2,
+			exp:   [][]int{{0, 0}, {1, 4}, {2, 8}},
+		},
+		{
+			setup: []int{20, 12, 4},
+			input: 3,
+			exp:   [][]int{{1, 4}, {2, 8}, {3, 12}},
+		},
+		{
+			setup: []int{20, 12, 4},
+			input: 4,
+			exp:   [][]int{{2, 8}, {3, 12}, {4, 16}},
+		},
+	}
+	for i, c := range cases {
+		got := widgets.NewScroller(c.setup[0], c.setup[1], c.setup[2])
+		if got == nil {
+			t.Errorf("[%d] NewVerticalScroller Error exp:*Scroller got:nil", i)
+			return
+		}
+		got.Update(c.input)
+		got.CreateIter()
+		j := 0
+		for got.IterHasNext() {
+			gotIndex, gotOffset := got.IterGetNext()
+			if c.exp[j][0] != gotIndex {
+				t.Errorf("[%d] IterGetNext [%d]Error.Index input:%d exp:%d got:%d", i, j, c.input, c.exp[j][0], gotIndex)
+			}
+			if c.exp[j][1] != gotOffset {
+				t.Errorf("[%d] IterGetNext [%d]Error.Offset input:%d exp:%d got:%d", i, j, c.input, c.exp[j][1], gotOffset)
+			}
+			j++
+		}
+	}
+}

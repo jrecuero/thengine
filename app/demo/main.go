@@ -462,7 +462,24 @@ func demoEleven(dryRun bool) {
 	appEngine.Init()
 	appEngine.Run(60.0)
 }
+func demoTwelve(dryRun bool) {
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-twelve")
+	fmt.Println("ThEngine demo-twelve")
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(60, 10))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	scene := engine.NewScene("scene", camera)
+
+	menu := widgets.NewMenu("menu/1", api.NewPoint(1, 1), api.NewSize(40, 3), &styleOne, []string{"one", "two", "three"}, 0)
+	scene.AddEntity(menu)
+
+	appEngine := engine.GetEngine()
+	appEngine.GetSceneManager().AddScene(scene)
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.Init()
+	appEngine.Run(60.0)
+}
 
 func main() {
-	demoEleven(false)
+	demoTwelve(false)
 }

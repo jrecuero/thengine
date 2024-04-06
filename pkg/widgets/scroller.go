@@ -3,6 +3,46 @@
 // selection of entries.
 package widgets
 
+import "github.com/jrecuero/thengine/pkg/tools"
+
+// -----------------------------------------------------------------------------
+// iterScroller
+// -----------------------------------------------------------------------------
+
+// iterScroller structure defines the data required to iterate over a Scroller
+// instance.
+type iterScroller struct {
+	index  int
+	offset int
+	delta  int
+}
+
+// newItemScroller function creates a new iterScroller instance.
+func newIterScroller(index int, delta int) *iterScroller {
+	iter := &iterScroller{
+		index:  index,
+		offset: index * delta,
+		delta:  delta,
+	}
+	return iter
+}
+
+// GetIndex method returns the iter scroller index.
+func (i *iterScroller) GetIndex() int {
+	return i.index
+}
+
+// GetOffset method returns the iter scroller offset.
+func (i *iterScroller) GetOffset() int {
+	return i.offset
+}
+
+// Next method increments the iter scroller.
+func (i *iterScroller) Next() {
+	i.index++
+	i.offset = i.index * i.delta
+}
+
 // -----------------------------------------------------------------------------
 //
 // Scroller
@@ -29,6 +69,7 @@ type Scroller struct {
 	SelectionLength      int
 	StartSelection       int
 	EndSelection         int
+	sIter                *iterScroller
 }
 
 // NewScroller function creates a new Scroller instance.
@@ -45,6 +86,9 @@ func NewScroller(totalSelectionLength int, maxLength int, selectionLength int) *
 		scroller.StartSelection = 0
 		scroller.EndSelection = (totalSelectionLength / selectionLength) - 1
 	}
+	tools.Logger.WithField("module", "scroller").
+		WithField("function", "NewScroller").
+		Debugf("%d %d %d", totalSelectionLength, maxLength, selectionLength)
 	return scroller
 }
 
@@ -57,6 +101,26 @@ func NewVerticalScroller(totalNbrOfSelections int, nbrOfSelectionToDisplay int) 
 // -----------------------------------------------------------------------------
 // Scroller Public methods
 // -----------------------------------------------------------------------------
+
+// CreateIter method created a new scroller iterator.
+func (s *Scroller) CreateIter() {
+	s.sIter = newIterScroller(s.StartSelection, s.SelectionLength)
+}
+
+// IterHasNext method checks if there are still some entries in the scroller
+// iterator.
+func (s *Scroller) IterHasNext() bool {
+	return s.sIter.GetIndex() <= s.EndSelection
+}
+
+// IterGetNext method returns the next entry to interate in the scorller and
+// increase all iterator attributes.
+func (s *Scroller) IterGetNext() (int, int) {
+	index := s.sIter.GetIndex()
+	offset := s.sIter.GetOffset()
+	s.sIter.Next()
+	return index, offset
+}
 
 // Update method update the scroller StartSelection and EndSelection based on
 // the given selection value.

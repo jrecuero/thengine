@@ -18,7 +18,7 @@ import (
 //
 // -----------------------------------------------------------------------------
 
-// ListBox structure defines a baseline for any listbox entity.
+// ListBox structure defines a baseline for any listbox widget.
 type ListBox struct {
 	*Widget
 	selections     []string
@@ -29,6 +29,7 @@ type ListBox struct {
 // NewListBox function creates a new ListBox instance.
 func NewListBox(name string, position *api.Point, size *api.Size, style *tcell.Style, selections []string, selectionIndex int) *ListBox {
 	selectionsLength := len(selections)
+	// Add padding for every menu item to fill the whole horizontal length.
 	paddingSelections := make([]string, selectionsLength)
 	for i, s := range selections {
 		paddingSelections[i] = fmt.Sprintf("%-*s", size.W-2, s)
@@ -74,7 +75,9 @@ func (l *ListBox) updateCanvas() {
 	l.scroller.Update(l.selectionIndex)
 	tools.Logger.WithField("module", "list-box").WithField("function", "updateCanvas").Debugf("[%d, %d]", l.scroller.StartSelection, l.scroller.EndSelection)
 	canvas := l.GetCanvas()
-	for index, x, y := l.scroller.StartSelection, 1, 1; index <= l.scroller.EndSelection; index, y = index+1, y+1 {
+	l.scroller.CreateIter()
+	for x := 1; l.scroller.IterHasNext(); {
+		index, y := l.scroller.IterGetNext()
 		selection := l.selections[index]
 		tools.Logger.WithField("module", "list-box").WithField("function", "updateCanvas").Debugf("selection %s", selection)
 		if index == l.selectionIndex {
@@ -84,6 +87,16 @@ func (l *ListBox) updateCanvas() {
 			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
 		}
 	}
+	//for index, x, y := l.scroller.StartSelection, 1, 1; index <= l.scroller.EndSelection; index, y = index+1, y+1 {
+	//    selection := l.selections[index]
+	//    tools.Logger.WithField("module", "list-box").WithField("function", "updateCanvas").Debugf("selection %s", selection)
+	//    if index == l.selectionIndex {
+	//        canvas.WriteStringInCanvasAt(selection, l.GetStyle(), api.NewPoint(x, y))
+	//    } else {
+	//        reverseStyle := tools.ReverseStyle(l.GetStyle())
+	//        canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
+	//    }
+	//}
 }
 
 // -----------------------------------------------------------------------------
