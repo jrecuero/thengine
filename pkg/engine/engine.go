@@ -225,25 +225,9 @@ func (e *Engine) Run(fps float64) {
 						WithField("function", "Run").
 						Debugf("rune %s", string(ev.Rune()))
 				default:
-					movement := map[tcell.Key]bool{
-						tcell.KeyUp:    true,
-						tcell.KeyDown:  true,
-						tcell.KeyLeft:  false,
-						tcell.KeyRight: false,
-					}
-					for k, ok := range movement {
-						if ev.Key() == k {
-							tools.Logger.WithField("module", "engine").
-								WithField("function", "Run").
-								Debugf("key %s is %t", ev.Name(), ok)
-						}
-					}
 				}
 			}
 		default:
-			//tools.Logger.WithField("module", "engine").
-			//    WithField("function", "Run").
-			//    Debugf("default %+v", event)
 		}
 
 		// update all engine resources.

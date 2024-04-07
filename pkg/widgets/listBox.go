@@ -1,5 +1,5 @@
 // listBox.go module contains all attributes and methods required to implement
-// a basic and generic list box.
+// a basic and generic list box widget.
 package widgets
 
 import (
@@ -73,13 +73,11 @@ func (l *ListBox) execute(args ...any) {
 func (l *ListBox) updateCanvas() {
 	// update the scroller with the selection index.
 	l.scroller.Update(l.selectionIndex)
-	tools.Logger.WithField("module", "list-box").WithField("function", "updateCanvas").Debugf("[%d, %d]", l.scroller.StartSelection, l.scroller.EndSelection)
 	canvas := l.GetCanvas()
 	l.scroller.CreateIter()
 	for x := 1; l.scroller.IterHasNext(); {
 		index, y := l.scroller.IterGetNext()
 		selection := l.selections[index]
-		tools.Logger.WithField("module", "list-box").WithField("function", "updateCanvas").Debugf("selection %s", selection)
 		if index == l.selectionIndex {
 			canvas.WriteStringInCanvasAt(selection, l.GetStyle(), api.NewPoint(x, y))
 		} else {
@@ -87,16 +85,6 @@ func (l *ListBox) updateCanvas() {
 			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
 		}
 	}
-	//for index, x, y := l.scroller.StartSelection, 1, 1; index <= l.scroller.EndSelection; index, y = index+1, y+1 {
-	//    selection := l.selections[index]
-	//    tools.Logger.WithField("module", "list-box").WithField("function", "updateCanvas").Debugf("selection %s", selection)
-	//    if index == l.selectionIndex {
-	//        canvas.WriteStringInCanvasAt(selection, l.GetStyle(), api.NewPoint(x, y))
-	//    } else {
-	//        reverseStyle := tools.ReverseStyle(l.GetStyle())
-	//        canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
-	//    }
-	//}
 }
 
 // -----------------------------------------------------------------------------

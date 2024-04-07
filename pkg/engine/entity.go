@@ -179,7 +179,6 @@ func (e *Entity) Start() {
 
 func (e *Entity) Update(tcell.Event) {
 	if e.IsActive() {
-		//tools.Logger.WithField("module", "entity").WithField("function", "update").Infof("!!!")
 	}
 }
 

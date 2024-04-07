@@ -465,12 +465,19 @@ func demoEleven(dryRun bool) {
 func demoTwelve(dryRun bool) {
 	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-twelve")
 	fmt.Println("ThEngine demo-twelve")
-	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(60, 10))
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(60, 20))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
 	scene := engine.NewScene("scene", camera)
 
-	menu := widgets.NewMenu("menu/1", api.NewPoint(1, 1), api.NewSize(40, 3), &styleOne, []string{"one", "two", "three"}, 0)
+	menu := widgets.NewTopMenu("menu/1", api.NewPoint(1, 1), api.NewSize(40, 3), &styleOne, []string{"one", "two", "three"}, 0)
 	scene.AddEntity(menu)
+
+	submenu := widgets.NewSubMenu("submenu/1", api.NewPoint(1, 5), api.NewSize(10, 5), &styleTwo, []string{"ONE", "TWO", "THREE"}, 0, menu)
+	scene.AddEntity(submenu)
+
+	checkbox := widgets.NewCheckBox("check-box/1", api.NewPoint(20, 5), api.NewSize(10, 5), &styleTwo, []string{"One", "Two", "Three"}, 0)
+	scene.AddEntity(checkbox)
 
 	appEngine := engine.GetEngine()
 	appEngine.GetSceneManager().AddScene(scene)

@@ -14,6 +14,20 @@ import (
 
 // -----------------------------------------------------------------------------
 //
+// MenuItem
+//
+// -----------------------------------------------------------------------------
+
+// MenuItem structure defines every item in a menu widget.
+type MenuItem struct {
+	label        string
+	menu         *Menu
+	callback     WidgetCallback
+	callbackArgs WidgetArgs
+}
+
+// -----------------------------------------------------------------------------
+//
 // Menu
 //
 // -----------------------------------------------------------------------------
@@ -24,10 +38,11 @@ type Menu struct {
 	menuItems     []string
 	menuItemIndex int
 	scroller      *Scroller
+	parent        *Menu
 }
 
-// NewMenu function creates a new Menu instance.
-func NewMenu(name string, position *api.Point, size *api.Size, style *tcell.Style, menuItems []string, menuItemIndex int) *Menu {
+// NewTopMenu function creates a new Menu instance.
+func NewTopMenu(name string, position *api.Point, size *api.Size, style *tcell.Style, menuItems []string, menuItemIndex int) *Menu {
 	numberOfMenuItems := len(menuItems)
 	// Look for the menu item with the largest string.
 	maxItemLength := 0
@@ -53,8 +68,30 @@ func NewMenu(name string, position *api.Point, size *api.Size, style *tcell.Styl
 		Widget:        NewWidget(name, position, size, style),
 		menuItems:     paddingMenuItems,
 		menuItemIndex: menuItemIndex,
+		parent:        nil,
 	}
 	menu.scroller = NewScroller(totalSelectionLength, size.W-2, maxItemLength)
+	menu.SetFocusType(engine.SingleFocus)
+	menu.SetFocusEnable(true)
+	menu.updateCanvas()
+	return menu
+}
+
+func NewSubMenu(name string, position *api.Point, size *api.Size, style *tcell.Style, menuItems []string, menuItemIndex int, parent *Menu) *Menu {
+	selectionsLength := len(menuItems)
+	// Add padding for every menu item to fill the whole horizontal length.
+	paddingSelections := make([]string, selectionsLength)
+	for i, s := range menuItems {
+		paddingSelections[i] = fmt.Sprintf("%-*s", size.W-2, s)
+	}
+	tools.Logger.WithField("module", "menu").WithField("function", "NewSubMenu").Debugf("%s %+v", name, paddingSelections)
+	menu := &Menu{
+		Widget:        NewWidget(name, position, size, style),
+		menuItems:     paddingSelections,
+		menuItemIndex: menuItemIndex,
+		parent:        parent,
+	}
+	menu.scroller = NewVerticalScroller(selectionsLength, size.H-2)
 	menu.SetFocusType(engine.SingleFocus)
 	menu.SetFocusEnable(true)
 	menu.updateCanvas()
@@ -65,39 +102,54 @@ func NewMenu(name string, position *api.Point, size *api.Size, style *tcell.Styl
 // Menu private methods
 // -----------------------------------------------------------------------------
 
+func (m *Menu) getMenuItemLabel(index int) string {
+	return m.menuItems[index]
+}
+
 func (m *Menu) execute(args ...any) {
 	tools.Logger.WithField("module", "menu").WithField("function", "execute").Debugf("%s %+v", m.GetName(), args)
 	switch args[0].(string) {
 	case "up":
-		fallthrough
+		if m.parent != nil {
+			m.prevMenuItem()
+		}
 	case "left":
-		if m.menuItemIndex > 0 {
-			m.menuItemIndex--
-			m.updateCanvas()
+		if m.parent == nil {
+			m.prevMenuItem()
 		}
 	case "down":
-		fallthrough
+		if m.parent != nil {
+			m.nextMenuItem()
+		}
 	case "right":
-		if m.menuItemIndex < (len(m.menuItems) - 1) {
-			m.menuItemIndex++
-			m.updateCanvas()
+		if m.parent == nil {
+			m.nextMenuItem()
 		}
 	case "run":
 	}
 }
 
-// updateCanvas method updates the list box canvas with proper menuItems to be
-// displayed and the proper selected option.
-func (m *Menu) updateCanvas() {
-	// update the scroller with the selection index.
+func (m *Menu) nextMenuItem() {
+	if m.menuItemIndex < (len(m.menuItems) - 1) {
+		m.menuItemIndex++
+		m.updateCanvas()
+	}
+}
+
+func (m *Menu) prevMenuItem() {
+	if m.menuItemIndex > 0 {
+		m.menuItemIndex--
+		m.updateCanvas()
+	}
+}
+
+func (m *Menu) updateTopMenuCanvas() {
 	m.scroller.Update(m.menuItemIndex)
-	tools.Logger.WithField("module", "menu").WithField("function", "updateCanvas").Debugf("[%d, %d]", m.scroller.StartSelection, m.scroller.EndSelection)
 	canvas := m.GetCanvas()
 	m.scroller.CreateIter()
 	for y := 1; m.scroller.IterHasNext(); {
 		index, x := m.scroller.IterGetNext()
 		selection := m.menuItems[index]
-		tools.Logger.WithField("module", "menu").WithField("function", "updateCanvas").Debugf("selection %s", selection)
 		if index == m.menuItemIndex {
 			canvas.WriteStringInCanvasAt(selection, m.GetStyle(), api.NewPoint(x, y))
 		} else {
@@ -105,16 +157,32 @@ func (m *Menu) updateCanvas() {
 			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
 		}
 	}
-	//for index, x, y := m.scroller.StartSelection, 1, 1; index <= m.scroller.EndSelection; index, y = index+1, y+1 {
-	//    selection := m.menuItems[index]
-	//    tools.Logger.WithField("module", "menu").WithField("function", "updateCanvas").Debugf("selection %s", selection)
-	//    if index == m.menuItemIndex {
-	//        canvas.WriteStringInCanvasAt(selection, m.GetStyle(), api.NewPoint(x, y))
-	//    } else {
-	//        reverseStyle := tools.ReverseStyle(m.GetStyle())
-	//        canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
-	//    }
-	//}
+}
+
+func (m *Menu) updateSubMenuCanvas() {
+	m.scroller.Update(m.menuItemIndex)
+	canvas := m.GetCanvas()
+	m.scroller.CreateIter()
+	for x := 1; m.scroller.IterHasNext(); {
+		index, y := m.scroller.IterGetNext()
+		selection := m.menuItems[index]
+		if index == m.menuItemIndex {
+			canvas.WriteStringInCanvasAt(selection, m.GetStyle(), api.NewPoint(x, y))
+		} else {
+			reverseStyle := tools.ReverseStyle(m.GetStyle())
+			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
+		}
+	}
+}
+
+// updateCanvas method updates the list box canvas with proper menuItems to be
+// displayed and the proper selected option.
+func (m *Menu) updateCanvas() {
+	if m.parent == nil {
+		m.updateTopMenuCanvas()
+	} else {
+		m.updateSubMenuCanvas()
+	}
 }
 
 // -----------------------------------------------------------------------------
