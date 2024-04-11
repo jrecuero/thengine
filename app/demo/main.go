@@ -465,18 +465,30 @@ func demoEleven(dryRun bool) {
 func demoTwelve(dryRun bool) {
 	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-twelve")
 	fmt.Println("ThEngine demo-twelve")
-	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(60, 20))
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
 	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
+	styleThree := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
+	styleFour := tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorBlue)
 	scene := engine.NewScene("scene", camera)
 
-	menu := widgets.NewTopMenu("menu/1", api.NewPoint(1, 1), api.NewSize(40, 3), &styleOne, []string{"one", "two", "three"}, 0)
+	textFirstName := widgets.NewText("text-first-name", api.NewPoint(1, 1), api.NewSize(1, 1), &styleThree, "First Name:")
+	scene.AddEntity(textFirstName)
+	textLastName := widgets.NewText("text-last-name", api.NewPoint(1, 2), api.NewSize(1, 1), &styleThree, "Last Name:")
+	scene.AddEntity(textLastName)
+
+	inputFirstName := widgets.NewTextInput("input-first-name", api.NewPoint(13, 1), api.NewSize(30, 1), &styleFour, "Jose Carlos")
+	scene.AddEntity(inputFirstName)
+	inputLastName := widgets.NewTextInput("input-last-name", api.NewPoint(13, 2), api.NewSize(30, 1), &styleFour, "Recuero Arias")
+	scene.AddEntity(inputLastName)
+
+	menu := widgets.NewTopMenu("menu/1", api.NewPoint(1, 3), api.NewSize(40, 3), &styleOne, []string{"one", "two", "three"}, 0)
 	scene.AddEntity(menu)
 
-	submenu := widgets.NewSubMenu("submenu/1", api.NewPoint(1, 5), api.NewSize(10, 5), &styleTwo, []string{"ONE", "TWO", "THREE"}, 0, menu)
+	submenu := widgets.NewSubMenu("submenu/1", api.NewPoint(1, 6), api.NewSize(10, 5), &styleTwo, []string{"ONE", "TWO", "THREE"}, 0, menu)
 	scene.AddEntity(submenu)
 
-	checkbox := widgets.NewCheckBox("check-box/1", api.NewPoint(20, 5), api.NewSize(10, 5), &styleTwo, []string{"One", "Two", "Three"}, 0)
+	checkbox := widgets.NewCheckBox("check-box/1", api.NewPoint(20, 6), api.NewSize(10, 5), &styleTwo, []string{"One", "Two", "Three"}, 0)
 	scene.AddEntity(checkbox)
 
 	appEngine := engine.GetEngine()
