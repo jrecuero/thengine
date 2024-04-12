@@ -67,7 +67,7 @@ func (p *Player) Move(args ...any) {
 	}
 }
 
-func (p *Player) Update(event tcell.Event) {
+func (p *Player) Update(event tcell.Event, scene engine.IScene) {
 	if !p.HasFocus() {
 		return
 	}
@@ -144,7 +144,7 @@ func (p *ninePlayer) Move(args ...any) {
 	}
 }
 
-func (p *ninePlayer) Update(event tcell.Event) {
+func (p *ninePlayer) Update(event tcell.Event, scene engine.IScene) {
 }
 
 func (p *ninePlayer) Consume() {
@@ -188,7 +188,7 @@ func (h *nineHandler) Move(args ...any) {
 	h.mailbox.Publish(DemoNineMoveTopic, message)
 }
 
-func (h *nineHandler) Update(event tcell.Event) {
+func (h *nineHandler) Update(event tcell.Event, scene engine.IScene) {
 	actions := []*widgets.KeyboardAction{
 		{
 			Key:      tcell.KeyUp,
@@ -497,14 +497,22 @@ func demoTwelve(dryRun bool) {
 	checkbox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &styleTwo, engine.CanvasRectDoubleLine)
 	scene.AddEntity(checkbox)
 
-	textClockCounter := 0
 	textClock := widgets.NewText("text/clock/1", api.NewPoint(1, 11), api.NewSize(1, 1), &styleThree, "clock: 0")
 	scene.AddEntity(textClock)
 
+	cell := engine.NewCell(&styleFour, '#')
+	sprite := widgets.NewSprite("sprite/1", api.NewPoint(20, 11),
+		[]*widgets.SpriteCell{widgets.NewSpriteCell(api.NewPoint(0, 0), cell)})
+	scene.AddEntity(sprite)
+
+	textClockCounter := 0
 	clockTimer := widgets.NewTimer("timer/clock/1", 1*time.Second, widgets.ForeverTimer)
 	clockTimer.SetWidgetCallback(func(entity engine.IEntity, args ...any) bool {
 		textClockCounter++
 		textClock.SetText(fmt.Sprintf("clock: %d", textClockCounter))
+		if (textClockCounter % 10) == 0 {
+			sprite.AddSpriteCellAt(widgets.AtTheEnd, widgets.NewSpriteCell(api.NewPoint(textClockCounter/10, 0), cell))
+		}
 		return true
 	})
 	scene.AddEntity(clockTimer)

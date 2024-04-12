@@ -346,7 +346,7 @@ func TestRectIsEqual(t *testing.T) {
 	}
 }
 
-func TestRecctInside(t *testing.T) {
+func TestRectInside(t *testing.T) {
 	cases := []struct {
 		input []int
 		exp   bool
@@ -384,6 +384,60 @@ func TestRecctInside(t *testing.T) {
 		got := rect.IsInside(point)
 		if c.exp != got {
 			t.Errorf("[%d] IsInside Error exp:%t got: %t", i, c.exp, got)
+		}
+	}
+}
+
+func TestRectIsRectIntersect(t *testing.T) {
+	cases := []struct {
+		origin1 *api.Point
+		size1   *api.Size
+		origin2 *api.Point
+		size2   *api.Size
+		exp     bool
+	}{
+		{
+			origin1: api.NewPoint(0, 0),
+			size1:   api.NewSize(10, 10),
+			origin2: api.NewPoint(5, 5),
+			size2:   api.NewSize(10, 10),
+			exp:     true,
+		},
+		{
+			origin1: api.NewPoint(3, 3),
+			size1:   api.NewSize(10, 10),
+			origin2: api.NewPoint(0, 0),
+			size2:   api.NewSize(10, 10),
+			exp:     true,
+		},
+		{
+			origin1: api.NewPoint(0, 0),
+			size1:   api.NewSize(5, 5),
+			origin2: api.NewPoint(6, 0),
+			size2:   api.NewSize(10, 10),
+			exp:     false,
+		},
+		{
+			origin1: api.NewPoint(0, 0),
+			size1:   api.NewSize(5, 5),
+			origin2: api.NewPoint(0, 6),
+			size2:   api.NewSize(10, 10),
+			exp:     false,
+		},
+		{
+			origin1: api.NewPoint(0, 0),
+			size1:   api.NewSize(5, 5),
+			origin2: api.NewPoint(6, 6),
+			size2:   api.NewSize(10, 10),
+			exp:     false,
+		},
+	}
+	for i, c := range cases {
+		rect1 := api.NewRect(c.origin1, c.size1)
+		rect2 := api.NewRect(c.origin2, c.size2)
+		got := rect1.IsRectIntersect(rect2)
+		if c.exp != got {
+			t.Errorf("[%d] IsRectIntersect Error exp:%t got:%t", i, c.exp, got)
 		}
 	}
 }

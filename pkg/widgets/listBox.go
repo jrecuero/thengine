@@ -99,7 +99,7 @@ func (l *ListBox) GetSelection() string {
 // Update method executes all listbox functionality every tick time. Keyboard
 // inut is scanned in order to move the selection index and proceed to select
 // any option.
-func (l *ListBox) Update(event tcell.Event) {
+func (l *ListBox) Update(event tcell.Event, scene engine.IScene) {
 	if !l.HasFocus() {
 		return
 	}

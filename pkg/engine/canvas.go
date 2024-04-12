@@ -206,15 +206,6 @@ func (c *Canvas) GetCellAt(point *api.Point) *Cell {
 	return nil
 }
 
-// GetColorAt method returns the Color in the canvas at the given row and
-// column.
-func (c *Canvas) GetStyleAt(point *api.Point) *tcell.Style {
-	if cell := c.GetCellAt(point); cell != nil {
-		return cell.Style
-	}
-	return nil
-}
-
 // GetRect method returns the Rect instance for the Canvas. The Rect will have
 // a zero origin (0, 0) and the Canvas width and height.
 func (c *Canvas) GetRect() *api.Rect {
@@ -229,6 +220,15 @@ func (c *Canvas) GetRuneAt(point *api.Point) rune {
 		return ch
 	}
 	return 0
+}
+
+// GetColorAt method returns the Color in the canvas at the given row and
+// column.
+func (c *Canvas) GetStyleAt(point *api.Point) *tcell.Style {
+	if cell := c.GetCellAt(point); cell != nil {
+		return cell.Style
+	}
+	return nil
 }
 
 // Height method returns the canvas number of rows.

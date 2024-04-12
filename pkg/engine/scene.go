@@ -129,7 +129,7 @@ func (s *Scene) Draw() {
 	}
 	// Draw entites by its zLevel.
 	for _, entity := range s.zLevelEntities {
-		entity.Draw(s.camera)
+		entity.Draw(s)
 	}
 }
 
@@ -171,7 +171,7 @@ func (s *Scene) RemoveEntity(entity IEntity) error {
 func (s *Scene) Update(event tcell.Event) {
 	// update entities by its pLevel.
 	for _, entity := range s.pLevelEntities {
-		entity.Update(event)
+		entity.Update(event, s)
 	}
 }
 

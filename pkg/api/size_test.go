@@ -212,6 +212,37 @@ func TestSizeIsEqual(t *testing.T) {
 	}
 }
 
+func TestSizeIsZeroSize(t *testing.T) {
+	cases := []struct {
+		input []int
+		exp   bool
+	}{
+		{
+			input: []int{0, 0},
+			exp:   true,
+		},
+		{
+			input: []int{1, 0},
+			exp:   false,
+		},
+		{
+			input: []int{0, 1},
+			exp:   false,
+		},
+		{
+			input: []int{7, 7},
+			exp:   false,
+		},
+	}
+	for i, c := range cases {
+		point := api.NewSize(c.input[0], c.input[1])
+		got := point.IsZeroSize()
+		if c.exp != got {
+			t.Errorf("[%d] IsZeroSize Error exp:%t got:%t", i, c.exp, got)
+		}
+	}
+}
+
 func TestSizeToString(t *testing.T) {
 	cases := []struct {
 		input []int

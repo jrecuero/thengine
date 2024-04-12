@@ -123,7 +123,7 @@ func (c *CheckBox) SetSelection(indexes ...int) {
 // Update method executes all check box functionality every tick time. Keyboard
 // inut is scanned in order to move the selection index and proceed to select
 // any option.
-func (c *CheckBox) Update(event tcell.Event) {
+func (c *CheckBox) Update(event tcell.Event, scene engine.IScene) {
 	if !c.HasFocus() {
 		return
 	}

@@ -71,6 +71,16 @@ func (r *Rect) Get() (*Point, *Size) {
 	return r.Origin, r.Size
 }
 
+// GetCorners method returns the left top corner and right bottom corner for
+// the rectangle instance.
+func (r *Rect) GetCorners() (*Point, *Point) {
+	leftTopX, leftTopY := r.Origin.Get()
+	sizeW, sizeH := r.Size.Get()
+	rightBottomX := leftTopX + sizeW
+	rightBottomY := leftTopY + sizeH
+	return r.Origin, NewPoint(rightBottomX, rightBottomY)
+}
+
 // GetOrigin method returns the instance origin.
 func (r *Rect) GetOrigin() *Point {
 	return r.Origin
@@ -93,6 +103,20 @@ func (r *Rect) IsInside(point *Point) bool {
 		point.X < (r.Origin.X+r.Size.W) &&
 		point.Y >= r.Origin.Y &&
 		point.Y < (r.Origin.Y+r.Size.H)
+}
+
+// IsRectIntersect method checks if the given rectangle is inside the rectangle
+// instance.
+func (r *Rect) IsRectIntersect(rect *Rect) bool {
+	leftTop, rightBottom := r.GetCorners()
+	rectLeftTop, rectRightBottom := rect.GetCorners()
+	if (leftTop.X > rectRightBottom.X) || (rectLeftTop.X > rightBottom.X) {
+		return false
+	}
+	if (rectLeftTop.Y > rightBottom.Y) || (leftTop.Y > rectRightBottom.Y) {
+		return false
+	}
+	return true
 }
 
 // IsBorder method chekcs if the given point is any border of the rectangle.

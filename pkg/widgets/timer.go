@@ -55,7 +55,7 @@ func (t *Timer) CancelTimer() {
 }
 
 // Timer method draws nothing.
-func (t *Timer) Draw(camera engine.ICamera) {
+func (t *Timer) Draw(engine.IScene) {
 }
 
 // Start methos starts the timer.
@@ -79,7 +79,7 @@ func (t *Timer) StopTimer() {
 
 // Udpate method executes timer functionality. It check if timer has expired
 // and command has to be called.
-func (t *Timer) Update(event tcell.Event) {
+func (t *Timer) Update(event tcell.Event, scene engine.IScene) {
 	if !t.running {
 		return
 	}

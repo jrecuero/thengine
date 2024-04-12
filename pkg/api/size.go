@@ -58,10 +58,15 @@ func (s *Size) Get() (int, int) {
 	return s.W, s.H
 }
 
-// IsEqual method returns if the given Szie is equal than the instance,
+// IsEqual method returns if the given Size is equal than the instance,
 // based on the same width and height.
 func (s *Size) IsEqual(size *Size) bool {
 	return (s.W == size.W) && (s.H == size.H)
+}
+
+// IsZeroSize method returns if the Size instance has zero width and height.
+func (s *Size) IsZeroSize() bool {
+	return (s.W == 0) && (s.H == 0)
 }
 
 // ToString method returns size information as a string.

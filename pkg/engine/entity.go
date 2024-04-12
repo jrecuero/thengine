@@ -18,10 +18,12 @@ type IEntity interface {
 	IObject
 	IFocus
 	Consume()
-	Draw(ICamera)
+	Draw(IScene)
 	GetCanvas() *Canvas
+	GetCollider() *Collider
 	GetPLevel() int
 	GetPosition() *api.Point
+	GetRect() *api.Rect
 	GetSize() *api.Size
 	GetStyle() *tcell.Style
 	GetZLevel() int
@@ -33,7 +35,7 @@ type IEntity interface {
 	SetStyle(*tcell.Style)
 	SetZLevel(int)
 	Start()
-	Update(tcell.Event)
+	Update(tcell.Event, IScene)
 }
 
 // -----------------------------------------------------------------------------
@@ -100,10 +102,20 @@ func (e *Entity) CanHaveFocus() bool {
 	return e.IsFocusEnable() && e.IsActive()
 }
 
-func (e *Entity) Draw(camera ICamera) {
+func (e *Entity) Draw(scene IScene) {
 	if e.IsVisible() && e.GetCanvas() != nil {
-		e.canvas.RenderAt(camera, e.position)
+		e.canvas.RenderAt(scene.GetCamera(), e.position)
 	}
+}
+
+func (e *Entity) GetCollider() *Collider {
+	if rect := e.GetRect(); rect != nil {
+		return &Collider{
+			rect:   rect,
+			points: nil,
+		}
+	}
+	return nil
 }
 
 // Consume method consume all messages from the mailbox.
@@ -124,6 +136,16 @@ func (e *Entity) GetPLevel() int {
 
 func (e *Entity) GetPosition() *api.Point {
 	return e.position
+}
+
+func (e *Entity) GetRect() *api.Rect {
+	var rect *api.Rect
+	if e.GetCanvas() != nil {
+		rect = e.GetCanvas().GetRect()
+		rect.Origin.X += e.GetPosition().X
+		rect.Origin.Y += e.GetPosition().Y
+	}
+	return rect
 }
 
 func (e *Entity) GetSize() *api.Size {
@@ -159,8 +181,11 @@ func (e *Entity) SetSize(size *api.Size) {
 }
 
 func (e *Entity) SetStyle(style *tcell.Style) {
+	if e.GetCanvas() == nil {
+		return
+	}
 	e.style = style
-	for _, rows := range e.canvas.Rows {
+	for _, rows := range e.GetCanvas().Rows {
 		for _, cell := range rows.Cols {
 			if cell != nil {
 				cell.Style = e.style
@@ -177,7 +202,7 @@ func (e *Entity) Start() {
 
 }
 
-func (e *Entity) Update(tcell.Event) {
+func (e *Entity) Update(tcell.Event, IScene) {
 	if e.IsActive() {
 	}
 }

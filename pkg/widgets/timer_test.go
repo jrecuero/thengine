@@ -17,7 +17,7 @@ func simEngine(timer *widgets.Timer) {
 	go func() {
 		for simRunning {
 			time.Sleep(10 * time.Millisecond)
-			timer.Update(nil)
+			timer.Update(nil, nil)
 		}
 	}()
 }

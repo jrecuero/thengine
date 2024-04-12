@@ -123,8 +123,8 @@ func (t *TileMap) IsTileMapPosInside(tileMapPos *api.Point) bool {
 	return true
 }
 
-func (t *TileMap) Draw(camera engine.ICamera) {
-	t.GetCanvas().RenderRectAt(camera, t.cameraOffset, t.cameraSize, t.GetPosition())
+func (t *TileMap) Draw(scene engine.IScene) {
+	t.GetCanvas().RenderRectAt(scene.GetCamera(), t.cameraOffset, t.cameraSize, t.GetPosition())
 }
 
 func (t *TileMap) SetCameraOffset(offset *api.Point) bool {

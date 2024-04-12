@@ -24,28 +24,28 @@ func TestListBox(t *testing.T) {
 	}
 
 	event := tcell.NewEventKey(tcell.KeyDown, 0, 0)
-	got.Update(event)
+	got.Update(event, nil)
 	gotSelection = got.GetSelection()
 	if gotSelection != exp {
 		t.Errorf("[1] GetSelection Error exp:%s got:%s", exp, gotSelection)
 	}
 
 	got.AcquireFocus()
-	got.Update(event)
+	got.Update(event, nil)
 	exp = "two"
 	gotSelection = got.GetSelection()
 	if gotSelection != exp {
 		t.Errorf("[1] GetSelection Error exp:%s got:%s", exp, gotSelection)
 	}
 
-	got.Update(event)
+	got.Update(event, nil)
 	exp = "three"
 	gotSelection = got.GetSelection()
 	if gotSelection != exp {
 		t.Errorf("[1] GetSelection Error exp:%s got:%s", exp, gotSelection)
 	}
 
-	got.Update(event)
+	got.Update(event, nil)
 	exp = "three"
 	gotSelection = got.GetSelection()
 	if gotSelection != exp {
@@ -53,7 +53,7 @@ func TestListBox(t *testing.T) {
 	}
 
 	event = tcell.NewEventKey(tcell.KeyUp, 0, 0)
-	got.Update(event)
+	got.Update(event, nil)
 	exp = "two"
 	gotSelection = got.GetSelection()
 	if gotSelection != exp {
@@ -61,7 +61,7 @@ func TestListBox(t *testing.T) {
 	}
 
 	event = tcell.NewEventKey(tcell.KeyUp, 0, 0)
-	got.Update(event)
+	got.Update(event, nil)
 	exp = "one"
 	gotSelection = got.GetSelection()
 	if gotSelection != exp {
@@ -69,7 +69,7 @@ func TestListBox(t *testing.T) {
 	}
 
 	event = tcell.NewEventKey(tcell.KeyUp, 0, 0)
-	got.Update(event)
+	got.Update(event, nil)
 	exp = "one"
 	gotSelection = got.GetSelection()
 	if gotSelection != exp {

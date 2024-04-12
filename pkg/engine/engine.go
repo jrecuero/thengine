@@ -186,7 +186,8 @@ func (e *Engine) Run(fps float64) {
 		// panic handler.
 		defer func() {
 			recoverStack := false
-			if err := recover(); err != nil {
+			err := recover()
+			if err != nil {
 				tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("panic %+v", err)
 				tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("%s", string(debug.Stack()))
 				recoverStack = true
@@ -195,6 +196,7 @@ func (e *Engine) Run(fps float64) {
 				e.screen.Fini()
 			}
 			if recoverStack {
+				fmt.Printf("%+v", err)
 				fmt.Printf("%s", string(debug.Stack()))
 			}
 			os.Exit(0)
