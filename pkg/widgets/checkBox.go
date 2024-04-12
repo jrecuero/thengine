@@ -87,10 +87,10 @@ func (c *CheckBox) updateCanvas() {
 			selection = "- " + selection
 		}
 		if index == c.selectionIndex {
-			canvas.WriteStringInCanvasAt(selection, c.GetStyle(), api.NewPoint(x, y))
+			canvas.WriteStringInCanvasAt(selection, c.GetStyle(), api.NewPoint(x, y+1))
 		} else {
 			reverseStyle := tools.ReverseStyle(c.GetStyle())
-			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
+			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y+1))
 		}
 	}
 }

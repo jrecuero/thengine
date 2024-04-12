@@ -7,7 +7,6 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/engine"
-	"github.com/jrecuero/thengine/pkg/tools"
 )
 
 // -----------------------------------------------------------------------------
@@ -59,6 +58,11 @@ func (t *Timer) CancelTimer() {
 func (t *Timer) Draw(camera engine.ICamera) {
 }
 
+// Start methos starts the timer.
+func (t *Timer) Start() {
+	t.StartTimer()
+}
+
 // StartTimer method starts the timer.
 func (t *Timer) StartTimer() {
 	t.time = time.Now()
@@ -87,7 +91,7 @@ func (t *Timer) Update(event tcell.Event) {
 		//tools.Logger.WithField("module", "timer").WithField("function", "Update").Infof("%d < %d", elapsed, t.interval)
 		return
 	}
-	tools.Logger.WithField("module", "timer").WithField("function", "Update").Infof("%s callback", t.GetName())
+	//tools.Logger.WithField("module", "timer").WithField("function", "Update").Infof("%s callback", t.GetName())
 	t.RunCallback()
 	if t.count == ForeverTimer {
 		t.time = time.Now()

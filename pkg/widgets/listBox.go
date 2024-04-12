@@ -79,10 +79,10 @@ func (l *ListBox) updateCanvas() {
 		index, y := l.scroller.IterGetNext()
 		selection := l.selections[index]
 		if index == l.selectionIndex {
-			canvas.WriteStringInCanvasAt(selection, l.GetStyle(), api.NewPoint(x, y))
+			canvas.WriteStringInCanvasAt(selection, l.GetStyle(), api.NewPoint(x, y+1))
 		} else {
 			reverseStyle := tools.ReverseStyle(l.GetStyle())
-			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
+			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y+1))
 		}
 	}
 }

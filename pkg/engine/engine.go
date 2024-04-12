@@ -179,6 +179,8 @@ func (e *Engine) Run(fps float64) {
 		// Enable Mouse & Focus.
 		//e.screen.EnableMouse()
 		//e.screen.EnableFocus()
+
+		// Clear the screen.
 		e.screen.Clear()
 
 		// panic handler.
@@ -249,6 +251,11 @@ func (e *Engine) Run(fps float64) {
 func (e *Engine) SetDryRun(dryRun bool) {
 	e.dryRun = dryRun
 	e.sceneManager.SetDryRun(dryRun)
+}
+
+// Start method starts any required functionality for running the engine.
+func (e *Engine) Start() {
+	e.sceneManager.Start()
 }
 
 // Update method proceeds to update all entities in active scenes.

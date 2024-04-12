@@ -48,6 +48,13 @@ func NewWidget(name string, position *api.Point, size *api.Size, style *tcell.St
 	}
 }
 
+// NewNamedWidget function creates a new Widget instance with only a name.
+func NewNamedWidget(name string) *Widget {
+	return &Widget{
+		Entity: engine.NewNamedEntity(name),
+	}
+}
+
 // -----------------------------------------------------------------------------
 // Widget public methods
 // -----------------------------------------------------------------------------

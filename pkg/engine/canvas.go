@@ -13,6 +13,20 @@ import (
 )
 
 // -----------------------------------------------------------------------------
+// Package public constants
+// -----------------------------------------------------------------------------
+
+var (
+	CanvasRectSingleLine []rune = []rune{tcell.RuneULCorner,
+		tcell.RuneURCorner,
+		tcell.RuneLLCorner,
+		tcell.RuneLRCorner,
+		tcell.RuneHLine,
+		tcell.RuneVLine}
+	CanvasRectDoubleLine []rune = []rune{'╔', '╗', '╚', '╝', '═', '║'}
+)
+
+// -----------------------------------------------------------------------------
 // iterCanvas
 // -----------------------------------------------------------------------------
 
@@ -405,4 +419,48 @@ func (c *Canvas) WriteStringInCanvasAt(str string, style *tcell.Style, position 
 			c.SetCellAt(api.NewPoint(col, row), cell)
 		}
 	}
+}
+
+// WriteRectangleInCanvasAt method write the given rectangle in the canvas at
+// the given position.
+func (c *Canvas) WriteRectangleInCanvasAt(position *api.Point, size *api.Size, style *tcell.Style, pattern []rune) {
+	if position == nil {
+		position = api.NewPoint(0, 0)
+	}
+	if size == nil {
+		size = c.Size()
+	}
+	var ul, ur, ll, lr, hl, vl rune
+	if len(pattern) == 1 {
+		ul = pattern[0]
+		ur = pattern[0]
+		ll = pattern[0]
+		lr = pattern[0]
+		hl = pattern[0]
+		vl = pattern[0]
+	} else if len(pattern) == 6 {
+		ul = pattern[0]
+		ur = pattern[1]
+		ll = pattern[2]
+		lr = pattern[3]
+		hl = pattern[4]
+		vl = pattern[5]
+	} else {
+		return
+	}
+	x, y := position.Get()
+	for col := 1; col < (size.W - 1); col++ {
+		cell := NewCell(style, hl)
+		c.SetCellAt(api.NewPoint(x+col, y), cell)
+		c.SetCellAt(api.NewPoint(x+col, y+size.H-1), cell)
+	}
+	for row := 1; row < (size.H - 1); row++ {
+		cell := NewCell(style, vl)
+		c.SetCellAt(api.NewPoint(x, y+row), cell)
+		c.SetCellAt(api.NewPoint(x+size.W-1, y+row), cell)
+	}
+	c.SetCellAt(api.NewPoint(x, y), NewCell(style, ul))
+	c.SetCellAt(api.NewPoint(x+size.W-1, y), NewCell(style, ur))
+	c.SetCellAt(api.NewPoint(x, y+size.H-1), NewCell(style, ll))
+	c.SetCellAt(api.NewPoint(x+size.W-1, y+size.H-1), NewCell(style, lr))
 }

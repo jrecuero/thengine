@@ -259,6 +259,9 @@ func (m *SceneManager) SetSceneAsVisible(scene IScene) bool {
 
 // Start method is called by the engine to start all scene manager resources.
 func (m *SceneManager) Start() {
+	for _, scene := range m.scenes {
+		scene.Start()
+	}
 }
 
 // Update method is called by the engine to update all scene manager scenes.

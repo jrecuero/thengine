@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
@@ -462,6 +463,7 @@ func demoEleven(dryRun bool) {
 	appEngine.Init()
 	appEngine.Run(60.0)
 }
+
 func demoTwelve(dryRun bool) {
 	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-twelve")
 	fmt.Println("ThEngine demo-twelve")
@@ -470,6 +472,7 @@ func demoTwelve(dryRun bool) {
 	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
 	styleThree := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
 	styleFour := tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorBlue)
+	styleFive := tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorRed)
 	scene := engine.NewScene("scene", camera)
 
 	textFirstName := widgets.NewText("text-first-name", api.NewPoint(1, 1), api.NewSize(1, 1), &styleThree, "First Name:")
@@ -483,19 +486,35 @@ func demoTwelve(dryRun bool) {
 	scene.AddEntity(inputLastName)
 
 	menu := widgets.NewTopMenu("menu/1", api.NewPoint(1, 3), api.NewSize(40, 3), &styleOne, []string{"one", "two", "three"}, 0)
+	menu.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &styleFive, []rune{tcell.RuneDiamond})
 	scene.AddEntity(menu)
 
 	submenu := widgets.NewSubMenu("submenu/1", api.NewPoint(1, 6), api.NewSize(10, 5), &styleTwo, []string{"ONE", "TWO", "THREE"}, 0, menu)
+	submenu.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &styleTwo, engine.CanvasRectSingleLine)
 	scene.AddEntity(submenu)
 
 	checkbox := widgets.NewCheckBox("check-box/1", api.NewPoint(20, 6), api.NewSize(10, 5), &styleTwo, []string{"One", "Two", "Three"}, 0)
+	checkbox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &styleTwo, engine.CanvasRectDoubleLine)
 	scene.AddEntity(checkbox)
+
+	textClockCounter := 0
+	textClock := widgets.NewText("text/clock/1", api.NewPoint(1, 11), api.NewSize(1, 1), &styleThree, "clock: 0")
+	scene.AddEntity(textClock)
+
+	clockTimer := widgets.NewTimer("timer/clock/1", 1*time.Second, widgets.ForeverTimer)
+	clockTimer.SetWidgetCallback(func(entity engine.IEntity, args ...any) bool {
+		textClockCounter++
+		textClock.SetText(fmt.Sprintf("clock: %d", textClockCounter))
+		return true
+	})
+	scene.AddEntity(clockTimer)
 
 	appEngine := engine.GetEngine()
 	appEngine.GetSceneManager().AddScene(scene)
 	appEngine.GetSceneManager().SetSceneAsActive(scene)
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
 	appEngine.Init()
+	appEngine.Start()
 	appEngine.Run(60.0)
 }
 

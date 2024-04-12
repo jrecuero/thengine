@@ -153,6 +153,9 @@ func (s *Scene) Init(display tcell.Screen) {
 
 // Start method proceeds to start all scene resources.
 func (s *Scene) Start() {
+	for _, entity := range s.entities {
+		entity.Start()
+	}
 }
 
 // RemoveEntity method proceeds to remove the given entity from the scene.

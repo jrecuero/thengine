@@ -151,10 +151,10 @@ func (m *Menu) updateTopMenuCanvas() {
 		index, x := m.scroller.IterGetNext()
 		selection := m.menuItems[index]
 		if index == m.menuItemIndex {
-			canvas.WriteStringInCanvasAt(selection, m.GetStyle(), api.NewPoint(x, y))
+			canvas.WriteStringInCanvasAt(selection, m.GetStyle(), api.NewPoint(x+1, y))
 		} else {
 			reverseStyle := tools.ReverseStyle(m.GetStyle())
-			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
+			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x+1, y))
 		}
 	}
 }
@@ -167,10 +167,10 @@ func (m *Menu) updateSubMenuCanvas() {
 		index, y := m.scroller.IterGetNext()
 		selection := m.menuItems[index]
 		if index == m.menuItemIndex {
-			canvas.WriteStringInCanvasAt(selection, m.GetStyle(), api.NewPoint(x, y))
+			canvas.WriteStringInCanvasAt(selection, m.GetStyle(), api.NewPoint(x, y+1))
 		} else {
 			reverseStyle := tools.ReverseStyle(m.GetStyle())
-			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
+			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y+1))
 		}
 	}
 }
