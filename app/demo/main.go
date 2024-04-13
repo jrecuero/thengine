@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -103,6 +104,7 @@ func (p *Player) Update(event tcell.Event, scene engine.IScene) {
 
 const (
 	DemoNineMoveTopic = "demo/nine/topic"
+	SnakePointsTopic  = "snake/points/topic"
 )
 
 type ninePlayer struct {
@@ -631,51 +633,68 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 				newSpriteCell := widgets.NewSpriteCell(api.NewPoint(int(s.x), int(s.y)), spriteCell.GetCell())
 				s.AddSpriteCellAt(0, newSpriteCell)
 				tools.Logger.WithField("module", "mail").WithField("struct", "snake").WithField("function", "update").Infof("eat %s", newSpriteCell.GetPosition().ToString())
+				message := &engine.Message{
+					Topic:   SnakePointsTopic,
+					Src:     s.GetName(),
+					Dst:     "broadcast",
+					Content: nil,
+				}
+				engine.GetMailbox().Publish(SnakePointsTopic, message)
 			}
 		}
+	}
+}
+
+type TextPoints struct {
+	*widgets.Text
+	points int
+}
+
+func (t *TextPoints) Consume() {
+	if message, _ := engine.GetMailbox().Consume(SnakePointsTopic, t.GetName()); message != nil {
+		t.points += 10
+		t.SetText(fmt.Sprintf("Points: %d", t.points))
 	}
 }
 
 func demoSnake(dryRun bool) {
 	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-snake")
 	fmt.Println("ThEngine demo-snake")
+	appEngine := engine.GetEngine()
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
 	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
-	//styleThree := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
+	styleThree := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
 	//styleFour := tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorBlue)
 	//styleFive := tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorRed)
 	scene := engine.NewScene("scene", camera)
 
-	box := engine.NewEntity("box/1", api.NewPoint(0, 0), api.NewSize(80, 20), &styleTwo)
+	textPoints := &TextPoints{
+		Text: widgets.NewText("points/1", api.NewPoint(0, 0), api.NewSize(20, 1), &styleThree, "Points: 0"),
+	}
+	scene.AddEntity(textPoints)
+	engine.GetMailbox().CreateTopic(SnakePointsTopic)
+	engine.GetMailbox().Subscribe(SnakePointsTopic, textPoints.GetName())
+
+	box := engine.NewEntity("box/1", api.NewPoint(0, 1), api.NewSize(80, 20), &styleTwo)
 	box.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &styleTwo, engine.CanvasRectSingleLine)
 	scene.AddEntity(box)
 
-	for x := 0; x < 5; x++ {
-		food := engine.NewEntity("food/1", api.NewPoint(10+x, 10+x), api.NewSize(1, 1), &styleOne)
+	foodTimer := widgets.NewTimer("timer/food/1", 5*time.Second, widgets.ForeverTimer)
+	foodTimer.SetWidgetCallback(func(entity engine.IEntity, args ...any) bool {
+		x := rand.Intn(78) + 1
+		y := rand.Intn(18) + 2
+		food := engine.NewEntity("food/1", api.NewPoint(x, y), api.NewSize(1, 1), &styleOne)
 		food.GetCanvas().WriteStringInCanvas(".", &styleOne)
 		food.SetSolid(true)
 		scene.AddEntity(food)
-	}
-
-	for x := 0; x < 5; x++ {
-		food := engine.NewEntity("food/1", api.NewPoint(20+x, 5+x), api.NewSize(1, 1), &styleOne)
-		food.GetCanvas().WriteStringInCanvas(".", &styleOne)
-		food.SetSolid(true)
-		scene.AddEntity(food)
-	}
-
-	for x := 0; x < 5; x++ {
-		food := engine.NewEntity("food/1", api.NewPoint(30+x, 10+x), api.NewSize(1, 1), &styleOne)
-		food.GetCanvas().WriteStringInCanvas(".", &styleOne)
-		food.SetSolid(true)
-		scene.AddEntity(food)
-	}
+		return true
+	})
+	scene.AddEntity(foodTimer)
 
 	snake := NewSnake(api.NewPoint(5, 5), &styleTwo)
 	scene.AddEntity(snake)
 
-	appEngine := engine.GetEngine()
 	appEngine.GetSceneManager().AddScene(scene)
 	appEngine.GetSceneManager().SetSceneAsActive(scene)
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
