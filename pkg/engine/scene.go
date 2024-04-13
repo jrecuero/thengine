@@ -26,11 +26,13 @@ const (
 type IScene interface {
 	IObject
 	AddEntity(IEntity) error
+	CheckCollisionWith(IEntity) []IEntity
 	Consume()
 	Draw()
 	GetEntities() []IEntity
 	GetCamera() ICamera
 	Init(tcell.Screen)
+	RemoveEntity(IEntity) error
 	Update(tcell.Event)
 	Start()
 }
@@ -111,6 +113,18 @@ func (s *Scene) AddEntity(entity IEntity) error {
 	focusManager := GetEngine().GetFocusManager()
 	focusManager.AddEntity(s, entity)
 	return nil
+}
+
+// CheckCollisionWith method checks if the given entity has a collision with
+// any other solid entity in the scene.
+func (s *Scene) CheckCollisionWith(entity IEntity) []IEntity {
+	solidEntities := []IEntity{}
+	for _, ent := range s.entities {
+		if ent.IsActive() && ent.IsSolid() {
+			solidEntities = append(solidEntities, ent)
+		}
+	}
+	return CheckCollisionWith(entity, solidEntities)
 }
 
 // Consume method calls all entity instances to consume all messages from

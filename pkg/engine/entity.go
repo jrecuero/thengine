@@ -28,10 +28,12 @@ type IEntity interface {
 	GetStyle() *tcell.Style
 	GetZLevel() int
 	Init(tcell.Screen)
+	IsSolid() bool
 	SetCanvas(*Canvas)
 	SetPLevel(int)
 	SetPosition(*api.Point)
 	SetSize(*api.Size)
+	SetSolid(bool)
 	SetStyle(*tcell.Style)
 	SetZLevel(int)
 	Start()
@@ -60,6 +62,7 @@ type Entity struct {
 	screen   tcell.Screen
 	zLevel   int
 	pLevel   int
+	solid    bool
 }
 
 // NewEntity function creates a new Entity instance with all given attributes.
@@ -164,6 +167,10 @@ func (e *Entity) Init(screen tcell.Screen) {
 	e.screen = screen
 }
 
+func (e *Entity) IsSolid() bool {
+	return e.solid
+}
+
 func (e *Entity) SetCanvas(canvas *Canvas) {
 	e.canvas = canvas
 }
@@ -178,6 +185,10 @@ func (e *Entity) SetPosition(position *api.Point) {
 
 func (e *Entity) SetSize(size *api.Size) {
 	e.size = size
+}
+
+func (e *Entity) SetSolid(solid bool) {
+	e.solid = solid
 }
 
 func (e *Entity) SetStyle(style *tcell.Style) {

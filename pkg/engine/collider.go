@@ -69,7 +69,7 @@ func (c *Collider) CollideWith(collider *Collider) bool {
 	}
 	if c.GetPoints() != nil {
 		if collider.GetRect() != nil {
-			return collider.collideRectWithRect(c)
+			return collider.collideRectWithPoints(c)
 		}
 		if collider.GetPoints() != nil {
 			return c.collidePointsWithPoints(collider)
@@ -131,16 +131,17 @@ func checkCollisionsWorker(collisions []IEntity, dynamics <-chan IEntity, result
 // Package private functions
 // -----------------------------------------------------------------------------
 
-func CheckCollisionWith(entity IEntity, entities []IEntity) {
+func CheckCollisionWith(entity IEntity, entities []IEntity) []IEntity {
+	var collisions []IEntity = []IEntity{}
 	if (len(entities) == 0) || (entity == nil) {
-		return
+		return nil
 	}
 	for _, ent := range entities {
 		if checkCollisionBetweenEntities(entity, ent) {
-			//d.Collide(coll)
-			//coll.Collide(d)
+			collisions = append(collisions, ent)
 		}
 	}
+	return collisions
 }
 
 // checkCollisions function checks collisions between two sets of scene entities.

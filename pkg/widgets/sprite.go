@@ -111,12 +111,30 @@ func (s *Sprite) Draw(scene engine.IScene) {
 	}
 }
 
+func (s *Sprite) GetCollider() *engine.Collider {
+	points := []*api.Point{}
+	for _, spriteCell := range s.spriteCells {
+		position := api.ClonePoint(s.GetPosition())
+		position.Add(spriteCell.GetPosition())
+		points = append(points, position)
+	}
+	return engine.NewCollider(nil, points)
+}
+
 func (s *Sprite) GetSpriteCells() []*SpriteCell {
 	return s.spriteCells
 }
 
-func (s *Sprite) RemoveSpriteCellAt(atIndex int) {
+func (s *Sprite) RemoveSpriteCellAt(atIndex int) *SpriteCell {
+	if atIndex == AtTheEnd {
+		atIndex = len(s.spriteCells) - 1
+	}
+	if (atIndex < 0) || (atIndex >= len(s.spriteCells)) {
+		return nil
+	}
+	spriteCell := s.spriteCells[atIndex]
 	s.spriteCells = append(s.spriteCells[:atIndex], s.spriteCells[atIndex+1:]...)
+	return spriteCell
 }
 
 func (s *Sprite) SetSpriteCells(spriteCells []*SpriteCell) {
