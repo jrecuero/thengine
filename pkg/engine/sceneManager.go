@@ -27,6 +27,8 @@ type SceneManager struct {
 	scenes        []IScene
 	activeScenes  []IScene
 	visibleScenes []IScene
+	initialized   bool
+	started       bool
 }
 
 // NewSceneManager function creates a new SceneManager instance.
@@ -35,6 +37,8 @@ func NewSceneManager() *SceneManager {
 		scenes:        make([]IScene, 0),
 		activeScenes:  make([]IScene, 0),
 		visibleScenes: make([]IScene, 0),
+		initialized:   false,
+		started:       false,
 	}
 	return mgr
 }
@@ -61,6 +65,15 @@ func getSceneInSlice(scene IScene, slice []IScene) int {
 // AddScene method adds a new Scene to be handled by the manager.
 func (m *SceneManager) AddScene(scene IScene) bool {
 	m.scenes = append(m.scenes, scene)
+	// if the scene manager has been already initialized or started, call
+	// related function for the added scene.
+	if m.initialized {
+		screen := GetEngine().GetScreen()
+		scene.Init(screen)
+	}
+	if m.started {
+		m.Start()
+	}
 	return true
 }
 
@@ -74,10 +87,11 @@ func (m *SceneManager) Consume() {
 
 // Draw method is called by the engine to draw all visible scenes in the scene
 // manager.
-func (m *SceneManager) Draw(display tcell.Screen) {
+func (m *SceneManager) Draw(screen tcell.Screen) {
 	for _, scene := range m.visibleScenes {
+		tools.Logger.WithField("module", "scene-manager").WithField("function", "Draw").Debugf("visible scene %s", scene.GetName())
 		scene.Draw()
-		scene.GetCamera().Draw(true, display)
+		scene.GetCamera().Draw(true, screen)
 	}
 }
 
@@ -137,10 +151,11 @@ func (m *SceneManager) GetVisibleSceneIndex(scene IScene) int {
 }
 
 // Init method is called to initializes all scene manager resources.
-func (m *SceneManager) Init(display tcell.Screen) {
+func (m *SceneManager) Init(screen tcell.Screen) {
 	for _, scene := range m.scenes {
-		scene.Init(display)
+		scene.Init(screen)
 	}
+	m.initialized = true
 }
 
 // IsSceneAvailable method finds the given scene in the list of all scenes available.
@@ -211,14 +226,33 @@ func (m *SceneManager) PushVisibleSceneAsLast(scene IScene) bool {
 
 // RemoveScene method removes the given scene from all scene slices.
 func (m *SceneManager) RemoveScene(scene IScene) bool {
-	if activeIndex := m.GetActiveSceneIndex(scene); activeIndex != InvalidSceneIndex {
-		m.activeScenes = append(m.activeScenes[:activeIndex], m.scenes[activeIndex+1:]...)
+	m.RemoveSceneAsActive(scene)
+	m.RemoveSceneAsVisible(scene)
+	return m.RemoveSceneAsAvailable(scene)
+}
+
+// RemoveSceneAsActive method removes the given scene as an active scene.
+func (m *SceneManager) RemoveSceneAsActive(scene IScene) bool {
+	if index := m.GetActiveSceneIndex(scene); index != InvalidSceneIndex {
+		m.activeScenes = append(m.activeScenes[:index], m.scenes[index+1:]...)
+		return true
 	}
-	if visibleIndex := m.GetVisibleSceneIndex(scene); visibleIndex != InvalidSceneIndex {
-		m.visibleScenes = append(m.visibleScenes[:visibleIndex], m.visibleScenes[visibleIndex+1:]...)
-	}
+	return false
+}
+
+// RemoveSceneAsAvaible method removes the given scene as an available scene.
+func (m *SceneManager) RemoveSceneAsAvailable(scene IScene) bool {
 	if index := m.GetSceneIndex(scene); index != InvalidSceneIndex {
 		m.scenes = append(m.scenes[:index], m.scenes[index+1:]...)
+		return true
+	}
+	return false
+}
+
+// Remove SceneAsVisible method remove the given scene as a visible scene.
+func (m *SceneManager) RemoveSceneAsVisible(scene IScene) bool {
+	if index := m.GetVisibleSceneIndex(scene); index != InvalidSceneIndex {
+		m.visibleScenes = append(m.visibleScenes[:index], m.visibleScenes[index+1:]...)
 		return true
 	}
 	return false
@@ -262,6 +296,7 @@ func (m *SceneManager) Start() {
 	for _, scene := range m.scenes {
 		scene.Start()
 	}
+	m.started = true
 }
 
 // Update method is called by the engine to update all scene manager scenes.

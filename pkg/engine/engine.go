@@ -110,10 +110,10 @@ func (e *Engine) Consume() {
 
 // CreateEngineScene method proceeds to create a new an unique scene owned by
 // the engine. The size of the scene is equal to the size of the tcell.Screen.
-func (e *Engine) CreateEngineScene() error {
+func (e *Engine) CreateEngineScene() (IScene, error) {
 
 	if e.screen == nil {
-		return fmt.Errorf("Engine screen was not created. Engine.Init() has to be called")
+		return nil, fmt.Errorf("Engine screen was not created. Engine.Init() has to be called")
 	}
 
 	// Create a new screen to be used by the engine scene with the same size as
@@ -125,7 +125,7 @@ func (e *Engine) CreateEngineScene() error {
 	// all applications.
 	engineScene := NewScene(EngineMainSceneName, engineCamera)
 	e.sceneManager.AddScene(engineScene)
-	return nil
+	return engineScene, nil
 }
 
 // Draw method proceeds to draws all entities in visible scenes.
@@ -151,6 +151,11 @@ func (e *Engine) GetSceneManager() *SceneManager {
 
 // Init method initializes are resources required to run the engine.
 func (e *Engine) Init() {
+	e.sceneManager.Init(e.screen)
+}
+
+// InitResources methos initializes all engine low level resources (tcell).
+func (e *Engine) InitResources() {
 	// Initialize tcell Screen.
 	if !e.dryRun {
 		var err error
@@ -164,7 +169,6 @@ func (e *Engine) Init() {
 		defaultStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
 		e.screen.SetStyle(defaultStyle)
 	}
-	e.sceneManager.Init(e.screen)
 }
 
 // Run method runs the engine in an infinite loop.
@@ -188,8 +192,8 @@ func (e *Engine) Run(fps float64) {
 			recoverStack := false
 			err := recover()
 			if err != nil {
-				tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("panic %+v", err)
-				tools.Logger.WithField("module", "engine").WithField("function", "Run").Infof("%s", string(debug.Stack()))
+				tools.Logger.WithField("module", "engine").WithField("function", "Run").Errorf("panic %+v", err)
+				tools.Logger.WithField("module", "engine").WithField("function", "Run").Errorf("%s", string(debug.Stack()))
 				recoverStack = true
 			}
 			if !e.dryRun {

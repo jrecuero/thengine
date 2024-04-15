@@ -62,6 +62,7 @@ func NewScene(name string, camera ICamera) *Scene {
 		pLevelEntities: []IEntity{},
 		camera:         camera,
 	}
+	tools.Logger.WithField("module", "scene").WithField("function", "NewScene").Debugf("new scene %s", scene.GetName())
 	return scene
 }
 
@@ -97,9 +98,9 @@ func (s *Scene) sortEntities() {
 		return s.pLevelEntities[i].GetPLevel() > s.pLevelEntities[j].GetPLevel()
 	})
 
-	tools.Logger.WithField("module", "scene").
-		WithField("function", "sortEntities").
-		Debugf("zLevelEntities %+v, pLevelEntities %+v", s.zLevelEntities, s.pLevelEntities)
+	//tools.Logger.WithField("module", "scene").
+	//    WithField("function", "sortEntities").
+	//    Debugf("zLevelEntities %+v, pLevelEntities %+v", s.zLevelEntities, s.pLevelEntities)
 }
 
 // -----------------------------------------------------------------------------

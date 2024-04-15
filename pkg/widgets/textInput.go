@@ -63,7 +63,7 @@ func (t *TextInput) updateCursor() {
 
 // AcquireFocus method acquires focus for the entity.
 func (t *TextInput) AcquireFocus() (bool, error) {
-	tools.Logger.WithField("module", "text-input").WithField("function", "AcquireFocus").Infof("%s", t.GetName())
+	tools.Logger.WithField("module", "text-input").WithField("function", "AcquireFocus").Debugf("%s", t.GetName())
 	ok, err := t.Entity.AcquireFocus()
 	if err == nil {
 		t.updateCursor()
