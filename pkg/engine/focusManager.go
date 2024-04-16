@@ -234,6 +234,14 @@ func (m *FocusManager) RemoveEntity(scene IScene, entity IEntity) error {
 	return nil
 }
 
+// RemoveEntitiesInScene method removes all entities from the given scene in
+// the focus manager.
+func (m *FocusManager) RemoveEntitiesInScene(scene IScene) error {
+	m.entities[scene.GetName()] = []IEntity{}
+	m.withFocus[scene.GetName()] = []IEntity{}
+	return nil
+}
+
 // RemoveScene method removes all entities for the given scene.
 func (m *FocusManager) RemoveScene(scene IScene) {
 	delete(m.entities, scene.GetName())

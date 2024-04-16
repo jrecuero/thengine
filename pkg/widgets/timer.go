@@ -7,6 +7,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/engine"
+	"github.com/jrecuero/thengine/pkg/tools"
 )
 
 // -----------------------------------------------------------------------------
@@ -36,6 +37,9 @@ type Timer struct {
 
 // NewTimer function creates a new Timer instance.
 func NewTimer(name string, interval time.Duration, count int) *Timer {
+	tools.Logger.WithField("module", "timer").
+		WithField("function", "NewTimer").
+		Debugf("%s", name)
 	return &Timer{
 		Widget:   NewWidget(name, nil, nil, nil),
 		interval: interval,

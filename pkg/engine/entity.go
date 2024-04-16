@@ -30,6 +30,9 @@ type IEntity interface {
 	Init(tcell.Screen)
 	IsSolid() bool
 	SetCanvas(*Canvas)
+	SetCustomInit(func())
+	SetCustomStart(func())
+	SetCustomStop(func())
 	SetPLevel(int)
 	SetPosition(*api.Point)
 	SetSize(*api.Size)
@@ -37,6 +40,7 @@ type IEntity interface {
 	SetStyle(*tcell.Style)
 	SetZLevel(int)
 	Start()
+	Stop()
 	Update(tcell.Event, IScene)
 }
 
@@ -55,14 +59,17 @@ type IEntity interface {
 type Entity struct {
 	*EObject
 	*Focus
-	canvas   *Canvas
-	position *api.Point
-	size     *api.Size
-	style    *tcell.Style
-	screen   tcell.Screen
-	zLevel   int
-	pLevel   int
-	solid    bool
+	canvas      *Canvas
+	position    *api.Point
+	size        *api.Size
+	style       *tcell.Style
+	screen      tcell.Screen
+	zLevel      int
+	pLevel      int
+	solid       bool
+	customInit  func()
+	customStart func()
+	customStop  func()
 }
 
 // NewEntity function creates a new Entity instance with all given attributes.
@@ -165,6 +172,9 @@ func (e *Entity) GetZLevel() int {
 
 func (e *Entity) Init(screen tcell.Screen) {
 	e.screen = screen
+	if e.customInit != nil {
+		e.customInit()
+	}
 }
 
 func (e *Entity) IsSolid() bool {
@@ -173,6 +183,18 @@ func (e *Entity) IsSolid() bool {
 
 func (e *Entity) SetCanvas(canvas *Canvas) {
 	e.canvas = canvas
+}
+
+func (e *Entity) SetCustomInit(f func()) {
+	e.customInit = f
+}
+
+func (e *Entity) SetCustomStart(f func()) {
+	e.customStart = f
+}
+
+func (e *Entity) SetCustomStop(f func()) {
+	e.customStop = f
 }
 
 func (e *Entity) SetPLevel(level int) {
@@ -210,7 +232,15 @@ func (e *Entity) SetZLevel(level int) {
 }
 
 func (e *Entity) Start() {
+	if e.customStart != nil {
+		e.customStart()
+	}
+}
 
+func (e *Entity) Stop() {
+	if e.customStop != nil {
+		e.customStop()
+	}
 }
 
 func (e *Entity) Update(tcell.Event, IScene) {

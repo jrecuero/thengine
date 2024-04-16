@@ -62,6 +62,15 @@ func getSceneInSlice(scene IScene, slice []IScene) int {
 // SceneManager public methods
 // -----------------------------------------------------------------------------
 
+// ActivateScene method adds the given scene to the list of active scenes and
+// visible scenes.
+func (m *SceneManager) ActivateScene(scene IScene) bool {
+	if ok := m.SetSceneAsActive(scene); !ok {
+		return false
+	}
+	return m.SetSceneAsVisible(scene)
+}
+
 // AddScene method adds a new Scene to be handled by the manager.
 func (m *SceneManager) AddScene(scene IScene) bool {
 	m.scenes = append(m.scenes, scene)
@@ -85,11 +94,19 @@ func (m *SceneManager) Consume() {
 	}
 }
 
+// DeactivateScene method removes the given scene from the list of active
+// scenes and visible scenes.
+func (m *SceneManager) DeactivateScene(scene IScene) bool {
+	if ok := m.RemoveSceneAsActive(scene); !ok {
+		return false
+	}
+	return m.RemoveSceneAsVisible(scene)
+}
+
 // Draw method is called by the engine to draw all visible scenes in the scene
 // manager.
 func (m *SceneManager) Draw(screen tcell.Screen) {
 	for _, scene := range m.visibleScenes {
-		tools.Logger.WithField("module", "scene-manager").WithField("function", "Draw").Debugf("visible scene %s", scene.GetName())
 		scene.Draw()
 		scene.GetCamera().Draw(true, screen)
 	}
@@ -310,7 +327,9 @@ func (m *SceneManager) Update(event tcell.Event) {
 func (m *SceneManager) UpdateFocus() {
 	if lenActiveScenes := len(m.activeScenes); lenActiveScenes != 0 {
 		lastActiveScene := m.activeScenes[lenActiveScenes-1]
-		tools.Logger.WithField("module", "scene-manager").WithField("function", "UpdateFocus").Debugf("scene %s", lastActiveScene.GetName())
+		tools.Logger.WithField("module", "scene-manager").
+			WithField("function", "UpdateFocus").
+			Debugf("scene %s", lastActiveScene.GetName())
 		focusManager := GetEngine().GetFocusManager()
 		focusManager.UpdateFocusForScene(lastActiveScene)
 	}

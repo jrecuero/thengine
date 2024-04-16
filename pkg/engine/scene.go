@@ -27,6 +27,7 @@ type IScene interface {
 	IObject
 	AddEntity(IEntity) error
 	CheckCollisionWith(IEntity) []IEntity
+	Clean()
 	Consume()
 	Draw()
 	GetEntities() []IEntity
@@ -126,6 +127,14 @@ func (s *Scene) CheckCollisionWith(entity IEntity) []IEntity {
 		}
 	}
 	return CheckCollisionWith(entity, solidEntities)
+}
+
+// Clean method cleans all resources for the scene in order to set it up as a
+// brand new screen.
+func (s *Scene) Clean() {
+	s.entities = []IEntity{}
+	s.zLevelEntities = []IEntity{}
+	s.pLevelEntities = []IEntity{}
 }
 
 // Consume method calls all entity instances to consume all messages from
