@@ -81,7 +81,7 @@ func (m *SceneManager) AddScene(scene IScene) bool {
 		scene.Init(screen)
 	}
 	if m.started {
-		m.Start()
+		scene.Start()
 	}
 	return true
 }
@@ -314,6 +314,13 @@ func (m *SceneManager) Start() {
 		scene.Start()
 	}
 	m.started = true
+}
+
+// Stop method is called by the engine to stop all scene manager resources.
+func (m *SceneManager) Stop() {
+	for _, scene := range m.scenes {
+		scene.Stop()
+	}
 }
 
 // Update method is called by the engine to update all scene manager scenes.

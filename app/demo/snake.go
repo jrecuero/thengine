@@ -14,11 +14,13 @@ import (
 
 const (
 	// Widget names
-	SnakeWidgetName      = "widget/snake/1"
-	TextPointsWidgetName = "text/points/1"
-	BoxWidgetName        = "widget/box/1"
-	FoodTimerWidgetName  = "timer/food/1"
-	TextGameOverName     = "text/game-over/1"
+	SnakeWidgetName          = "widget/snake/1"
+	TextPointsWidgetName     = "text/points/1"
+	TextHighScoreWidgetName  = "text/high-score/1"
+	BoxWidgetName            = "widget/box/1"
+	TimerFoodWidgetName      = "timer/food/1"
+	TimerFoodPieceWidgetName = "timer/food-piece/%d"
+	TextGameOverWidgetName   = "text/game-over/1"
 
 	// Scene names
 	MainSceneName     = "scene/main/1"
@@ -29,6 +31,10 @@ const (
 
 	SnakePointsTopic = "snake/points/topic"
 	GameOverTopic    = "snake/game-over/topic"
+)
+
+var (
+	FoodPieceCounter int = 0
 )
 
 type snake struct {
@@ -49,8 +55,6 @@ func NewSnake(position *api.Point, style *tcell.Style) *snake {
 		direction: "none",
 		alive:     true,
 	}
-	//snake.x = float64(snake.GetPosition().X)
-	//snake.y = float64(snake.GetPosition().Y)
 	snake.x = 5.0
 	snake.y = 5.0
 	snake.SetFocusType(engine.SingleFocus)
@@ -73,12 +77,12 @@ func (s *snake) Move(args ...any) {
 	s.direction = args[0].(string)
 }
 
-func (s *snake) PublishCollision() {
+func (s *snake) PublishCollision(points int) {
 	message := &engine.Message{
 		Topic:   SnakePointsTopic,
 		Src:     s.GetName(),
 		Dst:     "broadcast",
-		Content: nil,
+		Content: points,
 	}
 	engine.GetMailbox().Publish(SnakePointsTopic, message)
 }
@@ -178,7 +182,7 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 					WithField("struct", "snake").
 					WithField("function", "Update").
 					Debugf("eat %s", newSpriteCell.GetPosition().ToString())
-				s.PublishCollision()
+				s.PublishCollision(ent.(*TimerFoodPiece).Points)
 			}
 		}
 	}
@@ -186,13 +190,13 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 
 type TextPoints struct {
 	*widgets.Text
-	points int
+	Points int
 }
 
 func (t *TextPoints) Consume() {
 	if message, _ := engine.GetMailbox().Consume(SnakePointsTopic, t.GetName()); message != nil {
-		t.points += 10
-		t.SetText(fmt.Sprintf("Points: %d", t.points))
+		t.Points += message.Content.(int)
+		t.SetText(fmt.Sprintf("Points: %d", t.Points))
 	}
 }
 
@@ -224,9 +228,37 @@ func (t *TextGameOver) Update(event tcell.Event, scene engine.IScene) {
 	t.HandleKeyboardForActions(event, actions)
 }
 
+type TimerFoodPiece struct {
+	*widgets.Widget
+	interval time.Duration
+	time     time.Time
+	Points   int
+}
+
+func NewTimerFoodPiece(name string, position *api.Point, style *tcell.Style, duration time.Duration, points int) *TimerFoodPiece {
+	return &TimerFoodPiece{
+		Widget:   widgets.NewWidget(name, position, api.NewSize(1, 1), style),
+		interval: duration,
+		Points:   points,
+	}
+}
+
+func (t *TimerFoodPiece) Start() {
+	t.time = time.Now()
+}
+
+func (t *TimerFoodPiece) Update(event tcell.Event, scene engine.IScene) {
+	now := time.Now()
+	if elapsed := now.Sub(t.time); elapsed < t.interval {
+		return
+	}
+	scene.RemoveEntity(t)
+}
+
 type AppHandler struct {
 	*engine.Entity
-	Running bool
+	Running   bool
+	HighScore int
 }
 
 func (h *AppHandler) Consume() {
@@ -243,10 +275,16 @@ func (h *AppHandler) Consume() {
 		sceneManager := engine.GetEngine().GetSceneManager()
 		mainScene := sceneManager.GetSceneByName(MainSceneName)
 		gameOverScene := sceneManager.GetSceneByName(GameOverSceneName)
+		textPoints := mainScene.GetEntityByName(TextPointsWidgetName).(*TextPoints)
 		if content == "game-over" {
+			textGameOver := gameOverScene.GetEntityByName(TextGameOverWidgetName).(*TextGameOver)
+			textGameOver.SetText(fmt.Sprintf("GAME OVER\nScore: %d\nHSCORE: %d", textPoints.Points, h.HighScore))
 			sceneManager.DeactivateScene(mainScene)
 			sceneManager.ActivateScene(gameOverScene)
 		} else if content == "restart" {
+			if textPoints.Points > h.HighScore {
+				h.HighScore = textPoints.Points
+			}
 			sceneManager.DeactivateScene(gameOverScene)
 			// Remove all entities from the scene.
 			mainScene.Clean()
@@ -264,28 +302,50 @@ func (h *AppHandler) SetUpMainScene(mainScene engine.IScene) {
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
 	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
 	styleThree := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
+	styleFour := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlue)
+	styleFive := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorYellow)
 
 	textPoints := &TextPoints{
 		Text: widgets.NewText(TextPointsWidgetName, api.NewPoint(0, 0), api.NewSize(20, 1), &styleThree, "Points: 0"),
 	}
 	mainScene.AddEntity(textPoints)
 
+	highScore := fmt.Sprintf("HSCORE: %d", h.HighScore)
+	TextHighScore := widgets.NewText(TextHighScoreWidgetName, api.NewPoint(65, 0), api.NewSize(20, 1), &styleThree, highScore)
+	mainScene.AddEntity(TextHighScore)
+
 	box := engine.NewEntity(BoxWidgetName, api.NewPoint(0, 1), api.NewSize(80, 20), &styleTwo)
 	box.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &styleTwo, engine.CanvasRectSingleLine)
 	mainScene.AddEntity(box)
 
-	foodTimer := widgets.NewTimer(FoodTimerWidgetName, 5*time.Second, widgets.ForeverTimer)
+	foodTimer := widgets.NewTimer(TimerFoodWidgetName, 5*time.Second, widgets.ForeverTimer)
 	foodTimer.SetWidgetCallback(func(entity engine.IEntity, args ...any) bool {
 		x := rand.Intn(78) + 1
 		y := rand.Intn(18) + 2
-		food := engine.NewEntity("food/1", api.NewPoint(x, y), api.NewSize(1, 1), &styleOne)
-		food.GetCanvas().WriteStringInCanvas(".", &styleOne)
+		FoodPieceCounter++
+		foodPieceName := fmt.Sprintf(TimerFoodPieceWidgetName, FoodPieceCounter)
+		duration := rand.Intn(30) + 10
+		var points int
+		var style tcell.Style
+		if duration < 20 {
+			points = duration + 20
+			style = styleOne
+		} else if duration < 30 {
+			points = duration - 10
+			style = styleFour
+		} else if duration < 40 {
+			points = duration - 30
+			style = styleFive
+		}
+		timeDuration := time.Duration(duration) * time.Second
+		food := NewTimerFoodPiece(foodPieceName, api.NewPoint(x, y), &style, timeDuration, points)
+		food.GetCanvas().WriteStringInCanvas("*", &style)
 		food.SetSolid(true)
 		mainScene.AddEntity(food)
 		tools.Logger.WithField("module", "snake").
 			WithField("struct", "AppHandler").
 			WithField("function", "SetUpMainScene").
-			Debugf("foodTimer generates new food")
+			Debugf("foodTimer generates new food %d %d", duration, points)
 		return true
 	})
 	mainScene.AddEntity(foodTimer)
@@ -306,43 +366,9 @@ func (h *AppHandler) SetUp(appEngine *engine.Engine) {
 
 	h.SetUpMainScene(mainScene)
 
-	////textPoints := &TextPoints{
-	////    Text: widgets.NewText(TextPointsWidgetName, api.NewPoint(0, 0), api.NewSize(20, 1), &styleThree, "Points: 0"),
-	////}
-	//textPoints := &TextPoints{
-	//    Text: widgets.NewText(TextPointsWidgetName, nil, nil, &styleThree, ""),
-	//}
-	//// These should be the values the instance has to take every time it is
-	//// initialized.
-	//textPoints.SetCustomStart(func() {
-	//    textPoints.SetPosition(api.NewPoint(0, 0))
-	//    textPoints.SetSize(api.NewSize(20, 1))
-	//    textPoints.SetText("Points: 0")
-	//})
-
-	//mainScene.AddEntity(textPoints)
 	// TODO this is required in the initialized part
 	engine.GetMailbox().CreateTopic(SnakePointsTopic)
 	engine.GetMailbox().Subscribe(SnakePointsTopic, TextPointsWidgetName)
-
-	//box := engine.NewEntity(BoxWidgetName, api.NewPoint(0, 1), api.NewSize(80, 20), &styleTwo)
-	//box.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &styleTwo, engine.CanvasRectSingleLine)
-	//mainScene.AddEntity(box)
-
-	//foodTimer := widgets.NewTimer(FoodTimerWidgetName, 5*time.Second, widgets.ForeverTimer)
-	//foodTimer.SetWidgetCallback(func(entity engine.IEntity, args ...any) bool {
-	//    x := rand.Intn(78) + 1
-	//    y := rand.Intn(18) + 2
-	//    food := engine.NewEntity("food/1", api.NewPoint(x, y), api.NewSize(1, 1), &styleOne)
-	//    food.GetCanvas().WriteStringInCanvas(".", &styleOne)
-	//    food.SetSolid(true)
-	//    mainScene.AddEntity(food)
-	//    return true
-	//})
-	//mainScene.AddEntity(foodTimer)
-
-	//snake := NewSnake(api.NewPoint(0, 1), &styleTwo)
-	//mainScene.AddEntity(snake)
 
 	engineScene, err := appEngine.CreateEngineScene()
 	if err != nil {
@@ -355,8 +381,9 @@ func (h *AppHandler) SetUp(appEngine *engine.Engine) {
 	appEngine.GetSceneManager().ActivateScene(mainScene)
 
 	gameOverScene := engine.NewScene(GameOverSceneName, camera)
-	//gameOverText := widgets.NewText(TextGameOverName, api.NewPoint(40, 10), api.NewSize(20, 1), &styleFour, "GAME OVER")
-	gameOverText := &TextGameOver{Text: widgets.NewText(TextGameOverName, api.NewPoint(40, 10), api.NewSize(20, 1), &styleFour, "GAME OVER")}
+	gameOverText := &TextGameOver{
+		Text: widgets.NewText(TextGameOverWidgetName, api.NewPoint(40, 10), api.NewSize(20, 1), &styleFour, "GAME OVER"),
+	}
 	gameOverText.SetFocusType(engine.SingleFocus)
 	gameOverText.SetFocusEnable(true)
 	gameOverScene.AddEntity(gameOverText)

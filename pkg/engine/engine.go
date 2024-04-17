@@ -250,6 +250,9 @@ func (e *Engine) Run(fps float64) {
 		timeToSleep := (time.Until(nowTime).Seconds() * 1000.0) + 1000.0/fps
 		time.Sleep(time.Duration(timeToSleep) * time.Millisecond)
 	}
+
+	// stop all engine resources.
+	e.Stop()
 }
 
 // SetDryRun method sets the dryRun variable to set dryRun flag which avoid any
@@ -262,6 +265,11 @@ func (e *Engine) SetDryRun(dryRun bool) {
 // Start method starts any required functionality for running the engine.
 func (e *Engine) Start() {
 	e.sceneManager.Start()
+}
+
+// Stop method stops any engine resources.
+func (e *Engine) Stop() {
+	e.sceneManager.Stop()
 }
 
 // Update method proceeds to update all entities in active scenes.

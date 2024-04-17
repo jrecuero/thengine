@@ -31,11 +31,13 @@ type IScene interface {
 	Consume()
 	Draw()
 	GetEntities() []IEntity
+	GetEntityByName(string) IEntity
 	GetCamera() ICamera
 	Init(tcell.Screen)
 	RemoveEntity(IEntity) error
 	Update(tcell.Event)
 	Start()
+	Stop()
 }
 
 // -----------------------------------------------------------------------------
@@ -52,6 +54,8 @@ type Scene struct {
 	zLevelEntities []IEntity
 	pLevelEntities []IEntity
 	camera         ICamera
+	initialized    bool
+	started        bool
 }
 
 // NewCamera function creates a new Scene instance.
@@ -62,6 +66,8 @@ func NewScene(name string, camera ICamera) *Scene {
 		zLevelEntities: []IEntity{},
 		pLevelEntities: []IEntity{},
 		camera:         camera,
+		initialized:    false,
+		started:        false,
 	}
 	tools.Logger.WithField("module", "scene").WithField("function", "NewScene").Debugf("new scene %s", scene.GetName())
 	return scene
@@ -114,6 +120,13 @@ func (s *Scene) AddEntity(entity IEntity) error {
 	s.sortEntities()
 	focusManager := GetEngine().GetFocusManager()
 	focusManager.AddEntity(s, entity)
+	if s.initialized {
+		screen := GetEngine().GetScreen()
+		entity.Init(screen)
+	}
+	if s.started {
+		entity.Start()
+	}
 	return nil
 }
 
@@ -162,6 +175,16 @@ func (s *Scene) GetEntities() []IEntity {
 	return s.entities
 }
 
+// GetEntityByName method returns the entity with the given name in the scene.
+func (s *Scene) GetEntityByName(name string) IEntity {
+	for _, entity := range s.entities {
+		if entity.GetName() == name {
+			return entity
+		}
+	}
+	return nil
+}
+
 // GetScreeen method returns the camera instance related to the scene.
 func (s *Scene) GetCamera() ICamera {
 	return s.camera
@@ -173,12 +196,21 @@ func (s *Scene) Init(display tcell.Screen) {
 	for _, entity := range s.entities {
 		entity.Init(display)
 	}
+	s.initialized = true
 }
 
 // Start method proceeds to start all scene resources.
 func (s *Scene) Start() {
 	for _, entity := range s.entities {
 		entity.Start()
+	}
+	s.started = true
+}
+
+// Stop method proceeds to stop all scene resources.
+func (s *Scene) Stop() {
+	for _, entity := range s.entities {
+		entity.Stop()
 	}
 }
 
