@@ -21,6 +21,7 @@ const (
 	TimerFoodWidgetName      = "timer/food/1"
 	TimerFoodPieceWidgetName = "timer/food-piece/%d"
 	TextGameOverWidgetName   = "text/game-over/1"
+	BulletWidgetName         = "widget/bullet/%d"
 
 	// Scene names
 	MainSceneName     = "scene/main/1"
@@ -35,7 +36,82 @@ const (
 
 var (
 	FoodPieceCounter int = 0
+	BulletCounter    int = 0
 )
+
+type Bullet struct {
+	*widgets.Widget
+	direction string
+	x         float64
+	y         float64
+	parent    *snake
+}
+
+func NewBullet(position *api.Point, style *tcell.Style, direction string, parent *snake) *Bullet {
+	name := fmt.Sprintf(BulletWidgetName, BulletCounter)
+	bullet := &Bullet{
+		Widget:    widgets.NewWidget(name, position, api.NewSize(1, 1), style),
+		direction: direction,
+		x:         float64(position.X),
+		y:         float64(position.Y),
+		parent:    parent,
+	}
+	bullet.GetCanvas().WriteStringInCanvas(string(tcell.RuneBullet), style)
+	bullet.SetSolid(true)
+	return bullet
+}
+
+func (b *Bullet) PublishCollision(points int) {
+	message := &engine.Message{
+		Topic:   SnakePointsTopic,
+		Src:     b.GetName(),
+		Dst:     "broadcast",
+		Content: points,
+	}
+	engine.GetMailbox().Publish(SnakePointsTopic, message)
+}
+
+func (b *Bullet) Update(ecent tcell.Event, scene engine.IScene) {
+	var vx, vy int
+	switch b.direction {
+	case "up":
+		vx = 0
+		vy = -1
+	case "down":
+		vx = 0
+		vy = 1
+	case "left":
+		vx = -1
+		vy = 0
+	case "right":
+		vx = 1
+		vy = 0
+	}
+	speed := 2.0
+	b.x += float64(vx) / speed
+	b.y += float64(vy) / speed
+	intX := int(b.x)
+	intY := int(b.y)
+	if (intX != b.GetPosition().X) || (intY != b.GetPosition().Y) {
+		if (intX >= 80) || (intX < 0) || (intY >= 20) || (intY < 0) {
+			b.parent.Bullet = nil
+			scene.RemoveEntity(b)
+			return
+		}
+		b.SetPosition(api.NewPoint(intX, intY))
+	}
+
+	collisions := scene.CheckCollisionWith(b)
+	for _, ent := range collisions {
+		if _, ok := ent.(*TimerFoodPiece); ok {
+			b.parent.Bullet = nil
+			scene.RemoveEntity(ent)
+			scene.RemoveEntity(b)
+			b.PublishCollision(ent.(*TimerFoodPiece).Points)
+			return
+		}
+	}
+}
 
 type snake struct {
 	*widgets.Sprite
@@ -44,6 +120,7 @@ type snake struct {
 	speed     float64
 	direction string
 	alive     bool
+	Bullet    *Bullet
 }
 
 func NewSnake(position *api.Point, style *tcell.Style) *snake {
@@ -54,6 +131,7 @@ func NewSnake(position *api.Point, style *tcell.Style) *snake {
 		speed:     10.0,
 		direction: "none",
 		alive:     true,
+		Bullet:    nil,
 	}
 	snake.x = 5.0
 	snake.y = 5.0
@@ -75,6 +153,22 @@ func (s *snake) Move(args ...any) {
 		return
 	}
 	s.direction = args[0].(string)
+}
+
+func (s *snake) Shoot(args ...any) {
+	tools.Logger.WithField("module", "snake").
+		WithField("struct", "snake").
+		WithField("function", "Shoot").
+		Debugf("snake is shooting %s", s.direction)
+	if s.Bullet == nil {
+		scene := args[0].(engine.IScene)
+		BulletCounter++
+		spriteCell := s.GetSpriteCells()[0]
+		position := api.ClonePoint(s.GetPosition())
+		position.Add(spriteCell.GetPosition())
+		s.Bullet = NewBullet(position, s.GetStyle(), s.direction, s)
+		scene.AddEntity(s.Bullet)
+	}
 }
 
 func (s *snake) PublishCollision(points int) {
@@ -109,6 +203,7 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 		{Key: tcell.KeyDown, Callback: s.Move, Args: []any{"down"}},
 		{Key: tcell.KeyRight, Callback: s.Move, Args: []any{"right"}},
 		{Key: tcell.KeyLeft, Callback: s.Move, Args: []any{"left"}},
+		{Rune: ' ', Callback: s.Shoot, Args: []any{scene}},
 	}
 	s.HandleKeyboardForActions(event, actions)
 	var vx, vy int
@@ -171,18 +266,20 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 		collisions := scene.CheckCollisionWith(s)
 		if len(collisions) != 0 {
 			for _, ent := range collisions {
-				spriteCell = s.GetSpriteCells()[0]
-				scene.RemoveEntity(ent)
-				// Update float64 position with new entry.
-				s.x = float64(spriteCell.GetPosition().X + vx)
-				s.y = float64(spriteCell.GetPosition().Y + vy)
-				newSpriteCell := widgets.NewSpriteCell(api.NewPoint(int(s.x), int(s.y)), spriteCell.GetCell())
-				s.AddSpriteCellAt(0, newSpriteCell)
-				tools.Logger.WithField("module", "snake").
-					WithField("struct", "snake").
-					WithField("function", "Update").
-					Debugf("eat %s", newSpriteCell.GetPosition().ToString())
-				s.PublishCollision(ent.(*TimerFoodPiece).Points)
+				if _, ok := ent.(*TimerFoodPiece); ok {
+					spriteCell = s.GetSpriteCells()[0]
+					scene.RemoveEntity(ent)
+					// Update float64 position with new entry.
+					s.x = float64(spriteCell.GetPosition().X + vx)
+					s.y = float64(spriteCell.GetPosition().Y + vy)
+					newSpriteCell := widgets.NewSpriteCell(api.NewPoint(int(s.x), int(s.y)), spriteCell.GetCell())
+					s.AddSpriteCellAt(0, newSpriteCell)
+					tools.Logger.WithField("module", "snake").
+						WithField("struct", "snake").
+						WithField("function", "Update").
+						Debugf("collision with %s at %s", ent.GetName(), newSpriteCell.GetPosition().ToString())
+					s.PublishCollision(ent.(*TimerFoodPiece).Points)
+				}
 			}
 		}
 	}

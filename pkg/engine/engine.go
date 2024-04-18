@@ -233,6 +233,9 @@ func (e *Engine) Run(fps float64) {
 						WithField("function", "Run").
 						Debugf("rune %s", string(ev.Rune()))
 				default:
+					tools.Logger.WithField("module", "engine").
+						WithField("function", "Run").
+						Debugf("key %+v", ev.Key())
 				}
 			}
 		default:
