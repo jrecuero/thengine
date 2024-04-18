@@ -14,14 +14,15 @@ import (
 
 const (
 	// Widget names
-	SnakeWidgetName          = "widget/snake/1"
-	TextPointsWidgetName     = "text/points/1"
-	TextHighScoreWidgetName  = "text/high-score/1"
-	BoxWidgetName            = "widget/box/1"
-	TimerFoodWidgetName      = "timer/food/1"
-	TimerFoodPieceWidgetName = "timer/food-piece/%d"
-	TextGameOverWidgetName   = "text/game-over/1"
-	BulletWidgetName         = "widget/bullet/%d"
+	SnakeWidgetName            = "widget/snake/1"
+	TextPointsWidgetName       = "text/points/1"
+	TextHighScoreWidgetName    = "text/high-score/1"
+	BoxWidgetName              = "widget/box/1"
+	TimerFoodWidgetName        = "timer/food/1"
+	TimerFoodPieceWidgetName   = "timer/food-piece/%d"
+	TextGameOverWidgetName     = "text/game-over/1"
+	BulletWidgetName           = "widget/bullet/%d"
+	TimerGaugeBullerWidgetName = "timer-gauge/bullet/1"
 
 	// Scene names
 	MainSceneName     = "scene/main/1"
@@ -104,6 +105,14 @@ func (b *Bullet) Update(ecent tcell.Event, scene engine.IScene) {
 	collisions := scene.CheckCollisionWith(b)
 	for _, ent := range collisions {
 		if _, ok := ent.(*TimerFoodPiece); ok {
+			tools.Logger.WithField("module", "snake").
+				WithField("struct", "Bullet").
+				WithField("function", "Update").
+				Debugf("bullet collider %s", b.GetCollider().GetRect().ToString())
+			tools.Logger.WithField("module", "snake").
+				WithField("struct", "Bullet").
+				WithField("function", "Update").
+				Debugf("collision collider %s", ent.GetCollider().GetRect().ToString())
 			b.parent.Bullet = nil
 			scene.RemoveEntity(ent)
 			scene.RemoveEntity(b)
@@ -410,6 +419,9 @@ func (h *AppHandler) SetUpMainScene(mainScene engine.IScene) {
 	highScore := fmt.Sprintf("HSCORE: %d", h.HighScore)
 	TextHighScore := widgets.NewText(TextHighScoreWidgetName, api.NewPoint(65, 0), api.NewSize(20, 1), &styleThree, highScore)
 	mainScene.AddEntity(TextHighScore)
+
+	gauge := widgets.NewTimerGauge(TimerGaugeBullerWidgetName, api.NewPoint(30, 0), api.NewSize(10, 1), &styleOne, 2*time.Second, 10)
+	mainScene.AddEntity(gauge)
 
 	box := engine.NewEntity(BoxWidgetName, api.NewPoint(0, 1), api.NewSize(80, 20), &styleTwo)
 	box.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &styleTwo, engine.CanvasRectSingleLine)

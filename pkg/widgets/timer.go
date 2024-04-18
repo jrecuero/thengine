@@ -28,11 +28,12 @@ const (
 // Timer structure defines a baseline for any timer entity.
 type Timer struct {
 	*Widget
-	interval time.Duration
-	time     time.Time
-	count    int
-	elapsed  time.Duration
-	running  bool
+	interval      time.Duration
+	time          time.Time
+	count         int
+	originalCount int
+	elapsed       time.Duration
+	running       bool
 }
 
 // NewTimer function creates a new Timer instance.
@@ -41,10 +42,11 @@ func NewTimer(name string, interval time.Duration, count int) *Timer {
 		WithField("function", "NewTimer").
 		Debugf("%s", name)
 	return &Timer{
-		Widget:   NewWidget(name, nil, nil, nil),
-		interval: interval,
-		count:    count,
-		running:  false,
+		Widget:        NewWidget(name, nil, nil, nil),
+		interval:      interval,
+		count:         count,
+		originalCount: count,
+		running:       false,
 	}
 }
 
@@ -58,7 +60,7 @@ func (t *Timer) CancelTimer() {
 	t.running = false
 }
 
-// Timer method draws nothing.
+// Draw method draws nothing.
 func (t *Timer) Draw(engine.IScene) {
 }
 
@@ -71,6 +73,13 @@ func (t *Timer) Start() {
 func (t *Timer) StartTimer() {
 	t.time = time.Now()
 	t.running = true
+}
+
+// RestartTimer method re-starts the timer.
+func (t *Timer) RestartTimer() {
+	t.time = time.Now()
+	t.running = true
+	t.count = t.originalCount
 }
 
 // StopTimer method stops the timer

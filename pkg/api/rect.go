@@ -76,8 +76,11 @@ func (r *Rect) Get() (*Point, *Size) {
 func (r *Rect) GetCorners() (*Point, *Point) {
 	leftTopX, leftTopY := r.Origin.Get()
 	sizeW, sizeH := r.Size.Get()
-	rightBottomX := leftTopX + sizeW
-	rightBottomY := leftTopY + sizeH
+	// subtract one from width and height because a rect with size (1, 1) it is
+	// really a single character, and when size is larger it has to take in
+	// account that fact.
+	rightBottomX := leftTopX + (sizeW - 1)
+	rightBottomY := leftTopY + (sizeH - 1)
 	return r.Origin, NewPoint(rightBottomX, rightBottomY)
 }
 
