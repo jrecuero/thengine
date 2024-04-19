@@ -29,6 +29,7 @@ type IEntity interface {
 	GetZLevel() int
 	Init(tcell.Screen)
 	IsSolid() bool
+	Refresh()
 	SetCanvas(*Canvas)
 	SetCustomInit(func())
 	SetCustomStart(func())
@@ -179,6 +180,9 @@ func (e *Entity) Init(screen tcell.Screen) {
 
 func (e *Entity) IsSolid() bool {
 	return e.solid
+}
+
+func (e *Entity) Refresh() {
 }
 
 func (e *Entity) SetCanvas(canvas *Canvas) {

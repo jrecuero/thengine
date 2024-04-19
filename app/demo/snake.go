@@ -14,15 +14,16 @@ import (
 
 const (
 	// Widget names
-	SnakeWidgetName            = "widget/snake/1"
-	TextPointsWidgetName       = "text/points/1"
-	TextHighScoreWidgetName    = "text/high-score/1"
-	BoxWidgetName              = "widget/box/1"
-	TimerFoodWidgetName        = "timer/food/1"
-	TimerFoodPieceWidgetName   = "timer/food-piece/%d"
-	TextGameOverWidgetName     = "text/game-over/1"
-	BulletWidgetName           = "widget/bullet/%d"
-	TimerGaugeBullerWidgetName = "timer-gauge/bullet/1"
+	SnakeWidgetName               = "widget/snake/1"
+	TextPointsWidgetName          = "text/points/1"
+	TextHighScoreWidgetName       = "text/high-score/1"
+	BoxWidgetName                 = "widget/box/1"
+	TimerFoodWidgetName           = "timer/food/1"
+	TimerFoodPieceWidgetName      = "timer/food-piece/%d"
+	TextGameOverWidgetName        = "text/game-over/1"
+	BulletWidgetName              = "widget/bullet/%d"
+	TimerGaugeBullerWidgetName    = "timer-gauge/bullet/1"
+	TextBulletAvailableWidgetName = "text/bullet-available/1"
 
 	// Scene names
 	MainSceneName     = "scene/main/1"
@@ -38,6 +39,14 @@ const (
 var (
 	FoodPieceCounter int = 0
 	BulletCounter    int = 0
+
+	styleOne    = tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	styleTwo    = tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
+	styleThree  = tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
+	styleFour   = tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlue)
+	styleFive   = tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorYellow)
+	styleSixDim = tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite).Attributes(tcell.AttrDim)
+	styleSix    = tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorYellow)
 )
 
 type Bullet struct {
@@ -45,17 +54,15 @@ type Bullet struct {
 	direction string
 	x         float64
 	y         float64
-	parent    *snake
 }
 
-func NewBullet(position *api.Point, style *tcell.Style, direction string, parent *snake) *Bullet {
+func NewBullet(position *api.Point, style *tcell.Style, direction string) *Bullet {
 	name := fmt.Sprintf(BulletWidgetName, BulletCounter)
 	bullet := &Bullet{
 		Widget:    widgets.NewWidget(name, position, api.NewSize(1, 1), style),
 		direction: direction,
 		x:         float64(position.X),
 		y:         float64(position.Y),
-		parent:    parent,
 	}
 	bullet.GetCanvas().WriteStringInCanvas(string(tcell.RuneBullet), style)
 	bullet.SetSolid(true)
@@ -95,7 +102,6 @@ func (b *Bullet) Update(ecent tcell.Event, scene engine.IScene) {
 	intY := int(b.y)
 	if (intX != b.GetPosition().X) || (intY != b.GetPosition().Y) {
 		if (intX >= 80) || (intX < 0) || (intY >= 20) || (intY < 0) {
-			b.parent.Bullet = nil
 			scene.RemoveEntity(b)
 			return
 		}
@@ -113,7 +119,6 @@ func (b *Bullet) Update(ecent tcell.Event, scene engine.IScene) {
 				WithField("struct", "Bullet").
 				WithField("function", "Update").
 				Debugf("collision collider %s", ent.GetCollider().GetRect().ToString())
-			b.parent.Bullet = nil
 			scene.RemoveEntity(ent)
 			scene.RemoveEntity(b)
 			b.PublishCollision(ent.(*TimerFoodPiece).Points)
@@ -124,12 +129,12 @@ func (b *Bullet) Update(ecent tcell.Event, scene engine.IScene) {
 
 type snake struct {
 	*widgets.Sprite
-	x         float64
-	y         float64
-	speed     float64
-	direction string
-	alive     bool
-	Bullet    *Bullet
+	x               float64
+	y               float64
+	speed           float64
+	direction       string
+	alive           bool
+	BulletAvailable bool
 }
 
 func NewSnake(position *api.Point, style *tcell.Style) *snake {
@@ -137,10 +142,10 @@ func NewSnake(position *api.Point, style *tcell.Style) *snake {
 	snake := &snake{
 		Sprite: widgets.NewSprite(SnakeWidgetName, position,
 			[]*widgets.SpriteCell{widgets.NewSpriteCell(api.NewPoint(5, 5), cell)}),
-		speed:     10.0,
-		direction: "none",
-		alive:     true,
-		Bullet:    nil,
+		speed:           10.0,
+		direction:       "none",
+		alive:           true,
+		BulletAvailable: false,
 	}
 	snake.x = 5.0
 	snake.y = 5.0
@@ -169,14 +174,22 @@ func (s *snake) Shoot(args ...any) {
 		WithField("struct", "snake").
 		WithField("function", "Shoot").
 		Debugf("snake is shooting %s", s.direction)
-	if s.Bullet == nil {
+	if s.BulletAvailable {
 		scene := args[0].(engine.IScene)
 		BulletCounter++
 		spriteCell := s.GetSpriteCells()[0]
 		position := api.ClonePoint(s.GetPosition())
 		position.Add(spriteCell.GetPosition())
-		s.Bullet = NewBullet(position, s.GetStyle(), s.direction, s)
-		scene.AddEntity(s.Bullet)
+		bullet := NewBullet(position, s.GetStyle(), s.direction)
+		scene.AddEntity(bullet)
+		s.BulletAvailable = false
+		if textBulletAvailable := scene.GetEntityByName(TextBulletAvailableWidgetName); textBulletAvailable != nil {
+			textBulletAvailable.SetStyle(&styleSixDim)
+			textBulletAvailable.Refresh()
+		}
+		if gauge := scene.GetEntityByName(TimerGaugeBullerWidgetName); gauge != nil {
+			gauge.(*widgets.TimerGauge).RestartTimer()
+		}
 	}
 }
 
@@ -405,11 +418,6 @@ func (h *AppHandler) Consume() {
 }
 
 func (h *AppHandler) SetUpMainScene(mainScene engine.IScene) {
-	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
-	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
-	styleThree := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
-	styleFour := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlue)
-	styleFive := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorYellow)
 
 	textPoints := &TextPoints{
 		Text: widgets.NewText(TextPointsWidgetName, api.NewPoint(0, 0), api.NewSize(20, 1), &styleThree, "Points: 0"),
@@ -420,7 +428,23 @@ func (h *AppHandler) SetUpMainScene(mainScene engine.IScene) {
 	TextHighScore := widgets.NewText(TextHighScoreWidgetName, api.NewPoint(65, 0), api.NewSize(20, 1), &styleThree, highScore)
 	mainScene.AddEntity(TextHighScore)
 
-	gauge := widgets.NewTimerGauge(TimerGaugeBullerWidgetName, api.NewPoint(30, 0), api.NewSize(10, 1), &styleOne, 2*time.Second, 10)
+	textBulletAvailable := widgets.NewText(TextBulletAvailableWidgetName, api.NewPoint(23, 0), api.NewSize(6, 1), &styleSixDim, "BULLET")
+	mainScene.AddEntity(textBulletAvailable)
+
+	snake := NewSnake(api.NewPoint(0, 1), &styleTwo)
+	mainScene.AddEntity(snake)
+
+	gauge := widgets.NewTimerGauge(TimerGaugeBullerWidgetName, api.NewPoint(30, 0), api.NewSize(10, 1), &styleOne, 1*time.Second, 10)
+	gauge.SetWidgetCallback(func(entity engine.IEntity, args ...any) bool {
+		textBulletAvailable.SetStyle(&styleSix)
+		textBulletAvailable.Refresh()
+		snake.BulletAvailable = true
+		tools.Logger.WithField("module", "snake").
+			WithField("struct", "AppHandler").
+			WithField("function", "SetUpMainScene").
+			Debugf("gauge callback")
+		return true
+	})
 	mainScene.AddEntity(gauge)
 
 	box := engine.NewEntity(BoxWidgetName, api.NewPoint(0, 1), api.NewSize(80, 20), &styleTwo)
@@ -458,19 +482,11 @@ func (h *AppHandler) SetUpMainScene(mainScene engine.IScene) {
 		return true
 	})
 	mainScene.AddEntity(foodTimer)
-
-	snake := NewSnake(api.NewPoint(0, 1), &styleTwo)
-	mainScene.AddEntity(snake)
 }
 
 func (h *AppHandler) SetUp(appEngine *engine.Engine) {
 	appEngine.InitResources()
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
-	//styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
-	//styleTwo := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
-	//styleThree := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
-	styleFour := tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorBlue)
-	//styleFive := tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorRed)
 	mainScene := engine.NewScene(MainSceneName, camera)
 
 	h.SetUpMainScene(mainScene)

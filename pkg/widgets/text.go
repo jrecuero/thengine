@@ -55,6 +55,10 @@ func (t *Text) GetText() string {
 	return t.label
 }
 
+func (t *Text) Refresh() {
+	t.updateCanvas()
+}
+
 // SetText method sets the Text instance string.
 func (t *Text) SetText(label string) {
 	t.label = label
