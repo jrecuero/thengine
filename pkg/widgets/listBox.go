@@ -123,4 +123,6 @@ func (l *ListBox) Update(event tcell.Event, scene engine.IScene) {
 	l.HandleKeyboardForActions(event, actions)
 }
 
+var _ engine.IObject = (*ListBox)(nil)
+var _ engine.IFocus = (*ListBox)(nil)
 var _ engine.IEntity = (*ListBox)(nil)

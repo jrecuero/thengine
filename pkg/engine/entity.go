@@ -76,12 +76,19 @@ type Entity struct {
 // NewEntity function creates a new Entity instance with all given attributes.
 func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.Style) *Entity {
 	entity := &Entity{
-		EObject:  NewEObject(name),
-		Focus:    NewDisableFocus(),
-		canvas:   NewCanvas(size),
-		position: position,
-		size:     size,
-		style:    style,
+		EObject:     NewEObject(name),
+		Focus:       NewDisableFocus(),
+		canvas:      NewCanvas(size),
+		position:    position,
+		size:        size,
+		style:       style,
+		screen:      nil,
+		zLevel:      0,
+		pLevel:      0,
+		solid:       false,
+		customInit:  nil,
+		customStart: nil,
+		customStop:  nil,
 	}
 	return entity
 }
@@ -90,8 +97,19 @@ func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.St
 // as default values.
 func NewEmptyEntity() *Entity {
 	return &Entity{
-		EObject: NewEObject(""),
-		Focus:   NewFocus(NoFocus),
+		EObject:     NewEObject(""),
+		Focus:       NewFocus(NoFocus),
+		canvas:      nil,
+		position:    nil,
+		size:        nil,
+		style:       nil,
+		screen:      nil,
+		zLevel:      0,
+		pLevel:      0,
+		solid:       false,
+		customInit:  nil,
+		customStart: nil,
+		customStop:  nil,
 	}
 }
 
@@ -99,8 +117,19 @@ func NewEmptyEntity() *Entity {
 // attributes but the given name.
 func NewNamedEntity(name string) *Entity {
 	return &Entity{
-		EObject: NewEObject(name),
-		Focus:   NewFocus(NoFocus),
+		EObject:     NewEObject(name),
+		Focus:       NewFocus(NoFocus),
+		canvas:      nil,
+		position:    nil,
+		size:        nil,
+		style:       nil,
+		screen:      nil,
+		zLevel:      0,
+		pLevel:      0,
+		solid:       false,
+		customInit:  nil,
+		customStart: nil,
+		customStop:  nil,
 	}
 }
 
@@ -108,17 +137,19 @@ func NewNamedEntity(name string) *Entity {
 // Entity public methods
 // -----------------------------------------------------------------------------
 
+// CanHaveFocus method checks if the entity can receive and have focus.
 func (e *Entity) CanHaveFocus() bool {
-	//return e.IsFocusEnable() && e.IsVisible() && e.IsActive()
 	return e.IsFocusEnable() && e.IsActive()
 }
 
+// Draw method renders the entity in the screen.
 func (e *Entity) Draw(scene IScene) {
 	if e.IsVisible() && e.GetCanvas() != nil {
 		e.canvas.RenderAt(scene.GetCamera(), e.position)
 	}
 }
 
+// GetCollider method returns the Collider instance for the entity.
 func (e *Entity) GetCollider() *Collider {
 	if rect := e.GetRect(); rect != nil {
 		return &Collider{
@@ -133,22 +164,27 @@ func (e *Entity) GetCollider() *Collider {
 func (e *Entity) Consume() {
 }
 
+// GetCanvas method returns the entity canvas instance.
 func (e *Entity) GetCanvas() *Canvas {
 	return e.canvas
 }
 
+// GetScreen method returns the entity screen instance.
 func (e *Entity) GetScreen() tcell.Screen {
 	return e.screen
 }
 
+// GetPLevel method returns the entity p-level value.
 func (e *Entity) GetPLevel() int {
 	return e.pLevel
 }
 
+// GetPosition method returns the entity origin position.
 func (e *Entity) GetPosition() *api.Point {
 	return e.position
 }
 
+// GetRect method returns the entity rectangle instance.
 func (e *Entity) GetRect() *api.Rect {
 	var rect *api.Rect
 	if e.GetCanvas() != nil {
@@ -159,18 +195,22 @@ func (e *Entity) GetRect() *api.Rect {
 	return rect
 }
 
+// GetSize method returns the entity size instance.
 func (e *Entity) GetSize() *api.Size {
 	return e.size
 }
 
+// GetStyle method returns the entity style instance.
 func (e *Entity) GetStyle() *tcell.Style {
 	return e.style
 }
 
+// GetZLevel method returns the entity z-level value.
 func (e *Entity) GetZLevel() int {
 	return e.zLevel
 }
 
+// Init methos initialize the entity instance.
 func (e *Entity) Init(screen tcell.Screen) {
 	e.screen = screen
 	if e.customInit != nil {
@@ -178,45 +218,56 @@ func (e *Entity) Init(screen tcell.Screen) {
 	}
 }
 
+// IsSolid method returns if the entity is solid or not.
 func (e *Entity) IsSolid() bool {
 	return e.solid
 }
 
+// Refresh method refreshes the entity instance.
 func (e *Entity) Refresh() {
 }
 
+// SetCanvas method sets a new value for the entity canvas.
 func (e *Entity) SetCanvas(canvas *Canvas) {
 	e.canvas = canvas
 }
 
+// SetCustomInit method sets a new value for the custom init function.
 func (e *Entity) SetCustomInit(f func()) {
 	e.customInit = f
 }
 
+// SetCustomStart method sets a new value for the custon start function.
 func (e *Entity) SetCustomStart(f func()) {
 	e.customStart = f
 }
 
+// SetCustomStop method sets a new value for the custom stop function.
 func (e *Entity) SetCustomStop(f func()) {
 	e.customStop = f
 }
 
+// SetPLevel method sets a new value for the entity p-level.
 func (e *Entity) SetPLevel(level int) {
 	e.pLevel = level
 }
 
+// SetPosition method sets a new value for the entity position.
 func (e *Entity) SetPosition(position *api.Point) {
 	e.position = position
 }
 
+// SetSize method sets a new value for the entity size.
 func (e *Entity) SetSize(size *api.Size) {
 	e.size = size
 }
 
+// SetSolid method sets a new value for the entity solid attribute.
 func (e *Entity) SetSolid(solid bool) {
 	e.solid = solid
 }
 
+// SetStyle method sets a new value for the entity style.
 func (e *Entity) SetStyle(style *tcell.Style) {
 	if e.GetCanvas() == nil {
 		return
@@ -231,22 +282,26 @@ func (e *Entity) SetStyle(style *tcell.Style) {
 	}
 }
 
+// SetZLevel method sets a new value for the entity z-level.
 func (e *Entity) SetZLevel(level int) {
 	e.zLevel = level
 }
 
+// Start method starts the entity instance.
 func (e *Entity) Start() {
 	if e.customStart != nil {
 		e.customStart()
 	}
 }
 
+// Stop method stops the entity instance.
 func (e *Entity) Stop() {
 	if e.customStop != nil {
 		e.customStop()
 	}
 }
 
+// Update method updates the entity instance.
 func (e *Entity) Update(tcell.Event, IScene) {
 	if e.IsActive() {
 	}

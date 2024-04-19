@@ -93,6 +93,10 @@ func (g *Gauge) SetCompleted(completed int) {
 	g.updateCanvas()
 }
 
+var _ engine.IObject = (*Gauge)(nil)
+var _ engine.IFocus = (*Gauge)(nil)
+var _ engine.IEntity = (*Gauge)(nil)
+
 // -----------------------------------------------------------------------------
 //
 // TimerGauge
@@ -176,4 +180,6 @@ func (g *TimerGauge) Update(event tcell.Event, scene engine.IScene) {
 	g.CancelTimer()
 }
 
+var _ engine.IObject = (*TimerGauge)(nil)
+var _ engine.IFocus = (*TimerGauge)(nil)
 var _ engine.IEntity = (*TimerGauge)(nil)

@@ -147,4 +147,6 @@ func (c *CheckBox) Update(event tcell.Event, scene engine.IScene) {
 	c.HandleKeyboardForActions(event, actions)
 }
 
+var _ engine.IObject = (*CheckBox)(nil)
+var _ engine.IFocus = (*CheckBox)(nil)
 var _ engine.IEntity = (*CheckBox)(nil)

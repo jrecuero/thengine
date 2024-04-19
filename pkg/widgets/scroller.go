@@ -3,7 +3,9 @@
 // selection of entries.
 package widgets
 
-import "github.com/jrecuero/thengine/pkg/tools"
+import (
+	"github.com/jrecuero/thengine/pkg/tools"
+)
 
 // -----------------------------------------------------------------------------
 // iterScroller

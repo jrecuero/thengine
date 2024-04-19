@@ -46,6 +46,7 @@ func NewTimer(name string, interval time.Duration, count int) *Timer {
 		interval:      interval,
 		count:         count,
 		originalCount: count,
+		elapsed:       0,
 		running:       false,
 	}
 }
@@ -77,8 +78,7 @@ func (t *Timer) StartTimer() {
 
 // RestartTimer method re-starts the timer.
 func (t *Timer) RestartTimer() {
-	t.time = time.Now()
-	t.running = true
+	t.StartTimer()
 	t.count = t.originalCount
 }
 
@@ -115,4 +115,6 @@ func (t *Timer) Update(event tcell.Event, scene engine.IScene) {
 	}
 }
 
+var _ engine.IObject = (*Timer)(nil)
+var _ engine.IFocus = (*Timer)(nil)
 var _ engine.IEntity = (*Timer)(nil)

@@ -44,14 +44,18 @@ type Widget struct {
 // NewWidget function creates a new Widget instance.
 func NewWidget(name string, position *api.Point, size *api.Size, style *tcell.Style) *Widget {
 	return &Widget{
-		Entity: engine.NewEntity(name, position, size, style),
+		Entity:       engine.NewEntity(name, position, size, style),
+		callback:     nil,
+		callbackArgs: nil,
 	}
 }
 
 // NewNamedWidget function creates a new Widget instance with only a name.
 func NewNamedWidget(name string) *Widget {
 	return &Widget{
-		Entity: engine.NewNamedEntity(name),
+		Entity:       engine.NewNamedEntity(name),
+		callback:     nil,
+		callbackArgs: nil,
 	}
 }
 
@@ -139,4 +143,6 @@ func (w *Widget) SetWidgetCallbackArgs(args ...any) {
 	w.callbackArgs = args
 }
 
+var _ engine.IObject = (*Widget)(nil)
+var _ engine.IFocus = (*Widget)(nil)
 var _ engine.IEntity = (*Widget)(nil)

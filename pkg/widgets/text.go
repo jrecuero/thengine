@@ -65,4 +65,6 @@ func (t *Text) SetText(label string) {
 	t.updateCanvas()
 }
 
+var _ engine.IObject = (*Text)(nil)
+var _ engine.IFocus = (*Text)(nil)
 var _ engine.IEntity = (*Text)(nil)

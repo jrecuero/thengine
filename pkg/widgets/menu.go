@@ -231,4 +231,6 @@ func (m *Menu) Update(event tcell.Event, scene engine.IScene) {
 	m.HandleKeyboardForActions(event, actions)
 }
 
+var _ engine.IObject = (*Menu)(nil)
+var _ engine.IFocus = (*Menu)(nil)
 var _ engine.IEntity = (*Menu)(nil)

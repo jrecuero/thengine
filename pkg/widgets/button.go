@@ -112,4 +112,6 @@ func (b *Button) Update(event tcell.Event, scene engine.IScene) {
 	b.HandleKeyboardForActions(event, actions)
 }
 
+var _ engine.IObject = (*Button)(nil)
+var _ engine.IFocus = (*Button)(nil)
 var _ engine.IEntity = (*Button)(nil)

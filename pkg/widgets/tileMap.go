@@ -42,6 +42,8 @@ func NewTileMap(name string, position *api.Point, size *api.Size, style *tcell.S
 // TileMap public methods
 // -----------------------------------------------------------------------------
 
+// DistanceToTileMapEdgesX method returns the distance from the given point to
+// the edge X axe of the tile map.
 func (t *TileMap) DistanceToTileMapEdgesX(tileMapPos *api.Point) (bool, int, int) {
 	var x, y int
 	ok := t.IsTileMapPosInside(tileMapPos)
@@ -51,6 +53,8 @@ func (t *TileMap) DistanceToTileMapEdgesX(tileMapPos *api.Point) (bool, int, int
 	return ok, x, y
 }
 
+// DistanceToTileMapEdgesY method returns the distance from the given point to
+// the edge Y axe of the tile map.
 func (t *TileMap) DistanceToTileMapEdgesY(tileMapPos *api.Point) (bool, int, int) {
 	var x, y int
 	ok := t.IsTileMapPosInside(tileMapPos)
@@ -60,6 +64,8 @@ func (t *TileMap) DistanceToTileMapEdgesY(tileMapPos *api.Point) (bool, int, int
 	return ok, x, y
 }
 
+// DistanceToCameraEdgesX method returns the distance from the given point to
+// the edge X axe of the camera.
 func (t *TileMap) DistanceToCameraEdgesX(tileMapPos *api.Point) (bool, int, int) {
 	var x, y int
 	ok := t.IsTileMapPosInside(tileMapPos)
@@ -69,6 +75,8 @@ func (t *TileMap) DistanceToCameraEdgesX(tileMapPos *api.Point) (bool, int, int)
 	return ok, x, y
 }
 
+// DistanceToCameraEdgesY method returns the distance from the given point to
+// the edge Y axe of the camera.
 func (t *TileMap) DistanceToCameraEdgesY(tileMapPos *api.Point) (bool, int, int) {
 	var x, y int
 	ok := t.IsTileMapPosInside(tileMapPos)
@@ -78,14 +86,18 @@ func (t *TileMap) DistanceToCameraEdgesY(tileMapPos *api.Point) (bool, int, int)
 	return ok, x, y
 }
 
+// GetCameraOffset method returns the camera offset value.
 func (t *TileMap) GetCameraOffset() *api.Point {
 	return t.cameraOffset
 }
 
+// GetCameraSize method returns the camera size value.
 func (t *TileMap) GetCameraSize() *api.Size {
 	return t.cameraSize
 }
 
+// GetTileMapPosFromScreenPos method returns the position in the tile map from
+// a given screen position.
 func (t *TileMap) GetTileMapPosFromScreenPos(position *api.Point) *api.Point {
 	screenX, screenY := position.Get()
 	tileMapOriginX, tileMapOriginY := t.GetPosition().Get()
@@ -101,6 +113,8 @@ func (t *TileMap) GetTileMapPosFromScreenPos(position *api.Point) *api.Point {
 	return api.NewPoint(x, y)
 }
 
+// GetScreenPosFromTileMapPos method returns the position in the screen from
+// the give tile map position.
 func (t *TileMap) GetScreenPosFromTileMapPos(position *api.Point) *api.Point {
 	if !t.IsTileMapPosInside(position) {
 		return nil
@@ -111,6 +125,8 @@ func (t *TileMap) GetScreenPosFromTileMapPos(position *api.Point) *api.Point {
 	return api.NewPoint(tileMapPosX-offsetX+tileMapOriginX, tileMapPosY-offsetY+tileMapOriginY)
 }
 
+// IsTileMapPosInside method returns if the given postion is inside the tile
+// map.
 func (t *TileMap) IsTileMapPosInside(tileMapPos *api.Point) bool {
 	tileMapPosX, tileMapPosY := tileMapPos.Get()
 	offsetX, offsetY := t.cameraOffset.Get()
@@ -123,10 +139,12 @@ func (t *TileMap) IsTileMapPosInside(tileMapPos *api.Point) bool {
 	return true
 }
 
+// Draw method renders the tile map in the screen.
 func (t *TileMap) Draw(scene engine.IScene) {
 	t.GetCanvas().RenderRectAt(scene.GetCamera(), t.cameraOffset, t.cameraSize, t.GetPosition())
 }
 
+// SetCameraOffset method sets a new value for the camera offset.
 func (t *TileMap) SetCameraOffset(offset *api.Point) bool {
 	offsetX, offsetY := offset.Get()
 	// camera offset can never go below tile map origin
@@ -143,6 +161,11 @@ func (t *TileMap) SetCameraOffset(offset *api.Point) bool {
 	return true
 }
 
+// SetCameraSize method sets a new value for the camera size.
 func (t *TileMap) SetCameraSize(size *api.Size) {
 	t.cameraSize = size
 }
+
+var _ engine.IObject = (*TileMap)(nil)
+var _ engine.IFocus = (*TileMap)(nil)
+var _ engine.IEntity = (*TileMap)(nil)

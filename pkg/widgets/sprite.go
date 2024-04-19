@@ -141,4 +141,6 @@ func (s *Sprite) SetSpriteCells(spriteCells []*SpriteCell) {
 	s.spriteCells = spriteCells
 }
 
+var _ engine.IObject = (*Sprite)(nil)
+var _ engine.IFocus = (*Sprite)(nil)
 var _ engine.IEntity = (*Sprite)(nil)

@@ -231,4 +231,5 @@ func (s *Scene) Update(event tcell.Event) {
 	}
 }
 
+var _ IObject = (*Scene)(nil)
 var _ IScene = (*Scene)(nil)
