@@ -221,6 +221,7 @@ func demoOne() {
 	text := engine.NewCanvasFromString("Hello World", &defaultStyle)
 	text.Render(camera)
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	appEngine.Init()
 	camera.Draw(true, appEngine.GetScreen())
 	appEngine.Run(60.0)
@@ -242,6 +243,7 @@ func demoTwo() {
 	textTwo.SetCanvas(textTwoCanvas)
 	scene.AddEntity(textTwo)
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}
@@ -266,6 +268,8 @@ func demoThree() {
 	textOne.SetCanvas(textOneCanvas)
 	scene.AddEntity(textOne)
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
+	appEngine.InitResources()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}
@@ -284,6 +288,7 @@ func demoFour(dryRun bool) {
 	textOne := widgets.NewText("text-one", api.NewPoint(0, 0), api.NewSize(3, 3), &styleOne, "Hello\nWorld!")
 	scene.AddEntity(textOne)
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}
@@ -307,6 +312,7 @@ func demoFive(dryRun bool) {
 	inputOne := widgets.NewTextInput("input-one", api.NewPoint(6, 0), api.NewSize(30, 1), &styleTwo, "Jose Carlos Recuero")
 	scene.AddEntity(inputOne)
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}
@@ -343,6 +349,7 @@ func demoSix(dryRun bool) {
 	inputAge := widgets.NewTextInput("input-age", api.NewPoint(12, 2), api.NewSize(30, 1), &styleTwo, "57")
 	scene.AddEntity(inputAge)
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}
@@ -366,6 +373,7 @@ func demoSeven(dryRun bool) {
 	player.SetCanvas(playerCanvas)
 	scene.AddEntity(player)
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	if !appEngine.GetSceneManager().AddScene(scene) {
 		panic(fmt.Sprintf("can not add scene %s", scene.GetName()))
 	}
@@ -398,6 +406,7 @@ func demoEight(dryRun bool) {
 	player.TileMap = tileMap
 	scene.AddEntity(player)
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	appEngine.GetSceneManager().AddScene(scene)
 	appEngine.GetSceneManager().SetSceneAsActive(scene)
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
@@ -418,6 +427,7 @@ func demoNine(dryRun bool) {
 	player.SetCanvas(playerCanvas)
 	scene.AddEntity(player)
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	appEngine.GetSceneManager().AddScene(scene)
 	appEngine.GetSceneManager().SetSceneAsActive(scene)
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
@@ -439,6 +449,7 @@ func demoTen(dryRun bool) {
 	buttonTwo.SetWidgetCallbackArgs("PUSHED", 2, "active")
 	scene.AddEntity(buttonTwo)
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	appEngine.GetSceneManager().AddScene(scene)
 	appEngine.GetSceneManager().SetSceneAsActive(scene)
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
@@ -457,6 +468,7 @@ func demoEleven(dryRun bool) {
 	scene.AddEntity(listBox)
 
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	appEngine.GetSceneManager().AddScene(scene)
 	appEngine.GetSceneManager().SetSceneAsActive(scene)
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
@@ -518,6 +530,37 @@ func demoTwelve(dryRun bool) {
 	scene.AddEntity(clockTimer)
 
 	appEngine := engine.GetEngine()
+	appEngine.InitResources()
+	appEngine.GetSceneManager().AddScene(scene)
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.Init()
+	appEngine.Start()
+	appEngine.Run(60.0)
+}
+
+func demoThirteen(dryRun bool) {
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-thirteen")
+	fmt.Println("ThEngine demo-thirteen")
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorRed)
+	scene := engine.NewScene("scene", camera)
+
+	frames := []*widgets.Frame{}
+	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("- \n  ", &styleOne), 10))
+	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString(" -\n  ", &styleOne), 10))
+	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("  \n- ", &styleOne), 10))
+	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("  \n -", &styleOne), 10))
+	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("- \n  ", &styleTwo), 5))
+	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString(" -\n  ", &styleTwo), 5))
+	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("  \n- ", &styleTwo), 5))
+	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("  \n -", &styleTwo), 5))
+	animWidget := widgets.NewAnimWidget("anim-widget", api.NewPoint(1, 1), api.NewSize(2, 2), frames, 0)
+	scene.AddEntity(animWidget)
+
+	appEngine := engine.GetEngine()
+	appEngine.InitResources()
 	appEngine.GetSceneManager().AddScene(scene)
 	appEngine.GetSceneManager().SetSceneAsActive(scene)
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
@@ -527,5 +570,6 @@ func demoTwelve(dryRun bool) {
 }
 
 func main() {
-	demoSnake(false)
+	demoThirteen(false)
+	//demoSnake(false)
 }

@@ -33,7 +33,7 @@ type KeyboardAction struct {
 //
 // -----------------------------------------------------------------------------
 
-// Wdiget structure defines all attributes and method for any basic and common
+// Widget structure defines all attributes and methods for any basic and common
 // widget.
 type Widget struct {
 	*engine.Entity
