@@ -1,4 +1,4 @@
-// animWidget.go contains all resources required to create an animaged widget
+// animWidget.go contains all resources required to create an animated widget
 // based on a set of canvas instances.
 package widgets
 
@@ -7,10 +7,6 @@ import (
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 )
-
-// -----------------------------------------------------------------------------
-// Package public types
-// -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 //

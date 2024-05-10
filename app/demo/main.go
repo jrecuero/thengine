@@ -569,7 +569,41 @@ func demoThirteen(dryRun bool) {
 	appEngine.Run(60.0)
 }
 
+func demoFourteen(dryRun bool) {
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-fourteen")
+	fmt.Println("ThEngine demo-fourteen")
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	//styleTwo := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorRed)
+	scene := engine.NewScene("scene", camera)
+
+	cell := engine.NewCell(&styleOne, '#')
+	frames := []*widgets.SpriteFrame{}
+	frames = append(frames, widgets.NewSpriteFrame(
+		[]*widgets.SpriteCell{
+			widgets.NewSpriteCell(api.NewPoint(0, 0), cell),
+			widgets.NewSpriteCell(api.NewPoint(1, 1), cell),
+			widgets.NewSpriteCell(api.NewPoint(2, 2), cell),
+		}, 20))
+	frames = append(frames, widgets.NewSpriteFrame(
+		[]*widgets.SpriteCell{
+			widgets.NewSpriteCell(api.NewPoint(0, 1), cell),
+			widgets.NewSpriteCell(api.NewPoint(1, 0), cell),
+		}, 20))
+	animSprite := widgets.NewAnimSprite("anim-sprite", api.NewPoint(1, 1), frames, 0)
+	scene.AddEntity(animSprite)
+
+	appEngine := engine.GetEngine()
+	appEngine.InitResources()
+	appEngine.GetSceneManager().AddScene(scene)
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.Init()
+	appEngine.Start()
+	appEngine.Run(60.0)
+}
+
 func main() {
-	demoThirteen(false)
+	demoFourteen(false)
 	//demoSnake(false)
 }
