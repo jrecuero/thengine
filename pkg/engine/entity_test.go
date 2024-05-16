@@ -272,3 +272,30 @@ func TestEntityProperties(t *testing.T) {
 		}
 	}
 }
+
+func TestEntityNewEmptyEntityVisible(t *testing.T) {
+	cases := []struct {
+		input bool
+		exp   bool
+	}{
+		{
+			input: false,
+			exp:   false,
+		},
+		{
+			input: true,
+			exp:   true,
+		},
+	}
+	for i, c := range cases {
+		got := engine.NewEmptyEntity()
+		if got == nil {
+			t.Errorf("[%d] NewEmptyEntityVisible Error exp:*Entitg got:nil", i)
+			continue
+		}
+		got.SetVisible(c.input)
+		if c.exp != got.IsVisible() {
+			t.Errorf("[%d] NewEmptyEntityVisible Error exp:%t got:%t", i, c.exp, got.IsVisible())
+		}
+	}
+}

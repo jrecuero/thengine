@@ -326,6 +326,10 @@ func (c *Canvas) SaveToDict() map[string]any {
 
 // SetCellAt method sets the given cell to the given row and column.
 func (c *Canvas) SetCellAt(point *api.Point, cell *Cell) bool {
+	// if no point value is being passed, set the (0, 0) point as default.
+	if point == nil {
+		point = api.NewPoint(0, 0)
+	}
 	if c.IsInside(point) {
 		c.Rows[point.Y].Cols[point.X] = cell
 		return true
@@ -424,9 +428,11 @@ func (c *Canvas) WriteStringInCanvasAt(str string, style *tcell.Style, position 
 // WriteRectangleInCanvasAt method write the given rectangle in the canvas at
 // the given position.
 func (c *Canvas) WriteRectangleInCanvasAt(position *api.Point, size *api.Size, style *tcell.Style, pattern []rune) {
+	// if no position is passed, set the (0, 0) position as default.
 	if position == nil {
 		position = api.NewPoint(0, 0)
 	}
+	// if no size is passed, set the canvas size as default.
 	if size == nil {
 		size = c.Size()
 	}

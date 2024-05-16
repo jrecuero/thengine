@@ -43,6 +43,10 @@ type Widget struct {
 
 // NewWidget function creates a new Widget instance.
 func NewWidget(name string, position *api.Point, size *api.Size, style *tcell.Style) *Widget {
+	// is no size is passed, set (1, 1) as default size.
+	if size == nil {
+		size = api.NewSize(1, 1)
+	}
 	return &Widget{
 		Entity:       engine.NewEntity(name, position, size, style),
 		callback:     nil,

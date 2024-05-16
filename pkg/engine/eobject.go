@@ -100,7 +100,7 @@ func (o *EObject) SetName(name string) {
 }
 
 // SetVisible method sets the instance visible with the given value.
-func (o EObject) SetVisible(visible bool) {
+func (o *EObject) SetVisible(visible bool) {
 	o.visible = visible
 }
 
