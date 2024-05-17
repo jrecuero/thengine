@@ -4,7 +4,9 @@
 // the scenario.
 package engine
 
-import "github.com/jrecuero/thengine/pkg/api"
+import (
+	"github.com/jrecuero/thengine/pkg/api"
+)
 
 // -----------------------------------------------------------------------------
 //

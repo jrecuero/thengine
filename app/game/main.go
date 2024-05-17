@@ -11,7 +11,9 @@ var (
 	theCamera             = engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
 	theEngine             = engine.GetEngine()
 	theStyleBlueOverBlack = tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
+	theStyleWhiteOverRed  = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorRed)
 	theFPS                = 60.0
+	thePlayerName         = "player/hero/1"
 )
 
 const (
@@ -36,7 +38,7 @@ func main() {
 	infoBox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &theStyleBlueOverBlack, engine.CanvasRectSingleLine)
 	mainScene.AddEntity(infoBox)
 
-	player := NewPlayer("player/hero/1", api.NewPoint(1, 1), &theStyleBlueOverBlack)
+	player := NewPlayer(thePlayerName, api.NewPoint(1, 1), &theStyleBlueOverBlack)
 	mainScene.AddEntity(player)
 
 	topWall := NewWall("widget/wall/top/1", api.NewPoint(0, 0), api.NewSize(80, 1), nil)
@@ -57,6 +59,12 @@ func main() {
 
 	middleWall := NewWall("widget/wall/middle/1", api.NewPoint(2, 2), api.NewSize(76, 1), &theStyleBlueOverBlack)
 	mainScene.AddEntity(middleWall)
+
+	enemy := NewEnemy("widget/enemy/1", api.NewPoint(5, 5), &theStyleWhiteOverRed)
+	mainScene.AddEntity(enemy)
+
+	gameHandler := NewGameHandler()
+	mainScene.AddEntity(gameHandler)
 
 	theEngine.InitResources()
 	theEngine.GetSceneManager().AddScene(mainScene)

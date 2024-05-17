@@ -213,6 +213,54 @@ func TestPointIsEqual(t *testing.T) {
 	}
 }
 
+func TestPointIsAdjacent(t *testing.T) {
+	cases := []struct {
+		input []int
+		exp   bool
+	}{
+		{
+			input: []int{1, 1, 1, 2},
+			exp:   true,
+		},
+		{
+			input: []int{1, 1, 1, 0},
+			exp:   true,
+		},
+		{
+			input: []int{1, 1, 2, 1},
+			exp:   true,
+		},
+		{
+			input: []int{1, 1, 0, 1},
+			exp:   true,
+		},
+		{
+			input: []int{0, 1, 1, 0},
+			exp:   false,
+		},
+		{
+			input: []int{1, 0, 0, 1},
+			exp:   false,
+		},
+		{
+			input: []int{0, 0, 1, 1},
+			exp:   false,
+		},
+		{
+			input: []int{0, 0, 2, 2},
+			exp:   false,
+		},
+	}
+	for i, c := range cases {
+		p1 := api.NewPoint(c.input[0], c.input[1])
+		p2 := api.NewPoint(c.input[2], c.input[3])
+		got := p1.IsAdjacent(p2)
+		if c.exp != got {
+			t.Errorf("[%d] IsAdjacent Error exp:%t got:%t", i, c.exp, got)
+		}
+	}
+}
+
 func TestPointAdd(t *testing.T) {
 	cases := []struct {
 		input []int

@@ -69,6 +69,15 @@ func (p *Point) Get() (int, int) {
 	return p.X, p.Y
 }
 
+// IsAdjacent method returns if the given Point is adjacent to the instance, it
+// means if it is just on top, bottom, left or right.
+func (p *Point) IsAdjacent(point *Point) bool {
+	return ((p.X == point.X) && (p.Y+1 == point.Y)) ||
+		((p.X == point.X) && (p.Y-1 == point.Y)) ||
+		((p.X+1 == point.X) && (p.Y == point.Y)) ||
+		((p.X-1 == point.X) && (p.Y == point.Y))
+}
+
 // IsEqual method returns if the given Point is equal than the instance, based
 // on the same horizontal and vertival coordinates.
 func (p *Point) IsEqual(point *Point) bool {
