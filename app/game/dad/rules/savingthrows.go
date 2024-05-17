@@ -63,17 +63,17 @@ func NewSavingThrows() *SavingThrows {
 func (a *SavingThrows) GetSavingThrowName(name string) IDiceThrow {
 	result := (IDiceThrow)(nil)
 	switch name {
-	case CONSTITUTION:
+	case ConstitutionStr:
 		result = a.constitution
-	case STRENGTH:
+	case StrengthStr:
 		result = a.strength
-	case DEXTERITY:
+	case DexterityStr:
 		result = a.dexterity
-	case INTELLIGENCE:
+	case IntelligenceStr:
 		result = a.intelligence
-	case WISDOM:
+	case WisdomStr:
 		result = a.wisdom
-	case CHARISMA:
+	case CharismaStr:
 		result = a.charisma
 	}
 	return result

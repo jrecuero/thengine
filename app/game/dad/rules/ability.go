@@ -233,17 +233,17 @@ func NewAbilities() *Abilities {
 func (a *Abilities) GetAbilityByName(name string) IAbility {
 	result := (IAbility)(nil)
 	switch name {
-	case CONSTITUTION:
+	case ConstitutionStr:
 		result = a.Constitution
-	case STRENGTH:
+	case StrengthStr:
 		result = a.Strength
-	case DEXTERITY:
+	case DexterityStr:
 		result = a.Dexterity
-	case INTELLIGENCE:
+	case IntelligenceStr:
 		result = a.Intelligence
-	case WISDOM:
+	case WisdomStr:
 		result = a.Wisdom
-	case CHARISMA:
+	case CharismaStr:
 		result = a.Charisma
 	}
 	return result

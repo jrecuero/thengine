@@ -17,9 +17,10 @@ var (
 )
 
 const (
-	GameBoxEntityName = "entity/game-box/1"
-	DataBoxEntityName = "entity/data-box/1"
-	InfoBoxEntityName = "entity/info-box/1"
+	GameBoxEntityName   = "entity/game-box/1"
+	DataBoxEntityName   = "entity/data-box/1"
+	InfoBoxEntityName   = "entity/info-box/1"
+	CommandLineTextName = "text/command-line/1"
 )
 
 func main() {
@@ -62,6 +63,10 @@ func main() {
 
 	enemy := NewEnemy("widget/enemy/1", api.NewPoint(5, 5), &theStyleWhiteOverRed)
 	mainScene.AddEntity(enemy)
+
+	//commandLine := widgets.NewText(CommandLineTextName, api.NewPoint(1, 21), api.NewSize(98, 8), &theStyleBlueOverBlack, ">")
+	commandLine := NewCommandLine(CommandLineTextName, api.NewPoint(1, 21), api.NewSize(98, 8), &theStyleBlueOverBlack)
+	mainScene.AddEntity(commandLine)
 
 	gameHandler := NewGameHandler()
 	mainScene.AddEntity(gameHandler)

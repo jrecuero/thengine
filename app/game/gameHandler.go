@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
@@ -36,6 +38,15 @@ func isAnyEnemyAdjacent(player engine.IEntity, enemies []engine.IEntity) engine.
 		}
 	}
 	return nil
+}
+
+func writeToCommandLine(scene engine.IScene, str string) {
+	commandLine := scene.GetEntityByName(CommandLineTextName)
+	if commandLine != nil {
+		if cl, ok := commandLine.(*CommandLine); ok {
+			cl.AddText(str)
+		}
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -80,7 +91,10 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 			case 'A', 'a':
 				enemies := getEnemiesInScene(scene)
 				if enemy := isAnyEnemyAdjacent(player, enemies); enemy != nil {
+					writeToCommandLine(scene, fmt.Sprintf("\n> Player attack to %s", enemy.GetName()))
 					tools.Logger.WithField("module", "gameHandler").WithField("method", "Update").Infof("player can attack to %s", enemy.GetName())
+				} else {
+					writeToCommandLine(scene, fmt.Sprintf("\n> Player attack not available"))
 				}
 			}
 		}

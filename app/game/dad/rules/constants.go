@@ -1,10 +1,10 @@
 package rules
 
 const (
-	CONSTITUTION = "constitution"
-	STRENGTH     = "strength"
-	DEXTERITY    = "dexterity"
-	INTELLIGENCE = "intelligence"
-	WISDOM       = "wisdom"
-	CHARISMA     = "charisma"
+	ConstitutionStr = "constitution"
+	StrengthStr     = "strength"
+	DexterityStr    = "dexterity"
+	IntelligenceStr = "intelligence"
+	WisdomStr       = "wisdom"
+	CharismaStr     = "charisma"
 )
