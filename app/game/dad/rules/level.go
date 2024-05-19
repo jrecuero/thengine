@@ -2,6 +2,12 @@ package rules
 
 import "math"
 
+// -----------------------------------------------------------------------------
+//
+// ILevel
+//
+// -----------------------------------------------------------------------------
+
 // ILevel interface defines all methods required for any level.
 type ILevel interface {
 	GetScore() int
@@ -14,6 +20,12 @@ type ILevel interface {
 	LevelUp(int) int
 	LevelDown(int) int
 }
+
+// -----------------------------------------------------------------------------
+//
+// Level
+//
+// -----------------------------------------------------------------------------
 
 // Level struct defines all attributes and methods required for level a unit
 // and experience need.
@@ -49,6 +61,10 @@ func NewLevel(score, exp int) *Level {
 	level.SetExperience(int(math.Min(float64(exp), float64(tonext-1))))
 	return level
 }
+
+// -----------------------------------------------------------------------------
+// Level public methods
+// -----------------------------------------------------------------------------
 
 // ToNext method returns the default value for the experience required to
 // reach a given level.
@@ -117,3 +133,5 @@ func (l *Level) LevelDown(score int) int {
 	}
 	return l.score
 }
+
+var _ ILevel = (*Level)(nil)

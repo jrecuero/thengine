@@ -1,5 +1,11 @@
 package rules
 
+// -----------------------------------------------------------------------------
+//
+// IAbility
+//
+// -----------------------------------------------------------------------------
+
 // IAbility interface defines all possible methods for any ability.
 type IAbility interface {
 	GetName() string
@@ -15,6 +21,12 @@ type IAbility interface {
 	GetModifier() int
 	GetScorePoint() int
 }
+
+// -----------------------------------------------------------------------------
+//
+// Ability
+//
+// -----------------------------------------------------------------------------
 
 // Ability structure contains all attributes required to define an ability.
 type Ability struct {
@@ -33,6 +45,10 @@ func NewAbility(name, shortname string, score int) *Ability {
 		score:     score,
 	}
 }
+
+// -----------------------------------------------------------------------------
+// Ability public methods
+// -----------------------------------------------------------------------------
 
 // GetName method returns ability name.
 func (a *Ability) GetName() string {
@@ -170,16 +186,28 @@ func (a *Ability) GetScorePoint() int {
 	return result
 }
 
+// -----------------------------------------------------------------------------
+//
+// IAbilities
+//
+// -----------------------------------------------------------------------------
+
 // IAbilities interfaces defines all abilities methods to be implemented.
 type IAbilities interface {
 	GetAbilityByName(string) IAbility
 	GetConstitution() IAbility
 	GetStrength() IAbility
-	GetDexteriry() IAbility
+	GetDexterity() IAbility
 	GetIntelligence() IAbility
 	GetWisdom() IAbility
 	GetCharisma() IAbility
 }
+
+// -----------------------------------------------------------------------------
+//
+// Abilities
+//
+// -----------------------------------------------------------------------------
 
 // Abilities struct contains all attributes and methods required all abilities
 // required for any unit.
@@ -228,6 +256,10 @@ func NewAbilities() *Abilities {
 		Charisma:     NewAbility("charisma", "char", 0),
 	}
 }
+
+// -----------------------------------------------------------------------------
+// Abilities public methods
+// -----------------------------------------------------------------------------
 
 // GetAbilityByName method return the ability for the given name.
 func (a *Abilities) GetAbilityByName(name string) IAbility {
@@ -278,3 +310,6 @@ func (a *Abilities) GetWisdom() IAbility {
 func (a *Abilities) GetCharisma() IAbility {
 	return a.Charisma
 }
+
+var _ IAbility = (*Ability)(nil)
+var _ IAbilities = (*Abilities)(nil)

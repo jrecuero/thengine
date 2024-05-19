@@ -2,6 +2,12 @@ package dices
 
 import "math/rand"
 
+// -----------------------------------------------------------------------------
+//
+// IDice
+//
+// -----------------------------------------------------------------------------
+
 // IDice interface defines all possible methods any dice struct should
 // implement.
 type IDice interface {
@@ -10,13 +16,17 @@ type IDice interface {
 	Roll() int       // returns a roll dice.
 }
 
+// -----------------------------------------------------------------------------
+//
+// Dice
+//
+// -----------------------------------------------------------------------------
+
 // Dice structure is the common and generic structure for any dice.
 type Dice struct {
 	name  string // dice name.
 	faces int    // number of faces in the dice.
 }
-
-var _ IDice = (*Dice)(nil)
 
 // NewDice function create a new Dice instance.
 func NewDice(name string, faces int) *Dice {
@@ -25,6 +35,10 @@ func NewDice(name string, faces int) *Dice {
 		faces: faces,
 	}
 }
+
+// -----------------------------------------------------------------------------
+// Dice public methods
+// -----------------------------------------------------------------------------
 
 // GetName method returns the name of the dice.
 func (d *Dice) GetName() string {
@@ -40,3 +54,5 @@ func (d *Dice) GetFaces() int {
 func (d *Dice) Roll() int {
 	return rand.Intn(d.GetFaces())
 }
+
+var _ IDice = (*Dice)(nil)

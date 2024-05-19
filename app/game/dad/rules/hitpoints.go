@@ -2,6 +2,12 @@ package rules
 
 import "math"
 
+// -----------------------------------------------------------------------------
+//
+// IHitPoints
+//
+// -----------------------------------------------------------------------------
+
 // IHitPoints interface defines all methods required to be impleted for any hit
 // points.
 type IHitPoints interface {
@@ -15,6 +21,12 @@ type IHitPoints interface {
 	Dec(int) int
 	IsAlive() bool
 }
+
+// -----------------------------------------------------------------------------
+//
+// HitPoints
+//
+// -----------------------------------------------------------------------------
 
 // HitPoints struct defines all attributes and methods requried for a unit hit
 // points.
@@ -52,6 +64,10 @@ func NewHitPoints(max int) *HitPoints {
 		score:    max,
 	}
 }
+
+// -----------------------------------------------------------------------------
+// HitPoints public methods
+// -----------------------------------------------------------------------------
 
 // GetMaxScore method returns the maximun hit points.
 func (l *HitPoints) GetMaxScore() int {
@@ -99,3 +115,5 @@ func (l *HitPoints) Dec(score int) int {
 func (l *HitPoints) IsAlive() bool {
 	return l.score > 0
 }
+
+var _ IHitPoints = (*HitPoints)(nil)

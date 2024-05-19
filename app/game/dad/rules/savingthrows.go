@@ -1,15 +1,27 @@
 package rules
 
+// -----------------------------------------------------------------------------
+//
+// ISavingThrows
+//
+// -----------------------------------------------------------------------------
+
 // ISavingThrows interfaces defines all abilities methods to be implemented.
 type ISavingThrows interface {
-	GetThrowByName(string) IDiceThrow
+	GetSavingThrowByName(string) IDiceThrow
 	GetConstitution() IDiceThrow
 	GetStrength() IDiceThrow
-	GetDexteriry() IDiceThrow
+	GetDexterity() IDiceThrow
 	GetIntelligence() IDiceThrow
 	GetWisdom() IDiceThrow
 	GetCharisma() IDiceThrow
 }
+
+// -----------------------------------------------------------------------------
+//
+// SavingThrows
+//
+// -----------------------------------------------------------------------------
 
 // SavingThrows struct contains all attributes and methods required all saving
 // throws required for any unit.
@@ -50,61 +62,67 @@ type SavingThrows struct {
 // NewSavingThrows function creates a new SavingThrows instance.
 func NewSavingThrows() *SavingThrows {
 	return &SavingThrows{
-		constitution: NewDiceThrow("constitution", "con", 0),
-		strength:     NewDiceThrow("strength", "str", 0),
-		dexterity:    NewDiceThrow("dexterity", "dex", 0),
-		intelligence: NewDiceThrow("intelligence", "int", 0),
-		charisma:     NewDiceThrow("charisma", "char", 0),
-		wisdom:       NewDiceThrow("wisdom", "wis", 0),
+		constitution: NewDiceThrow("constitution", "con", nil),
+		strength:     NewDiceThrow("strength", "str", nil),
+		dexterity:    NewDiceThrow("dexterity", "dex", nil),
+		intelligence: NewDiceThrow("intelligence", "int", nil),
+		charisma:     NewDiceThrow("charisma", "char", nil),
+		wisdom:       NewDiceThrow("wisdom", "wis", nil),
 	}
 }
 
+// -----------------------------------------------------------------------------
+// SavingThrows public methods
+// -----------------------------------------------------------------------------
+
 // GetSavingThrowName method return the saving throw for the given name.
-func (a *SavingThrows) GetSavingThrowName(name string) IDiceThrow {
+func (s *SavingThrows) GetSavingThrowByName(name string) IDiceThrow {
 	result := (IDiceThrow)(nil)
 	switch name {
 	case ConstitutionStr:
-		result = a.constitution
+		result = s.constitution
 	case StrengthStr:
-		result = a.strength
+		result = s.strength
 	case DexterityStr:
-		result = a.dexterity
+		result = s.dexterity
 	case IntelligenceStr:
-		result = a.intelligence
+		result = s.intelligence
 	case WisdomStr:
-		result = a.wisdom
+		result = s.wisdom
 	case CharismaStr:
-		result = a.charisma
+		result = s.charisma
 	}
 	return result
 }
 
 // GetConstitution method returns constitution saving throw.
-func (t *SavingThrows) GetConstitution() IDiceThrow {
-	return t.constitution
+func (s *SavingThrows) GetConstitution() IDiceThrow {
+	return s.constitution
 }
 
 // GetStrength method returns strength saving throw.
-func (t *SavingThrows) GetStrength() IDiceThrow {
-	return t.strength
+func (s *SavingThrows) GetStrength() IDiceThrow {
+	return s.strength
 }
 
 // GetDexterity method returns dexterity saving throw.
-func (t *SavingThrows) GetDexterity() IDiceThrow {
-	return t.dexterity
+func (s *SavingThrows) GetDexterity() IDiceThrow {
+	return s.dexterity
 }
 
 // GetIntelligence method returns intelligence saving throw.
-func (t *SavingThrows) GetIntelligence() IDiceThrow {
-	return t.intelligence
+func (s *SavingThrows) GetIntelligence() IDiceThrow {
+	return s.intelligence
 }
 
 // GetWisdom method returns wisdom saving throw.
-func (t *SavingThrows) GetWisdom() IDiceThrow {
-	return t.wisdom
+func (s *SavingThrows) GetWisdom() IDiceThrow {
+	return s.wisdom
 }
 
 // GetCharisma method returns charisma saving throw.
-func (t *SavingThrows) GetCharisma() IDiceThrow {
-	return t.charisma
+func (s *SavingThrows) GetCharisma() IDiceThrow {
+	return s.charisma
 }
+
+var _ ISavingThrows = (*SavingThrows)(nil)

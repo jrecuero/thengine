@@ -1,13 +1,47 @@
 package rules
 
+// -----------------------------------------------------------------------------
+//
+// IUnit
+//
+// -----------------------------------------------------------------------------
+
 // IUnit interface  defines all methods required a unit has to implement.
 type IUnit interface {
-	GetInitiative() int       // unit initiative 1d20 + mod(dex)
-	GetArmorClass() int       // unit AC 10 + mod(dex) + mod(equipment)
-	GetSpeed() int            // unit speed
+	AddAttack(IAttack)
+	Attack(IUnit)
+	GetAbilities() IAbilities
+	GetArmorClass() int // unit AC 10 + mod(dex) + mod(equipment)
+	GetAttacks() []IAttack
+	GetDescription() string
+	GetEquipment() any
+	GetHitDice() int // unit hit dice.
+	GetHitPoints() IHitPoints
+	GetInitiative() int // unit initiative 1d20 + mod(dex)
+	GetLanguages() any
 	GetProficiencyBonus() int // unit proficiency bonus.
-	GetHitDice() int          // unit hit dice.
+	GetSavingThrows() ISavingThrows
+	GetSkills() any
+	GetSpeed() int // unit speed
+	GetSpells() any
+	GetTraits() any
+	SetAbilities(IAbilities)
+	SetAttacks([]IAttack)
+	SetDescription(string)
+	SetEquipment(any)
+	SetHitPoints(IHitPoints)
+	SetLanguages(any)
+	SetSavingThrows(ISavingThrows)
+	SetSkills(any)
+	SetSpells(any)
+	SetTraits(any)
 }
+
+// -----------------------------------------------------------------------------
+//
+// Unit
+//
+// -----------------------------------------------------------------------------
 
 // Unit structure is the common and generic structure for any unit in the
 // application.
@@ -33,39 +67,53 @@ type IUnit interface {
 // representing a unique entity with its own attributes, abilities, and role in
 // the game world.
 type Unit struct {
-	name         string        // unit name.
 	description  string        // unit description.
 	hitPoints    IHitPoints    // unit hit points.
 	level        ILevel        // unit level.
 	abilities    IAbilities    // unit abilities.
 	savingThrows ISavingThrows // unit saving throws.
-	skills       interface{}   // unit skills
-	equipment    interface{}   // unit equipment
-	attacks      interface{}   // unit type of attacks
-	spells       interface{}   // unit spells
-	languages    interface{}   // unit languages
-	traits       interface{}   // unit personality traits
+	skills       any           // unit skills
+	equipment    any           // unit equipment
+	attacks      []IAttack     // unit type of attacks
+	spells       any           // unit spells
+	languages    any           // unit languages
+	traits       any           // unit personality traits
 }
 
-// GetInitiative method return the unit initiative.
-//
-// Initiative is calculated based on a character's Dexterity modifier. The
-// formula for calculating initiative is as follows:
-//
-// Initiative = d20 roll + Dexterity modifier
-//
-// At the start of a combat encounter, each participant rolls a d20 (a 20-sided
-// die) and adds their Dexterity modifier to the result. The Dexterity modifier
-// is determined by the character's Dexterity score and can be found on the
-// character sheet.
-//
-// For example, if a character has a Dexterity score of 16, their Dexterity
-// modifier would be +3. If they roll a 12 on their d20 initiative roll, their
-// total initiative would be 15 (12 + 3). This would mean that they would act
-// in the combat encounter before creatures with lower initiative scores.
-func (u *Unit) GetInititive() int {
-	// TODO: to be implemented.
-	return 1
+func NewUnit() *Unit {
+	return &Unit{
+		hitPoints:    NewHitPoints(0),
+		level:        NewLevel(0, 0),
+		abilities:    NewAbilities(),
+		savingThrows: NewSavingThrows(),
+	}
+}
+
+// -----------------------------------------------------------------------------
+// Unit public methods
+// -----------------------------------------------------------------------------
+
+func (u *Unit) AddAttack(attack IAttack) {
+	u.attacks = append(u.attacks, attack)
+}
+
+func (u *Unit) Attack(other IUnit) {
+	damage := u.GetAbilities().GetStrength().GetScore()
+	otherHp := other.GetHitPoints().GetScore()
+	otherHp -= damage
+	other.GetHitPoints().SetScore(otherHp)
+	otherDamage := other.GetAbilities().GetStrength().GetScore()
+	unitHp := u.GetHitPoints().GetScore()
+	unitHp -= otherDamage
+	u.GetHitPoints().SetScore(unitHp)
+}
+
+func (u *Unit) GetAbilities() IAbilities {
+	return u.abilities
+}
+
+func (u *Unit) GetAttacks() []IAttack {
+	return u.attacks
 }
 
 // GetArmorClass method returns the unit armor class.
@@ -100,26 +148,12 @@ func (u *Unit) GetArmorClass() int {
 	return 1
 }
 
-// GetSpeed method returns the unit speed.
-//
-// A character's speed is the distance they can move in a single round of
-// combat or during normal movement. The base speed for most races is 30 feet
-// per round, but this can be increased or decreased based on factors such as
-// race, class, equipment, and other abilities.
-func (u *Unit) GetSpeed() int {
-	// TODO: to be implemented.
-	return 1
+func (u *Unit) GetDescription() string {
+	return u.description
 }
 
-// GetProficiencyBonus method returns the unit proficiency bonus.
-//
-// The proficiency bonus is a bonus to a character's attack rolls, skill checks,
-// and saving throws that is determined by the character's level. It starts at
-// +2 for 1st level characters and increases by 1 every 4 levels thereafter (to
-// a maximum of +6 at level 17).
-func (u *Unit) GetProficiencyBonus() int {
-	// TODO: To be implemented.
-	return 1
+func (u *Unit) GetEquipment() any {
+	return u.equipment
 }
 
 // GetHitDice method returns the unit hit dice.
@@ -135,3 +169,112 @@ func (u *Unit) GetHitDice() int {
 	// TODO: To be implemented.
 	return 1
 }
+
+func (u *Unit) GetHitPoints() IHitPoints {
+	return u.hitPoints
+}
+
+// GetInitiative method return the unit initiative.
+//
+// Initiative is calculated based on a character's Dexterity modifier. The
+// formula for calculating initiative is as follows:
+//
+// Initiative = d20 roll + Dexterity modifier
+//
+// At the start of a combat encounter, each participant rolls a d20 (a 20-sided
+// die) and adds their Dexterity modifier to the result. The Dexterity modifier
+// is determined by the character's Dexterity score and can be found on the
+// character sheet.
+//
+// For example, if a character has a Dexterity score of 16, their Dexterity
+// modifier would be +3. If they roll a 12 on their d20 initiative roll, their
+// total initiative would be 15 (12 + 3). This would mean that they would act
+// in the combat encounter before creatures with lower initiative scores.
+func (u *Unit) GetInitiative() int {
+	// TODO: to be implemented.
+	return 1
+}
+
+func (u *Unit) GetLanguages() any {
+	return u.languages
+}
+
+// GetProficiencyBonus method returns the unit proficiency bonus.
+//
+// The proficiency bonus is a bonus to a character's attack rolls, skill checks,
+// and saving throws that is determined by the character's level. It starts at
+// +2 for 1st level characters and increases by 1 every 4 levels thereafter (to
+// a maximum of +6 at level 17).
+func (u *Unit) GetProficiencyBonus() int {
+	// TODO: To be implemented.
+	return 1
+}
+
+func (u *Unit) GetSavingThrows() ISavingThrows {
+	return u.savingThrows
+}
+
+func (u *Unit) GetSkills() any {
+	return u.skills
+}
+
+// GetSpeed method returns the unit speed.
+//
+// A character's speed is the distance they can move in a single round of
+// combat or during normal movement. The base speed for most races is 30 feet
+// per round, but this can be increased or decreased based on factors such as
+// race, class, equipment, and other abilities.
+func (u *Unit) GetSpeed() int {
+	// TODO: to be implemented.
+	return 1
+}
+
+func (u *Unit) GetSpells() any {
+	return u.spells
+}
+
+func (u *Unit) GetTraits() any {
+	return u.traits
+}
+
+func (u *Unit) SetAbilities(abilities IAbilities) {
+	u.abilities = abilities
+}
+
+func (u *Unit) SetAttacks(attacks []IAttack) {
+	u.attacks = attacks
+}
+
+func (u *Unit) SetDescription(desc string) {
+	u.description = desc
+}
+
+func (u *Unit) SetEquipment(equip any) {
+	u.equipment = equip
+}
+
+func (u *Unit) SetHitPoints(hp IHitPoints) {
+	u.hitPoints = hp
+}
+
+func (u *Unit) SetLanguages(langs any) {
+	u.languages = langs
+}
+
+func (u *Unit) SetSavingThrows(savingThrows ISavingThrows) {
+	u.savingThrows = savingThrows
+}
+
+func (u *Unit) SetSkills(skills any) {
+	u.skills = skills
+}
+
+func (u *Unit) SetSpells(spells any) {
+	u.spells = spells
+}
+
+func (u *Unit) SetTraits(traits any) {
+	u.traits = traits
+}
+
+var _ IUnit = (*Unit)(nil)

@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/tools"
+	"github.com/jrecuero/thengine/pkg/widgets"
 )
 
 var (
@@ -17,10 +20,12 @@ var (
 )
 
 const (
-	GameBoxEntityName   = "entity/game-box/1"
-	DataBoxEntityName   = "entity/data-box/1"
-	InfoBoxEntityName   = "entity/info-box/1"
-	CommandLineTextName = "text/command-line/1"
+	GameBoxEntityName      = "entity/game-box/1"
+	DataBoxEntityName      = "entity/data-box/1"
+	InfoBoxEntityName      = "entity/info-box/1"
+	CommandLineTextName    = "text/command-line/1"
+	PlayerLiveTextName     = "text/player/live/1"
+	PlayerStrengthTextName = "text/player/strength/1"
 )
 
 func main() {
@@ -67,6 +72,14 @@ func main() {
 	//commandLine := widgets.NewText(CommandLineTextName, api.NewPoint(1, 21), api.NewSize(98, 8), &theStyleBlueOverBlack, ">")
 	commandLine := NewCommandLine(CommandLineTextName, api.NewPoint(1, 21), api.NewSize(98, 8), &theStyleBlueOverBlack)
 	mainScene.AddEntity(commandLine)
+
+	hpText := fmt.Sprintf("HP:  %d", player.GetHitPoints().GetScore())
+	playerLiveText := widgets.NewText(PlayerLiveTextName, api.NewPoint(81, 1), api.NewSize(10, 1), &theStyleBlueOverBlack, hpText)
+	mainScene.AddEntity(playerLiveText)
+
+	strText := fmt.Sprintf("STR: %d", player.GetAbilities().GetStrength().GetScore())
+	playerStrengthText := widgets.NewText(PlayerLiveTextName, api.NewPoint(81, 2), api.NewSize(10, 1), &theStyleBlueOverBlack, strText)
+	mainScene.AddEntity(playerStrengthText)
 
 	gameHandler := NewGameHandler()
 	mainScene.AddEntity(gameHandler)

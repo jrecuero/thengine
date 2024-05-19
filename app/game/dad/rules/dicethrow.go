@@ -1,89 +1,113 @@
 package rules
 
+import "github.com/jrecuero/thengine/app/game/dad/dices"
+
+// -----------------------------------------------------------------------------
+//
+// IDiceThrow
+//
+// -----------------------------------------------------------------------------
+
 // IDiceThrow interface defines all possible methods for any dice throw.
 type IDiceThrow interface {
-	GetName() string
-	SetName(string)
 	GetDescription() string
-	SetDescription(string)
-	GetScore() int
-	SetScore(int) bool
+	GetDices() []dices.IDice
 	GetExtra() int
+	GetName() string
+	Roll() int
+	SetDescription(string)
+	SetDices([]dices.IDice)
+	SetName(string)
 	SetExtra(int)
 }
 
+// -----------------------------------------------------------------------------
+//
+// DiceThrow
+//
+// -----------------------------------------------------------------------------
+
 // DiceThrow structure contains all attributes required to define an dice throw.
 type DiceThrow struct {
-	name        string // dice throw name.
-	shortName   string // dice throw short name.
-	description string // dice throw description.
-	score       int    // dice throw score.
-	extra       int    // dice throw extra score.
+	name        string        // dice throw name.
+	shortName   string        // dice throw short name.
+	description string        // dice throw description.
+	dizes       []dices.IDice // dice throw score.
+	extra       int           // dice throw extra score.
 }
 
 // NewDiceThrow function creates a new DiceThrow instance.
-func NewDiceThrow(name, shortname string, score int) *DiceThrow {
+func NewDiceThrow(name, shortname string, dizes []dices.IDice) *DiceThrow {
 	return &DiceThrow{
 		name:      name,
 		shortName: shortname,
-		score:     score,
+		dizes:     dizes,
 	}
 }
 
-// GetName method returns dice throw name.
-func (t *DiceThrow) GetName() string {
-	return t.name
-}
-
-// SetName method sets dice throw name.
-func (t *DiceThrow) SetName(name string) {
-	t.name = name
-}
-
-// GetShortName method returns dice throw short name.
-func (t *DiceThrow) GetShortName() string {
-	return t.shortName
-}
-
-// SetShortName method sets dice throw short name.
-func (t *DiceThrow) SetShortName(name string) {
-	t.shortName = name
-}
+// -----------------------------------------------------------------------------
+// DiceThrow public methods
+// -----------------------------------------------------------------------------
 
 // GetDescription method returns dice throw description.
-func (t *DiceThrow) GetDescription() string {
-	return t.description
+func (d *DiceThrow) GetDescription() string {
+	return d.description
 }
 
-// SetDescription method sets dice throw description.
-func (t *DiceThrow) SetDescription(desc string) {
-	t.description = desc
-}
-
-// GetScore method returns dice throw score value.
-func (t *DiceThrow) GetScore() int {
-	score := t.score + t.GetExtra()
-	if score > 30 {
-		score = 30
-	}
-	return score
-}
-
-// SetScore method sets dice throw score value.
-func (t *DiceThrow) SetScore(score int) bool {
-	if score < 1 || score > 30 {
-		return false
-	}
-	t.score = score
-	return true
+func (d *DiceThrow) GetDices() []dices.IDice {
+	return d.dizes
 }
 
 // GetExtra method returns dice throw extra score value.
-func (t *DiceThrow) GetExtra() int {
-	return t.extra
+func (d *DiceThrow) GetExtra() int {
+	return d.extra
+}
+
+// GetName method returns dice throw name.
+func (d *DiceThrow) GetName() string {
+	return d.name
+}
+
+// GetShortName method returns dice throw short name.
+func (d *DiceThrow) GetShortName() string {
+	return d.shortName
+}
+
+// Roll method returns dice throw score value.
+func (d *DiceThrow) Roll() int {
+	score := 0
+	for _, dice := range d.dizes {
+		score += dice.Roll()
+	}
+	score += d.GetExtra()
+	//if score > 30 {
+	//    score = 30
+	//}
+	return score
+}
+
+// SetDescription method sets dice throw description.
+func (d *DiceThrow) SetDescription(desc string) {
+	d.description = desc
+}
+
+func (d *DiceThrow) SetDices(dizes []dices.IDice) {
+	d.dizes = dizes
 }
 
 // SetExtra method sets dice throw extra score value.
-func (t *DiceThrow) SetExtra(extra int) {
-	t.extra = extra
+func (d *DiceThrow) SetExtra(extra int) {
+	d.extra = extra
 }
+
+// SetName method sets dice throw name.
+func (d *DiceThrow) SetName(name string) {
+	d.name = name
+}
+
+// SetShortName method sets dice throw short name.
+func (d *DiceThrow) SetShortName(name string) {
+	d.shortName = name
+}
+
+var _ IDiceThrow = (*DiceThrow)(nil)

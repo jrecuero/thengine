@@ -69,8 +69,12 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 	if !h.HasFocus() {
 		return
 	}
-	player := scene.GetEntityByName(thePlayerName)
-	if player == nil {
+	p := scene.GetEntityByName(thePlayerName)
+	if p == nil {
+		return
+	}
+	player, ok := p.(*Player)
+	if !ok {
 		return
 	}
 	playerX, playerY := player.GetPosition().Get()
@@ -91,8 +95,13 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 			case 'A', 'a':
 				enemies := getEnemiesInScene(scene)
 				if enemy := isAnyEnemyAdjacent(player, enemies); enemy != nil {
-					writeToCommandLine(scene, fmt.Sprintf("\n> Player attack to %s", enemy.GetName()))
-					tools.Logger.WithField("module", "gameHandler").WithField("method", "Update").Infof("player can attack to %s", enemy.GetName())
+					if e, ok := enemy.(*Enemy); ok {
+						player.Attack(e)
+						writeToCommandLine(scene, fmt.Sprintf("\n> %s [%d] attack to %s [%d]",
+							player.GetName(), player.GetHitPoints().GetScore(),
+							enemy.GetName(), e.GetHitPoints().GetScore()))
+						tools.Logger.WithField("module", "gameHandler").WithField("method", "Update").Infof("player can attack to %s", enemy.GetName())
+					}
 				} else {
 					writeToCommandLine(scene, fmt.Sprintf("\n> Player attack not available"))
 				}

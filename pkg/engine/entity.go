@@ -133,6 +133,14 @@ func NewNamedEntity(name string) *Entity {
 	}
 }
 
+// NewHandler function creates a new Entity as a handler. A Handler does not
+// have any position or size by default, it is not a solid object and it is
+// not visible.
+func NewHandler(name string) *Entity {
+	handler := NewNamedEntity(name)
+	return handler
+}
+
 // -----------------------------------------------------------------------------
 // Entity public methods
 // -----------------------------------------------------------------------------
