@@ -8,11 +8,10 @@ package rules
 
 // IUnit interface  defines all methods required a unit has to implement.
 type IUnit interface {
-	AddAttack(IAttack)
-	Attack(IUnit)
+	Attack(IUnit) int
 	GetAbilities() IAbilities
 	GetArmorClass() int // unit AC 10 + mod(dex) + mod(equipment)
-	GetAttacks() []IAttack
+	GetAttacks() IAttacks
 	GetDescription() string
 	GetEquipment() any
 	GetHitDice() int // unit hit dice.
@@ -26,7 +25,7 @@ type IUnit interface {
 	GetSpells() any
 	GetTraits() any
 	SetAbilities(IAbilities)
-	SetAttacks([]IAttack)
+	SetAttacks(IAttacks)
 	SetDescription(string)
 	SetEquipment(any)
 	SetHitPoints(IHitPoints)
@@ -74,7 +73,7 @@ type Unit struct {
 	savingThrows ISavingThrows // unit saving throws.
 	skills       any           // unit skills
 	equipment    any           // unit equipment
-	attacks      []IAttack     // unit type of attacks
+	attacks      IAttacks      // unit type of attacks
 	spells       any           // unit spells
 	languages    any           // unit languages
 	traits       any           // unit personality traits
@@ -86,6 +85,7 @@ func NewUnit() *Unit {
 		level:        NewLevel(0, 0),
 		abilities:    NewAbilities(),
 		savingThrows: NewSavingThrows(),
+		attacks:      NewAttacks(nil),
 	}
 }
 
@@ -93,26 +93,19 @@ func NewUnit() *Unit {
 // Unit public methods
 // -----------------------------------------------------------------------------
 
-func (u *Unit) AddAttack(attack IAttack) {
-	u.attacks = append(u.attacks, attack)
-}
-
-func (u *Unit) Attack(other IUnit) {
-	damage := u.GetAbilities().GetStrength().GetScore()
+func (u *Unit) Attack(other IUnit) int {
+	damage := u.GetAttacks().GetAttacks()[0].Roll()
 	otherHp := other.GetHitPoints().GetScore()
 	otherHp -= damage
 	other.GetHitPoints().SetScore(otherHp)
-	otherDamage := other.GetAbilities().GetStrength().GetScore()
-	unitHp := u.GetHitPoints().GetScore()
-	unitHp -= otherDamage
-	u.GetHitPoints().SetScore(unitHp)
+	return damage
 }
 
 func (u *Unit) GetAbilities() IAbilities {
 	return u.abilities
 }
 
-func (u *Unit) GetAttacks() []IAttack {
+func (u *Unit) GetAttacks() IAttacks {
 	return u.attacks
 }
 
@@ -241,7 +234,7 @@ func (u *Unit) SetAbilities(abilities IAbilities) {
 	u.abilities = abilities
 }
 
-func (u *Unit) SetAttacks(attacks []IAttack) {
+func (u *Unit) SetAttacks(attacks IAttacks) {
 	u.attacks = attacks
 }
 

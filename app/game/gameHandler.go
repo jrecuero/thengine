@@ -7,6 +7,7 @@ import (
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/tools"
+	"github.com/jrecuero/thengine/pkg/widgets"
 )
 
 var (
@@ -40,6 +41,15 @@ func isAnyEnemyAdjacent(player engine.IEntity, enemies []engine.IEntity) engine.
 	return nil
 }
 
+func updateDataBox(scene engine.IScene, player *Player) {
+	if tmp := scene.GetEntityByName(PlayerLiveTextName); tmp != nil {
+		if playerLiveText, ok := tmp.(*widgets.Text); ok {
+			hpText := fmt.Sprintf("HP:  %d", player.GetHitPoints().GetScore())
+			playerLiveText.SetText(hpText)
+		}
+	}
+}
+
 func writeToCommandLine(scene engine.IScene, str string) {
 	commandLine := scene.GetEntityByName(CommandLineTextName)
 	if commandLine != nil {
@@ -57,7 +67,7 @@ func NewGameHandler() *GameHandler {
 	if theGameHandler == nil {
 		tools.Logger.WithField("module", "gameHandler").WithField("method", "NewGameHandler").Infof("handler/game/1")
 		theGameHandler = &GameHandler{
-			Entity: engine.NewNamedEntity("handler/game/1"),
+			Entity: engine.NewHandler("handler/game/1"),
 		}
 		theGameHandler.SetFocusType(engine.MultiFocus)
 		theGameHandler.SetFocusEnable(true)
@@ -97,9 +107,12 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 				if enemy := isAnyEnemyAdjacent(player, enemies); enemy != nil {
 					if e, ok := enemy.(*Enemy); ok {
 						player.Attack(e)
+						e.Attack(player)
 						writeToCommandLine(scene, fmt.Sprintf("\n> %s [%d] attack to %s [%d]",
 							player.GetName(), player.GetHitPoints().GetScore(),
 							enemy.GetName(), e.GetHitPoints().GetScore()))
+						//writeToCommandLine(scene, fmt.Sprintf("\n> player attack with damage %d", damage))
+						updateDataBox(scene, player)
 						tools.Logger.WithField("module", "gameHandler").WithField("method", "Update").Infof("player can attack to %s", enemy.GetName())
 					}
 				} else {

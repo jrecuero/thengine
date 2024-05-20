@@ -1,5 +1,7 @@
 package rules
 
+import "github.com/jrecuero/thengine/app/game/dad/dices"
+
 // -----------------------------------------------------------------------------
 //
 // IAttack
@@ -11,6 +13,7 @@ package rules
 type IAttack interface {
 	GetAttack() int
 	GetName() string
+	Roll() int
 }
 
 // -----------------------------------------------------------------------------
@@ -32,6 +35,13 @@ func NewAttack(name string, diceThrow IDiceThrow) *Attack {
 	}
 }
 
+func NewDefaultAttack(score int) *Attack {
+	dice := dices.NewDice("dice/attack", score)
+	diceThrow := NewDiceThrow("dice-throw/attack", "attack", []dices.IDice{dice})
+	attack := NewAttack("attack/default", diceThrow)
+	return attack
+}
+
 // -----------------------------------------------------------------------------
 // Attack public methods
 // -----------------------------------------------------------------------------
@@ -43,6 +53,10 @@ func (a *Attack) GetAttack() int {
 
 func (a *Attack) GetName() string {
 	return a.name
+}
+
+func (a *Attack) Roll() int {
+	return a.diceThrow.Roll()
 }
 
 // -----------------------------------------------------------------------------

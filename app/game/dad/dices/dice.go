@@ -52,7 +52,7 @@ func (d *Dice) GetFaces() int {
 
 // Roll method returns a roll dice.
 func (d *Dice) Roll() int {
-	return rand.Intn(d.GetFaces())
+	return rand.Intn(d.GetFaces() + 1)
 }
 
 var _ IDice = (*Dice)(nil)

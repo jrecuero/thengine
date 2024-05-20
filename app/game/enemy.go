@@ -24,5 +24,7 @@ func NewEnemy(name string, position *api.Point, style *tcell.Style) *Enemy {
 	enemy.GetHitPoints().SetMaxScore(50)
 	enemy.GetHitPoints().SetScore(50)
 	enemy.GetAbilities().GetStrength().SetScore(10)
+	attack := rules.NewDefaultAttack(6)
+	enemy.GetAttacks().AddAttack(attack)
 	return enemy
 }

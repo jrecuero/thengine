@@ -23,15 +23,10 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 	player.GetHitPoints().SetMaxScore(100)
 	player.GetHitPoints().SetScore(100)
 	player.GetAbilities().GetStrength().SetScore(10)
+	attack := rules.NewDefaultAttack(6)
+	player.GetAttacks().AddAttack(attack)
 	return player
 }
-
-//func (p *Player) Attack(other *Enemy) {
-//    damage := p.GetAbilities().GetStrength().GetScore()
-//    otherHp := other.GetHitPoints().GetScore()
-//    otherHp -= damage
-//    other.GetHitPoints().SetScore(otherHp)
-//}
 
 func (p *Player) Update(event tcell.Event, scene engine.IScene) {
 	if !p.HasFocus() {
