@@ -56,7 +56,7 @@ func (a *Attack) GetName() string {
 }
 
 func (a *Attack) Roll() int {
-	return a.diceThrow.Roll()
+	return a.diceThrow.SureRoll()
 }
 
 // -----------------------------------------------------------------------------

@@ -11,21 +11,28 @@ import (
 )
 
 var (
-	theCamera             = engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
-	theEngine             = engine.GetEngine()
-	theStyleBlueOverBlack = tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
-	theStyleWhiteOverRed  = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorRed)
-	theFPS                = 60.0
-	thePlayerName         = "player/hero/1"
+	theCamera              = engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
+	theEngine              = engine.GetEngine()
+	theStyleBlueOverBlack  = tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
+	theStyleWhiteOverRed   = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorRed)
+	theStyleGreenOverBlack = tcell.StyleDefault.Foreground(tcell.ColorGreen).Background(tcell.ColorBlack)
+	theStyleRedOverBlack   = tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
+	theFPS                 = 60.0
+	thePlayerName          = "player/hero/1"
 )
 
 const (
-	GameBoxEntityName      = "entity/game-box/1"
-	DataBoxEntityName      = "entity/data-box/1"
-	InfoBoxEntityName      = "entity/info-box/1"
-	CommandLineTextName    = "text/command-line/1"
-	PlayerLiveTextName     = "text/player/live/1"
-	PlayerStrengthTextName = "text/player/strength/1"
+	GameBoxEntityName       = "entity/game-box/1"
+	DataBoxEntityName       = "entity/data-box/1"
+	InfoBoxEntityName       = "entity/info-box/1"
+	CommandLineTextName     = "text/command-line/1"
+	PlayerLiveTextName      = "text/player/live/1"
+	PlayerStrengthTextName  = "text/player/strength/1"
+	PlayerDexterityTextName = "text/player/dexteriry/1"
+	PlayerNameTextName      = "text/player/name/1"
+	PlayerHealthBar         = "health-bar/player/live/1"
+	EnemyNameTextName       = "text/enemy/name/1"
+	EnemyHealthBar          = "health-bar/enemy/live/1"
 )
 
 func main() {
@@ -78,8 +85,26 @@ func main() {
 	mainScene.AddEntity(playerLiveText)
 
 	strText := fmt.Sprintf("STR: %d", player.GetAbilities().GetStrength().GetScore())
-	playerStrengthText := widgets.NewText(PlayerLiveTextName, api.NewPoint(81, 2), api.NewSize(10, 1), &theStyleBlueOverBlack, strText)
+	playerStrengthText := widgets.NewText(PlayerStrengthTextName, api.NewPoint(81, 2), api.NewSize(10, 1), &theStyleBlueOverBlack, strText)
 	mainScene.AddEntity(playerStrengthText)
+
+	dexText := fmt.Sprintf("DEX: %d", player.GetAbilities().GetDexterity().GetScore())
+	playerDexterityText := widgets.NewText(PlayerDexterityTextName, api.NewPoint(81, 3), api.NewSize(10, 1), &theStyleBlueOverBlack, dexText)
+	mainScene.AddEntity(playerDexterityText)
+
+	playerNameText := widgets.NewText(PlayerNameTextName, api.NewPoint(81, 9), api.NewSize(18, 1), &theStyleBlueOverBlack, player.GetUName())
+	mainScene.AddEntity(playerNameText)
+
+	playerHealthBar := NewHealthBar(PlayerHealthBar, api.NewPoint(81, 10), api.NewSize(18, 1), player.GetHitPoints().GetScore())
+	playerHealthBar.SetCompleted(player.GetHitPoints().GetScore())
+	mainScene.AddEntity(playerHealthBar)
+
+	enemyNameText := widgets.NewText(EnemyNameTextName, api.NewPoint(81, 11), api.NewSize(18, 1), &theStyleBlueOverBlack, enemy.GetUName())
+	mainScene.AddEntity(enemyNameText)
+
+	enemyHealthBar := NewHealthBar(EnemyHealthBar, api.NewPoint(81, 12), api.NewSize(18, 1), enemy.GetHitPoints().GetScore())
+	enemyHealthBar.SetCompleted(enemy.GetHitPoints().GetScore())
+	mainScene.AddEntity(enemyHealthBar)
 
 	gameHandler := NewGameHandler()
 	mainScene.AddEntity(gameHandler)

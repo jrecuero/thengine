@@ -19,6 +19,7 @@ type IDiceThrow interface {
 	SetDices([]dices.IDice)
 	SetName(string)
 	SetExtra(int)
+	SureRoll() int
 }
 
 // -----------------------------------------------------------------------------
@@ -108,6 +109,14 @@ func (d *DiceThrow) SetName(name string) {
 // SetShortName method sets dice throw short name.
 func (d *DiceThrow) SetShortName(name string) {
 	d.shortName = name
+}
+
+func (d *DiceThrow) SureRoll() int {
+	result := d.Roll()
+	if result == 0 {
+		result = 1
+	}
+	return result
 }
 
 var _ IDiceThrow = (*DiceThrow)(nil)

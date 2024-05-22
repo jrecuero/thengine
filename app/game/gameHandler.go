@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
+	battlelog "github.com/jrecuero/thengine/app/game/dad/battleLog"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/tools"
@@ -41,11 +42,23 @@ func isAnyEnemyAdjacent(player engine.IEntity, enemies []engine.IEntity) engine.
 	return nil
 }
 
-func updateDataBox(scene engine.IScene, player *Player) {
+func updateDataBox(scene engine.IScene, player *Player, enemy *Enemy) {
 	if tmp := scene.GetEntityByName(PlayerLiveTextName); tmp != nil {
 		if playerLiveText, ok := tmp.(*widgets.Text); ok {
 			hpText := fmt.Sprintf("HP:  %d", player.GetHitPoints().GetScore())
 			playerLiveText.SetText(hpText)
+		}
+	}
+	if tmp := scene.GetEntityByName(PlayerHealthBar); tmp != nil {
+		if playerHealthBar, ok := tmp.(*HealthBar); ok {
+			playerHealthBar.UpdateStyle(player.GetHitPoints().GetScore())
+			playerHealthBar.SetCompleted(player.GetHitPoints().GetScore())
+		}
+	}
+	if tmp := scene.GetEntityByName(EnemyHealthBar); tmp != nil {
+		if enemyHealthBar, ok := tmp.(*HealthBar); ok {
+			enemyHealthBar.UpdateStyle(enemy.GetHitPoints().GetScore())
+			enemyHealthBar.SetCompleted(enemy.GetHitPoints().GetScore())
 		}
 	}
 }
@@ -65,7 +78,7 @@ func writeToCommandLine(scene engine.IScene, str string) {
 
 func NewGameHandler() *GameHandler {
 	if theGameHandler == nil {
-		tools.Logger.WithField("module", "gameHandler").WithField("method", "NewGameHandler").Infof("handler/game/1")
+		tools.Logger.WithField("module", "gameHandler").WithField("function", "NewGameHandler").Debugf("handler/game/1")
 		theGameHandler = &GameHandler{
 			Entity: engine.NewHandler("handler/game/1"),
 		}
@@ -112,8 +125,11 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 							player.GetName(), player.GetHitPoints().GetScore(),
 							enemy.GetName(), e.GetHitPoints().GetScore()))
 						//writeToCommandLine(scene, fmt.Sprintf("\n> player attack with damage %d", damage))
-						updateDataBox(scene, player)
-						tools.Logger.WithField("module", "gameHandler").WithField("method", "Update").Infof("player can attack to %s", enemy.GetName())
+						updateDataBox(scene, player, e)
+						tools.Logger.WithField("module", "gameHandler").WithField("method", "Update").Debugf("player can attack to %s", enemy.GetName())
+						for battlelog.BLog.IsAny() {
+							writeToCommandLine(scene, fmt.Sprintf("\n> %s", battlelog.BLog.Pop()))
+						}
 					}
 				} else {
 					writeToCommandLine(scene, fmt.Sprintf("\n> Player attack not available"))

@@ -18,12 +18,15 @@ import (
 
 // updateCanvas function updates the canvas for a widget instance as a gauge.
 func updateCanvas(widget engine.IEntity, total int, completed int) {
-	var step int = total / widget.GetSize().W
-	var completedSteps int = completed / step
-	completedPattern := strings.Repeat(" ", completedSteps)
+	var step float64 = float64(total) / float64(widget.GetSize().W)
+	var completedSteps float64 = float64(completed) / step
+	completedPattern := strings.Repeat(" ", int(completedSteps))
 	basePattern := strings.Repeat(" ", widget.GetSize().W)
 	widget.GetCanvas().WriteStringInCanvas(basePattern, widget.GetStyle())
 	widget.GetCanvas().WriteStringInCanvas(completedPattern, tools.ReverseStyle(widget.GetStyle()))
+	//tools.Logger.WithField("module", "gauge").
+	//    WithField("function", "updateCanvas").
+	//    Debugf("%d/%d %f %f %s", total, completed, step, completedSteps, tools.StyleToString(widget.GetStyle()))
 }
 
 // -----------------------------------------------------------------------------
@@ -57,12 +60,6 @@ func NewGauge(name string, position *api.Point, size *api.Size, style *tcell.Sty
 // updateCanvas method updates the gauge widget canvas with latest completed
 // value.
 func (g *Gauge) updateCanvas() {
-	//var step int = g.total / g.GetSize().W
-	//var completedSteps int = g.completed / step
-	//completedPattern := strings.Repeat(" ", completedSteps)
-	//basePattern := strings.Repeat(" ", g.GetSize().W)
-	//g.GetCanvas().WriteStringInCanvas(basePattern, g.GetStyle())
-	//g.GetCanvas().WriteStringInCanvas(completedPattern, tools.ReverseStyle(g.GetStyle()))
 	updateCanvas(g, g.total, g.completed)
 }
 
@@ -89,6 +86,10 @@ func (g *Gauge) IncCompleted(steps int) int {
 
 // SetCompleted method sets a new value for the completed attribute.
 func (g *Gauge) SetCompleted(completed int) {
+	// completed gauge can not be lower than zero.
+	if completed < 0 {
+		completed = 0
+	}
 	g.completed = completed
 	g.updateCanvas()
 }
@@ -130,12 +131,6 @@ func NewTimerGauge(name string, position *api.Point, size *api.Size, style *tcel
 // updateCanvas method updates the gauge widget canvas with latest completed
 // value.
 func (g *TimerGauge) updateCanvas() {
-	//var step int = g.total / g.GetSize().W
-	//var completedSteps int = g.completed / step
-	//completedPattern := strings.Repeat(" ", completedSteps)
-	//basePattern := strings.Repeat(" ", g.GetSize().W)
-	//g.GetCanvas().WriteStringInCanvas(basePattern, g.GetStyle())
-	//g.GetCanvas().WriteStringInCanvas(completedPattern, tools.ReverseStyle(g.GetStyle()))
 	updateCanvas(g, g.total, g.completed)
 	//tools.Logger.WithField("module", "TimerGauge").
 	//    WithField("function", "updateCanvas").

@@ -1,7 +1,11 @@
 // tcell.go contains all general functionality related with tcell module.
 package tools
 
-import "github.com/gdamore/tcell/v2"
+import (
+	"fmt"
+
+	"github.com/gdamore/tcell/v2"
+)
 
 // -----------------------------------------------------------------------------
 // Public functions
@@ -23,4 +27,10 @@ func ReverseStyle(style *tcell.Style) *tcell.Style {
 	fg, bg, attrs := style.Decompose()
 	reversed := tcell.StyleDefault.Foreground(bg).Background(fg).Attributes(attrs)
 	return &reversed
+}
+
+// StyleToString function display style as a string.
+func StyleToString(style *tcell.Style) string {
+	fg, bg, attrs := style.Decompose()
+	return fmt.Sprintf("%s/%s/%d", fg.String(), bg.String(), attrs)
 }
