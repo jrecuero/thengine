@@ -24,7 +24,9 @@ type IBuiltIn interface {
 // Module public methods
 // -----------------------------------------------------------------------------
 
-func GetEntitiesFromJSON(filename string, builtin IBuiltIn) []IEntity {
+// ImportEntitiesFromJSON function reads all entities in the given JSON file
+// and it returns an array of IEntity instances.
+func ImportEntitiesFromJSON(filename string, builtin IBuiltIn) []IEntity {
 	var result []IEntity
 
 	jsonContent, err := os.ReadFile(filename)

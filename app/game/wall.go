@@ -20,3 +20,11 @@ func NewWall(name string, position *api.Point, size *api.Size, style *tcell.Styl
 	wall.SetSolid(true)
 	return wall
 }
+
+func NewEmptyWall() *Wall {
+	wall := &Wall{
+		Widget: widgets.NewWidget("", nil, nil, nil),
+	}
+	wall.SetSolid(true)
+	return wall
+}

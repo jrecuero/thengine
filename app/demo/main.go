@@ -604,6 +604,6 @@ func demoFourteen(dryRun bool) {
 }
 
 func main() {
-	//demoFourteen(false)
-	demoSnake(false)
+	demoEight(false)
+	//demoSnake(false)
 }

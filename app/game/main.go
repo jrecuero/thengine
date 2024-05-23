@@ -35,6 +35,19 @@ const (
 	EnemyHealthBar          = "health-bar/enemy/live/1"
 )
 
+type BuiltIn struct {
+	engine.IBuiltIn
+}
+
+func (b *BuiltIn) GetClassFromString(className string) engine.IEntity {
+	switch className {
+	case "Wall":
+		return NewEmptyWall()
+	default:
+		return engine.NewEmptyEntity()
+	}
+}
+
 func main() {
 	tools.Logger.WithField("module", "game/main").Infof("The Game")
 	mainScene := engine.NewScene("scene/main/1", theCamera)
@@ -70,8 +83,12 @@ func main() {
 	rightWall.SetVisible(false)
 	mainScene.AddEntity(rightWall)
 
-	middleWall := NewWall("widget/wall/middle/1", api.NewPoint(2, 2), api.NewSize(76, 1), &theStyleBlueOverBlack)
-	mainScene.AddEntity(middleWall)
+	//middleWall := NewWall("widget/wall/middle/1", api.NewPoint(2, 2), api.NewSize(76, 1), &theStyleBlueOverBlack)
+	//mainScene.AddEntity(middleWall)
+	entities := engine.ImportEntitiesFromJSON("app/game/assets/first_map.json", &BuiltIn{})
+	for _, ent := range entities {
+		mainScene.AddEntity(ent)
+	}
 
 	enemy := NewEnemy("widget/enemy/1", api.NewPoint(5, 5), &theStyleWhiteOverRed)
 	mainScene.AddEntity(enemy)
