@@ -3,6 +3,9 @@
 package engine
 
 import (
+	"encoding/json"
+	"strconv"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 )
@@ -43,6 +46,7 @@ type IEntity interface {
 	Start()
 	Stop()
 	Update(tcell.Event, IScene)
+	UnmarshalMap(map[string]any) error
 }
 
 // -----------------------------------------------------------------------------
@@ -231,6 +235,29 @@ func (e *Entity) IsSolid() bool {
 	return e.solid
 }
 
+// MarshalJSON method is the custom marshal method to generate JSON from an
+// instance.
+func (e *Entity) MarshalJSON() ([]byte, error) {
+	content, err := e.MarshalMap()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(content)
+}
+
+// MarshalMap method is the custom marshal method to generate a map[string]any
+// from an instance.
+func (e *Entity) MarshalMap() (map[string]any, error) {
+	fg, bg, attrs := e.style.Decompose()
+	content := map[string]any{
+		"name":     e.name,
+		"position": []int{e.position.X, e.position.Y},
+		"size":     []int{e.size.W, e.size.H},
+		"style":    []string{fg.String(), bg.String(), strconv.Itoa(int(attrs))},
+	}
+	return content, nil
+}
+
 // Refresh method refreshes the entity instance.
 func (e *Entity) Refresh() {
 }
@@ -307,6 +334,37 @@ func (e *Entity) Stop() {
 	if e.customStop != nil {
 		e.customStop()
 	}
+}
+
+// UnmarshalJSON method is the custom method to unmarshal JSON data into an
+// instance.
+func (e *Entity) UnmarshalJSON(data []byte) error {
+	var content map[string]any
+	if err := json.Unmarshal(data, &content); err != nil {
+		return err
+	}
+	return e.UnmarshalMap(content)
+}
+
+// UnmarshalMap method is the custom method to unmarshal a map[string]any data
+// into an instance.
+func (e *Entity) UnmarshalMap(content map[string]any) error {
+	if name, ok := content["name"].(string); ok {
+		e.name = name
+	}
+	if position, ok := content["position"].([]any); ok {
+		e.position = api.NewPoint(int(position[0].(float64)), int(position[1].(float64)))
+	}
+	if size, ok := content["size"].([]any); ok {
+		e.size = api.NewSize(int(size[0].(float64)), int(size[1].(float64)))
+	}
+	if style, ok := content["style"].([]any); ok {
+		tcellStyle := tcell.StyleDefault.
+			Foreground(tcell.GetColor(style[0].(string))).
+			Background(tcell.GetColor(style[1].(string)))
+		e.style = &tcellStyle
+	}
+	return nil
 }
 
 // Update method updates the entity instance.

@@ -1,6 +1,7 @@
 package engine_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/gdamore/tcell/v2"
@@ -62,7 +63,7 @@ func TestEntityNewEntity(t *testing.T) {
 	for i, c := range cases {
 		got := engine.NewEntity(c.input.name, c.input.position, c.input.size, c.input.style)
 		if got == nil {
-			t.Errorf("[%d] NewEntity Error exp:*Entitg got:nil", i)
+			t.Errorf("[%d] NewEntity Error exp:*Entity got:nil", i)
 			continue
 		}
 		if c.exp.name != got.GetName() {
@@ -124,7 +125,7 @@ func TestEntityNewEmptyEntity(t *testing.T) {
 	for i, c := range cases {
 		got := engine.NewEmptyEntity()
 		if got == nil {
-			t.Errorf("[%d] NewEmptyEntity Error exp:*Entitg got:nil", i)
+			t.Errorf("[%d] NewEmptyEntity Error exp:*Entity got:nil", i)
 			continue
 		}
 		if c.exp.name != got.GetName() {
@@ -173,7 +174,7 @@ func TestEntityNewNamedEntity(t *testing.T) {
 	for i, c := range cases {
 		got := engine.NewNamedEntity(c.input)
 		if got == nil {
-			t.Errorf("[%d] NewNamedEntity Error exp:*Entitg got:nil", i)
+			t.Errorf("[%d] NewNamedEntity Error exp:*Entity got:nil", i)
 			continue
 		}
 		if c.exp.name != got.GetName() {
@@ -240,7 +241,7 @@ func TestEntityProperties(t *testing.T) {
 	for i, c := range cases {
 		got := engine.NewEmptyEntity()
 		if got == nil {
-			t.Errorf("[%d] Properties Error exp:*Entitg got:nil", i)
+			t.Errorf("[%d] Properties Error exp:*Entity got:nil", i)
 			continue
 		}
 		got.SetName(c.input.name)
@@ -290,12 +291,78 @@ func TestEntityNewEmptyEntityVisible(t *testing.T) {
 	for i, c := range cases {
 		got := engine.NewEmptyEntity()
 		if got == nil {
-			t.Errorf("[%d] NewEmptyEntityVisible Error exp:*Entitg got:nil", i)
+			t.Errorf("[%d] NewEmptyEntityVisible Error exp:*Entity got:nil", i)
 			continue
 		}
 		got.SetVisible(c.input)
 		if c.exp != got.IsVisible() {
 			t.Errorf("[%d] NewEmptyEntityVisible Error exp:%t got:%t", i, c.exp, got.IsVisible())
 		}
+	}
+}
+
+func TestEntityMarshalJSON(t *testing.T) {
+	name := "test/1"
+	position := api.NewPoint(1, 2)
+	size := api.NewSize(10, 5)
+	input := engine.NewEntity(name, position, size, &styleOne)
+	if input == nil {
+		t.Errorf("[0] MarshalJSON NewEntity Error exp:*Entity got:nil")
+	}
+	output, err := json.Marshal(input)
+	if err != nil {
+		t.Errorf("[0] MarshalJSON Error:%s", err.Error())
+	}
+	var got map[string]any
+	err = json.Unmarshal(output, &got)
+	if err != nil {
+		t.Errorf("[0] MarshalJSON Error unmarshal map:%s", err.Error())
+	}
+	if got["name"].(string) != name {
+		t.Errorf("[0] MarshalJSON name exp:%s got:%s", name, got["name"])
+	}
+	gotX := got["position"].([]any)[0].(float64)
+	gotY := got["position"].([]any)[1].(float64)
+	gotPosition := api.NewPoint(int(gotX), int(gotY))
+	if !position.IsEqual(gotPosition) {
+		t.Errorf("[0] MarshalJSON position exp:%s got:%s", position.ToString(), gotPosition.ToString())
+	}
+	gotW := int(got["size"].([]any)[0].(float64))
+	gotH := int(got["size"].([]any)[1].(float64))
+	gotSize := api.NewSize(gotW, gotH)
+	if !size.IsEqual(gotSize) {
+		t.Errorf("[0] MarshalJSON size exp:%s got:%s", size.ToString(), gotSize.ToString())
+	}
+	gotFg := got["style"].([]any)[0].(string)
+	gotBg := got["style"].([]any)[1].(string)
+	gotAttrs := got["style"].([]any)[2].(string)
+	fg, bg, _ := styleOne.Decompose()
+	if fg.String() != gotFg {
+		t.Errorf("[0] MarshalJSON foreground exp:%s got:%s", fg.String(), gotFg)
+	}
+	if bg.String() != gotBg {
+		t.Errorf("[0] MarshalJSON background exp:%s got:%s", bg.String(), gotBg)
+	}
+	_ = gotAttrs
+	gotEntity := engine.NewEmptyEntity()
+	err = json.Unmarshal(output, &gotEntity)
+	if err != nil {
+		t.Errorf("[0] MarshalJSON Error unmarshal Entity:%s", err.Error())
+	}
+	if name != gotEntity.GetName() {
+		t.Errorf("[0] UnmarshalJSON name error exp:%s got:%s", name, gotEntity.GetName())
+	}
+	if !position.IsEqual(gotEntity.GetPosition()) {
+		t.Errorf("[0] UnmarshalJSON position exp:%s got:%s", position.ToString(), gotEntity.GetPosition().ToString())
+	}
+	if !size.IsEqual(gotEntity.GetSize()) {
+		t.Errorf("[0] UnmarshalJSON size exp:%s got:%s", size.ToString(), gotEntity.GetSize().ToString())
+	}
+	gotEntityFg, gotEntityBg, _ := gotEntity.GetStyle().Decompose()
+	if fg.String() != gotEntityFg.String() {
+		t.Errorf("[0] UnmarshalJSON foreground exp:%s got:%s", fg.String(), gotEntityFg.String())
+	}
+	if bg.String() != gotEntityBg.String() {
+		t.Errorf("[0] UnmarshalJSON background exp:%s got:%s", bg.String(), gotEntityBg.String())
 	}
 }

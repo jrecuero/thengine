@@ -284,7 +284,7 @@ func TestMailboxFaults(t *testing.T) {
 	}
 
 	// consume a message from a consumer not registered
-	consumerMessage, err = mailbox.Consume(topicName, wrongConsumer)
+	_, err = mailbox.Consume(topicName, wrongConsumer)
 	if err == nil {
 		t.Errorf("[3] Consume Error.WrongConsumer exp:error got:nil")
 	}

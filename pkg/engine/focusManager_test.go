@@ -142,6 +142,9 @@ func TestFocusManagerRemoveEntity(t *testing.T) {
 	_ = got.AddEntity(scene1, entity12)
 	_ = got.AddEntity(scene1, entity13)
 	gotError = got.RemoveEntity(scene1, entity11)
+	if gotError != nil {
+		t.Errorf("[3] RemoveEntity Error exp:nil got:%v", gotError)
+	}
 	gotEntities := got.GetEntities()
 	if len(gotEntities) != 1 {
 		t.Errorf("[3] RemoveEntity Error.GetEntities exp:1 got:%d", len(gotEntities))
