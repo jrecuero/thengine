@@ -497,11 +497,21 @@ func demoTwelve(dryRun bool) {
 	inputLastName := widgets.NewTextInput("input-last-name", api.NewPoint(13, 2), api.NewSize(30, 1), &styleFour, "Recuero Arias")
 	scene.AddEntity(inputLastName)
 
-	menu := widgets.NewTopMenu("menu/1", api.NewPoint(1, 3), api.NewSize(40, 3), &styleOne, []string{"one", "two", "three"}, 0)
+	menuItems := []*widgets.MenuItem{
+		widgets.NewMenuItem("one"),
+		widgets.NewMenuItem("two"),
+		widgets.NewMenuItem("three"),
+	}
+	menu := widgets.NewTopMenu("menu/1", api.NewPoint(1, 3), api.NewSize(40, 3), &styleOne, menuItems, 0)
 	menu.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &styleFive, []rune{tcell.RuneDiamond})
 	scene.AddEntity(menu)
 
-	submenu := widgets.NewSubMenu("submenu/1", api.NewPoint(1, 6), api.NewSize(10, 5), &styleTwo, []string{"ONE", "TWO", "THREE"}, 0, menu)
+	subMenuItems := []*widgets.MenuItem{
+		widgets.NewMenuItem("ONE"),
+		widgets.NewMenuItem("TWO"),
+		widgets.NewMenuItem("THREE"),
+	}
+	submenu := widgets.NewSubMenu("submenu/1", api.NewPoint(1, 6), api.NewSize(10, 5), &styleTwo, subMenuItems, 0, menu)
 	submenu.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &styleTwo, engine.CanvasRectSingleLine)
 	scene.AddEntity(submenu)
 
