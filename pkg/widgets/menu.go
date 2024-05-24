@@ -188,6 +188,10 @@ func (m *Menu) execute(args ...any) {
 			m.nextMenuItem()
 		}
 	case "run":
+		menuItem := m.menuItems[m.menuItemIndex]
+		if callback, args := menuItem.GetCallback(); callback != nil {
+			callback(m, args...)
+		}
 	}
 }
 
@@ -245,6 +249,9 @@ func (m *Menu) updateSubMenuCanvas() {
 			canvas.WriteStringInCanvasAt(selection, m.GetStyle(), api.NewPoint(x, y+1))
 		} else {
 			reverseStyle := tools.ReverseStyle(m.GetStyle())
+			if !m.menuItems[index].IsEnabled() {
+				reverseStyle = tools.SetAttrToStyle(reverseStyle, tcell.AttrDim)
+			}
 			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y+1))
 		}
 	}
@@ -264,25 +271,93 @@ func (m *Menu) updateCanvas() {
 // Menu public methods
 // -----------------------------------------------------------------------------
 
-func (m *Menu) DisableMenuItemForIndex(index int) error {
-	if index < len(m.menuItems) {
-		m.menuItems[index].SetEnabled(false)
-		return nil
+// DisableMenuItemForIndex method disables all menu items for given indexes.
+func (m *Menu) DisableMenuItemForIndex(indexes ...int) error {
+	for _, index := range indexes {
+		if index < len(m.menuItems) {
+			m.menuItems[index].SetEnabled(false)
+		} else {
+			return fmt.Errorf("Index %d out of range for menu %s", index, m.GetName())
+		}
 	}
-	return fmt.Errorf("Index %d out of range for menu %s", index, m.GetName())
+	return nil
 }
 
-func (m *Menu) EnableMenuItemForIndex(index int) error {
-	if index < len(m.menuItems) {
-		m.menuItems[index].SetEnabled(true)
-		return nil
+// DisableMenuItemForLabel method disables all menu item for given labels.
+func (m *Menu) DisableMenuItemsForLabel(labels ...string) error {
+	for _, label := range labels {
+		if menuItem := m.FindMenuItemByLabel(label); menuItem != nil {
+			menuItem.SetEnabled(false)
+		} else {
+			return fmt.Errorf("Label %s not found for menu %s", label, m.GetName())
+		}
 	}
-	return fmt.Errorf("Index %d out of range for menu %s", index, m.GetName())
+	return nil
+}
+
+// EnableMenuItemForIndex method enables all menu items for given indexes.
+func (m *Menu) EnableMenuItemForIndex(indexes ...int) error {
+	for _, index := range indexes {
+		if index < len(m.menuItems) {
+			m.menuItems[index].SetEnabled(true)
+		} else {
+			return fmt.Errorf("Index %d out of range for menu %s", index, m.GetName())
+		}
+	}
+	return nil
+}
+
+// EnableMenuItemForLabel method enables all menu item for given labels.
+func (m *Menu) EnableMenuItemsForLabel(labels ...string) error {
+	for _, label := range labels {
+		if menuItem := m.FindMenuItemByLabel(label); menuItem != nil {
+			menuItem.SetEnabled(true)
+		} else {
+			return fmt.Errorf("Label %s not found for menu %s", label, m.GetName())
+		}
+	}
+	return nil
+}
+
+// FindMenuItemByLabel method finds the menu item for the given label.
+func (m *Menu) FindMenuItemByLabel(label string) *MenuItem {
+	for _, menuItem := range m.menuItems {
+		if menuItem.GetLabel() == label {
+			return menuItem
+		}
+	}
+	return nil
 }
 
 // GetSelection method returns the option for the selected index.
 func (m *Menu) GetSelection() string {
 	return strings.TrimSpace(m.getMenuItemLabel(m.menuItemIndex))
+}
+
+func (m *Menu) Refresh() {
+	m.updateCanvas()
+}
+
+// SetSelectionToIndex method sets the menu item index selected to the given
+// index.
+func (m *Menu) SetSelectionToIndex(index int) error {
+	if index < len(m.menuItems) {
+		m.menuItemIndex = index
+		return nil
+	}
+	return fmt.Errorf("Index %d out of range for menu %s", index, m.GetName())
+}
+
+// SetSelectionToLabel method sets the menu item index selected to the given
+// label.
+func (m *Menu) SetSelectionToLabel(label string) error {
+	for index, menuLabel := range m.menuLabels {
+		if menuLabel == label {
+			m.menuItemIndex = index
+			return nil
+		}
+	}
+	return fmt.Errorf("Label %s not found for menu %s", label, m.GetName())
 }
 
 // Update method executes all listbox functionality every tick time. Keyboard

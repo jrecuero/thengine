@@ -222,6 +222,8 @@ func (e *Engine) Run(fps float64) {
 			case *tcell.EventKey:
 				switch ev.Key() {
 				case tcell.KeyEscape:
+					//isRunning = false
+				case tcell.KeyCtrlC:
 					isRunning = false
 				case tcell.KeyTab:
 					tools.Logger.WithField("module", "engine").
