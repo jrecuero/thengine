@@ -227,8 +227,7 @@ func (m *Menu) updateTopMenuCanvas() {
 		} else {
 			reverseStyle := tools.ReverseStyle(m.GetStyle())
 			if !m.menuItems[index].IsEnabled() {
-				reverseStyle.Attributes(tcell.AttrStrikeThrough)
-				tools.Logger.WithField("module", "menu").WithField("method", "updateTopMenuCanvas").Debugf("%s strike-through", selection)
+				reverseStyle = tools.SetAttrToStyle(reverseStyle, tcell.AttrDim)
 			}
 			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x+1, y))
 		}

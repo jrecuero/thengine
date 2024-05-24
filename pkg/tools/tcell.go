@@ -11,6 +11,14 @@ import (
 // Public functions
 // -----------------------------------------------------------------------------
 
+// ClearAttrToStyle function clears the given attribute to the style.
+func ClearAttrToStyle(style *tcell.Style, maskAttr tcell.AttrMask) *tcell.Style {
+	fg, bg, attr := style.Decompose()
+	attr &= ^maskAttr
+	reversed := tcell.StyleDefault.Foreground(fg).Background(bg).Attributes(attr)
+	return &reversed
+}
+
 // IsEqualStyle function checks if two styles are the same.
 func IsEqualStyle(style1, style2 *tcell.Style) bool {
 	fg1, bg1, attrs1 := style1.Decompose()
@@ -26,6 +34,14 @@ func ReverseStyle(style *tcell.Style) *tcell.Style {
 	}
 	fg, bg, attrs := style.Decompose()
 	reversed := tcell.StyleDefault.Foreground(bg).Background(fg).Attributes(attrs)
+	return &reversed
+}
+
+// SetAttrToStyle function sets the given attribute to the style.
+func SetAttrToStyle(style *tcell.Style, maskAttr tcell.AttrMask) *tcell.Style {
+	fg, bg, attr := style.Decompose()
+	attr |= maskAttr
+	reversed := tcell.StyleDefault.Foreground(fg).Background(bg).Attributes(attr)
 	return &reversed
 }
 

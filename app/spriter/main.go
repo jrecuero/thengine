@@ -32,6 +32,7 @@ var (
 	theCamera              = engine.NewCamera(api.NewPoint(0, 0), api.NewSize(theWidth, theHeight))
 	theEngine              = engine.GetEngine()
 	theStyleWhiteOverBlack = tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)
+	theStyleBlackOverWhite = tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite)
 )
 
 // -----------------------------------------------------------------------------
@@ -48,7 +49,7 @@ func main() {
 		widgets.NewMenuItem("Load"),
 		widgets.NewMenuItem("New Rune"),
 	}
-	topMenu := widgets.NewTopMenu(TopMenuName, api.NewPoint(0, 0), api.NewSize(theWidth, 3), &theStyleWhiteOverBlack, topMenuItems, 0)
+	topMenu := widgets.NewTopMenu(TopMenuName, api.NewPoint(0, 0), api.NewSize(theWidth, 3), &theStyleBlackOverWhite, topMenuItems, 0)
 	topMenu.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &theStyleWhiteOverBlack, engine.CanvasRectSingleLine)
 	drawingScene.AddEntity(topMenu)
 
