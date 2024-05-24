@@ -45,7 +45,7 @@ func (c *Collider) collidePointsWithPoints(collider *Collider) bool {
 
 func (c *Collider) collideRectWithPoints(collider *Collider) bool {
 	for _, point := range collider.GetPoints() {
-		if c.GetRect().IsInside(point) {
+		if c.GetRect().IsIn(point) {
 			return true
 		}
 	}

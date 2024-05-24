@@ -32,7 +32,7 @@ func (b *BuiltInTest) GetClassFromString(className string) engine.IEntity {
 
 func TestImportGetEntitiesFromJSON(t *testing.T) {
 	filename := "assets/test/entities.json"
-	got := engine.GetEntitiesFromJSON(filename, &BuiltInTest{})
+	got := engine.ImportEntitiesFromJSON(filename, &BuiltInTest{})
 	if len(got) != 1 {
 		t.Errorf("[0] GetEntitiesFromJSON len error exp:%d got:%d", 1, len(got))
 	}

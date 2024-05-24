@@ -335,7 +335,7 @@ func (m *SceneManager) UpdateFocus() {
 	if lenActiveScenes := len(m.activeScenes); lenActiveScenes != 0 {
 		lastActiveScene := m.activeScenes[lenActiveScenes-1]
 		tools.Logger.WithField("module", "scene-manager").
-			WithField("function", "UpdateFocus").
+			WithField("method", "UpdateFocus").
 			Debugf("scene %s", lastActiveScene.GetName())
 		focusManager := GetEngine().GetFocusManager()
 		focusManager.UpdateFocusForScene(lastActiveScene)

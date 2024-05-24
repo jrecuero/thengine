@@ -346,7 +346,7 @@ func TestRectIsEqual(t *testing.T) {
 	}
 }
 
-func TestRectInside(t *testing.T) {
+func TestRectIn(t *testing.T) {
 	cases := []struct {
 		input []int
 		exp   bool
@@ -381,9 +381,59 @@ func TestRectInside(t *testing.T) {
 		size := api.NewSize(c.input[2], c.input[3])
 		rect := api.NewRect(origin, size)
 		point := api.NewPoint(c.input[4], c.input[5])
+		got := rect.IsIn(point)
+		if c.exp != got {
+			t.Errorf("[%d] IsIn Error exp:%t got: %t", i, c.exp, got)
+		}
+	}
+}
+
+func TestRectInside(t *testing.T) {
+	cases := []struct {
+		input []int
+		exp   bool
+	}{
+		{
+			input: []int{0, 0, 10, 10, 5, 5},
+			exp:   true,
+		},
+		{
+			input: []int{0, 0, 10, 10, 1, 1},
+			exp:   true,
+		},
+		{
+			input: []int{0, 0, 10, 10, 8, 8},
+			exp:   true,
+		},
+		{
+			input: []int{0, 0, 10, 10, 0, 0},
+			exp:   false,
+		},
+		{
+			input: []int{0, 0, 10, 10, 0, 9},
+			exp:   false,
+		},
+		{
+			input: []int{0, 0, 10, 10, 9, 0},
+			exp:   false,
+		},
+		{
+			input: []int{0, 0, 10, 10, 9, 9},
+			exp:   false,
+		},
+		{
+			input: []int{0, 0, 10, 10, 15, 15},
+			exp:   false,
+		},
+	}
+	for i, c := range cases {
+		origin := api.NewPoint(c.input[0], c.input[1])
+		size := api.NewSize(c.input[2], c.input[3])
+		rect := api.NewRect(origin, size)
+		point := api.NewPoint(c.input[4], c.input[5])
 		got := rect.IsInside(point)
 		if c.exp != got {
-			t.Errorf("[%d] IsInside Error exp:%t got: %t", i, c.exp, got)
+			t.Errorf("[%d] IsInside Error %+v exp:%t got: %t", i, c.input, c.exp, got)
 		}
 	}
 }

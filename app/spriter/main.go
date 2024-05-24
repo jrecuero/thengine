@@ -12,17 +12,26 @@ import (
 // main private constants
 // -----------------------------------------------------------------------------
 const (
-	theWidth  = 90
-	theHeight = 30
-	theFPS    = 60.0
+	theCameraWidth      = 90
+	theCameraHeight     = 40
+	theMenuBoxWidth     = theCameraWidth
+	theMenuBoxHeight    = 3
+	theDrawingBoxWidth  = theCameraWidth
+	theDrawingBoxHeight = 27
+	theEntityBoxWidth   = theCameraWidth
+	theEntityBoxHeight  = 10
+	theFPS              = 60.0
 )
 
 // -----------------------------------------------------------------------------
 // main public constants
 // -----------------------------------------------------------------------------
 const (
-	TopMenuName    = "menu/top/1"
-	DrawingBoxName = "entity/drawing-box/1"
+	DrawingSceneName = "scene/drawing/1"
+	EntitySceneName  = "scene/entity/1"
+	TopMenuName      = "menu/top/1"
+	DrawingBoxName   = "entity/drawing-box/1"
+	EntityBoxName    = "entity/entity-box/1"
 )
 
 // -----------------------------------------------------------------------------
@@ -30,7 +39,7 @@ const (
 // -----------------------------------------------------------------------------
 
 var (
-	theCamera = engine.NewCamera(api.NewPoint(0, 0), api.NewSize(theWidth, theHeight))
+	theCamera = engine.NewCamera(api.NewPoint(0, 0), api.NewSize(theCameraWidth, theCameraHeight))
 	theEngine = engine.GetEngine()
 )
 
@@ -44,6 +53,11 @@ var (
 	TheStyleBlackOverWhite         = tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite)
 	TheStyleBlinkingBlackOverWhite = tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite).Attributes(tcell.AttrBlink)
 	TheStyleBoldBlackOverWhite     = tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite).Attributes(tcell.AttrBold)
+	TheDrawingBoxOrigin            = api.NewPoint(0, theMenuBoxHeight)
+	TheDrawingBoxSize              = api.NewSize(theDrawingBoxWidth, theDrawingBoxHeight)
+	TheDrawingBoxRect              = api.NewRect(TheDrawingBoxOrigin, TheDrawingBoxSize)
+	TheEntityBoxOrigin             = api.NewPoint(0, theMenuBoxHeight+theDrawingBoxHeight)
+	TheEntityBoxSize               = api.NewSize(theEntityBoxWidth, theEntityBoxHeight)
 )
 
 // -----------------------------------------------------------------------------
@@ -51,12 +65,15 @@ var (
 // -----------------------------------------------------------------------------
 
 func createDrawingBox(scene engine.IScene) {
-	drawingBox := engine.NewEntity(DrawingBoxName, api.NewPoint(0, 3), api.NewSize(theWidth, theHeight-3), &TheStyleWhiteOverBlack)
+	drawingBox := engine.NewEntity(DrawingBoxName, TheDrawingBoxOrigin, TheDrawingBoxSize, &TheStyleWhiteOverBlack)
 	drawingBox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &TheStyleWhiteOverBlack, engine.CanvasRectSingleLine)
 	scene.AddEntity(drawingBox)
 
-	cursor := NewCursor(api.NewPoint(1, 4))
+	cursor := NewCursor(api.NewPoint(1, theMenuBoxHeight+1))
 	scene.AddEntity(cursor)
+
+	handler := NewHandler()
+	scene.AddEntity(handler)
 }
 
 func newSpriter(ent engine.IEntity, args ...any) bool {
@@ -77,7 +94,7 @@ func newSpriter(ent engine.IEntity, args ...any) bool {
 
 func main() {
 	tools.Logger.WithField("module", "spriter").WithField("function", "main").Infof("Spriter App")
-	drawingScene := engine.NewScene("scene/drawing/1", theCamera)
+	drawingScene := engine.NewScene(DrawingSceneName, theCamera)
 
 	topMenuItems := []*widgets.MenuItem{
 		widgets.NewExtendedMenuItem("New", true, nil, newSpriter, []any{drawingScene}),
@@ -85,7 +102,7 @@ func main() {
 		widgets.NewExtendedMenuItem("Load", true, nil, nil, nil),
 		widgets.NewExtendedMenuItem("New Rune", false, nil, nil, nil),
 	}
-	topMenu := widgets.NewTopMenu(TopMenuName, api.NewPoint(0, 0), api.NewSize(theWidth, 3), &TheStyleBlackOverWhite, topMenuItems, 0)
+	topMenu := widgets.NewTopMenu(TopMenuName, api.NewPoint(0, 0), api.NewSize(theMenuBoxWidth, theMenuBoxHeight), &TheStyleBlackOverWhite, topMenuItems, 0)
 	topMenu.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &TheStyleWhiteOverBlack, engine.CanvasRectSingleLine)
 	drawingScene.AddEntity(topMenu)
 

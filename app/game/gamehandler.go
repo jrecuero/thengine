@@ -19,6 +19,18 @@ type GameHandler struct {
 	*engine.Entity
 }
 
+func NewGameHandler() *GameHandler {
+	if theGameHandler == nil {
+		tools.Logger.WithField("module", "gameHandler").WithField("function", "NewGameHandler").Debugf("handler/game/1")
+		theGameHandler = &GameHandler{
+			Entity: engine.NewHandler("handler/game/1"),
+		}
+		theGameHandler.SetFocusType(engine.MultiFocus)
+		theGameHandler.SetFocusEnable(true)
+	}
+	return theGameHandler
+}
+
 // -----------------------------------------------------------------------------
 // Module private methods
 // -----------------------------------------------------------------------------
@@ -75,18 +87,6 @@ func writeToCommandLine(scene engine.IScene, str string) {
 // -----------------------------------------------------------------------------
 // GameHandler public methods
 // -----------------------------------------------------------------------------
-
-func NewGameHandler() *GameHandler {
-	if theGameHandler == nil {
-		tools.Logger.WithField("module", "gameHandler").WithField("function", "NewGameHandler").Debugf("handler/game/1")
-		theGameHandler = &GameHandler{
-			Entity: engine.NewHandler("handler/game/1"),
-		}
-		theGameHandler.SetFocusType(engine.MultiFocus)
-		theGameHandler.SetFocusEnable(true)
-	}
-	return theGameHandler
-}
 
 func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 	if !h.HasFocus() {

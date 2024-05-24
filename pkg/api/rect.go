@@ -100,12 +100,21 @@ func (r *Rect) IsEqual(rect *Rect) bool {
 	return r.Origin.IsEqual(rect.Origin) && r.Size.IsEqual(rect.Size)
 }
 
-// IsInside method checks if the given point is inside the rectangle.
-func (r *Rect) IsInside(point *Point) bool {
+// IsIn method checks if the given point is in the rectangle, borders included.
+func (r *Rect) IsIn(point *Point) bool {
 	return point.X >= r.Origin.X &&
 		point.X < (r.Origin.X+r.Size.W) &&
 		point.Y >= r.Origin.Y &&
 		point.Y < (r.Origin.Y+r.Size.H)
+}
+
+// IsInside method checks if the given point is inside the rectangle, excluding
+// rectangle borders.
+func (r *Rect) IsInside(point *Point) bool {
+	return point.X > r.Origin.X &&
+		point.X < (r.Origin.X+r.Size.W-1) &&
+		point.Y > r.Origin.Y &&
+		point.Y < (r.Origin.Y+r.Size.H-1)
 }
 
 // IsRectIntersect method checks if the given rectangle is inside the rectangle
