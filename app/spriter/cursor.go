@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/widgets"
@@ -18,7 +19,7 @@ func NewCursor(position *api.Point) *Cursor {
 	cursor := &Cursor{
 		Widget: widgets.NewWidget(CursorName, position, api.NewSize(1, 1), &TheStyleWhiteOverBlack),
 	}
-	cell := engine.NewCell(&TheStyleWhiteOverBlack, 'x')
+	cell := engine.NewCell(&TheStyleBlinkingWhiteOverBlack, tcell.RuneBlock)
 	cursor.GetCanvas().SetCellAt(nil, cell)
 	return cursor
 }
