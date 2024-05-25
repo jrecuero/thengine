@@ -17,7 +17,7 @@ import (
 
 // ICamera interface defines all functions a Camera has to implement.
 type ICamera interface {
-	Draw(bool, tcell.Screen)
+	//Draw(bool, tcell.Screen)
 	GetOrigin() *api.Point
 	Init(tcell.Screen)
 	RenderCellAt(*api.Point, *Cell) bool
@@ -69,13 +69,13 @@ func NewCamera(origin *api.Point, size *api.Size) *Camera {
 // -----------------------------------------------------------------------------
 
 // Draw method draws the canvas content in the screen.
-func (s *Camera) Draw(flush bool, screen tcell.Screen) {
-	if flush {
-		if !s.dryRun {
-			s.screen.Show()
-		}
-	}
-}
+//func (s *Camera) Draw(flush bool, screen tcell.Screen) {
+//    if flush {
+//        if !s.dryRun {
+//            s.screen.Show()
+//        }
+//    }
+//}
 
 // GetOrigin method returns the origin point for the camera.
 func (s *Camera) GetOrigin() *api.Point {

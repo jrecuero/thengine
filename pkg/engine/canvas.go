@@ -200,6 +200,9 @@ func (c *Canvas) FillWithCell(cell *Cell) {
 
 // GetCellAt method returns the cell in the canvas at the given row and column.
 func (c *Canvas) GetCellAt(point *api.Point) *Cell {
+	if point == nil {
+		point = api.NewPoint(0, 0)
+	}
 	if c.IsInside(point) {
 		return c.Rows[point.Y].Cols[point.X]
 	}

@@ -20,7 +20,7 @@ const (
 	theDrawingBoxHeight = 27
 	theEntityBoxWidth   = theCameraWidth
 	theEntityBoxHeight  = 10
-	theFPS              = 60.0
+	theFPS              = 10.0
 )
 
 // -----------------------------------------------------------------------------
@@ -53,6 +53,8 @@ var (
 	TheStyleBlackOverWhite         = tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite)
 	TheStyleBlinkingBlackOverWhite = tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite).Attributes(tcell.AttrBlink)
 	TheStyleBoldBlackOverWhite     = tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite).Attributes(tcell.AttrBold)
+	TheStyleBoldBlackOverGreen     = tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorGreen).Attributes(tcell.AttrBold)
+	TheStyleBoldGreenOverBlack     = tcell.StyleDefault.Foreground(tcell.ColorGreen).Background(tcell.ColorBlack).Attributes(tcell.AttrBold)
 	TheDrawingBoxOrigin            = api.NewPoint(0, theMenuBoxHeight)
 	TheDrawingBoxSize              = api.NewSize(theDrawingBoxWidth, theDrawingBoxHeight)
 	TheDrawingBoxRect              = api.NewRect(TheDrawingBoxOrigin, TheDrawingBoxSize)
@@ -65,8 +67,9 @@ var (
 // -----------------------------------------------------------------------------
 
 func createDrawingBox(scene engine.IScene) {
-	drawingBox := engine.NewEntity(DrawingBoxName, TheDrawingBoxOrigin, TheDrawingBoxSize, &TheStyleWhiteOverBlack)
-	drawingBox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &TheStyleWhiteOverBlack, engine.CanvasRectSingleLine)
+	//drawingBox := engine.NewEntity(DrawingBoxName, TheDrawingBoxOrigin, TheDrawingBoxSize, &TheStyleWhiteOverBlack)
+	//drawingBox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &TheStyleWhiteOverBlack, engine.CanvasRectSingleLine)
+	drawingBox := widgets.NewBox(DrawingBoxName, TheDrawingBoxOrigin, TheDrawingBoxSize, &TheStyleWhiteOverBlack, widgets.BoxSingleLine)
 	scene.AddEntity(drawingBox)
 
 	cursor := NewCursor(api.NewPoint(1, theMenuBoxHeight+1))
@@ -74,6 +77,8 @@ func createDrawingBox(scene engine.IScene) {
 
 	handler := NewHandler()
 	scene.AddEntity(handler)
+
+	engine.GetEngine().GetSceneManager().UpdateFocus()
 }
 
 func newSpriter(ent engine.IEntity, args ...any) bool {
@@ -110,6 +115,7 @@ func main() {
 	theEngine.GetSceneManager().AddScene(drawingScene)
 	theEngine.GetSceneManager().SetSceneAsActive(drawingScene)
 	theEngine.GetSceneManager().SetSceneAsVisible(drawingScene)
+	theEngine.GetSceneManager().UpdateFocus()
 	theEngine.Init()
 	theEngine.Start()
 	theEngine.Run(theFPS)

@@ -21,7 +21,7 @@ type Handler struct {
 func NewHandler() *Handler {
 	if theHandler == nil {
 		theHandler = &Handler{
-			Entity: engine.NewNamedEntity(HandlerName),
+			Entity: engine.NewHandler(HandlerName),
 		}
 		theHandler.SetFocusType(engine.SingleFocus)
 		theHandler.SetFocusEnable(true)

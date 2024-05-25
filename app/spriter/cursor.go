@@ -19,7 +19,8 @@ func NewCursor(position *api.Point) *Cursor {
 	cursor := &Cursor{
 		Widget: widgets.NewWidget(CursorName, position, api.NewSize(1, 1), &TheStyleWhiteOverBlack),
 	}
-	cell := engine.NewCell(&TheStyleBlinkingWhiteOverBlack, tcell.RuneBlock)
+	//cell := engine.NewCell(&TheStyleBlinkingWhiteOverBlack, tcell.RuneBlock)
+	cell := engine.NewCell(&TheStyleWhiteOverBlack, tcell.RuneBlock)
 	cursor.GetCanvas().SetCellAt(nil, cell)
 	return cursor
 }

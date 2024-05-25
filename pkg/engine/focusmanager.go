@@ -55,7 +55,7 @@ func (m *FocusManager) acquireFocusToEntityInScene(sceneName string, entity IEnt
 	}
 	m.withFocus[sceneName] = append(m.withFocus[sceneName], entity)
 	tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("withFocus %+v", m.withFocus)
-	tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("entity %s", entity.GetName())
+	tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("acquire focus entity %s", entity.GetName())
 	entity.AcquireFocus()
 	// Remove the entity from the list of entities so it can not take focus
 	// again.

@@ -223,7 +223,8 @@ func demoOne() {
 	appEngine := engine.GetEngine()
 	appEngine.InitResources()
 	appEngine.Init()
-	camera.Draw(true, appEngine.GetScreen())
+	//camera.Draw(true, appEngine.GetScreen())
+	appEngine.GetScreen().Show()
 	appEngine.Run(60.0)
 }
 

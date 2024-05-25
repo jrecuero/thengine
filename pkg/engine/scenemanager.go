@@ -108,8 +108,9 @@ func (m *SceneManager) DeactivateScene(scene IScene) bool {
 func (m *SceneManager) Draw(screen tcell.Screen) {
 	for _, scene := range m.visibleScenes {
 		scene.Draw()
-		scene.GetCamera().Draw(true, screen)
+		//scene.GetCamera().Draw(true, screen)
 	}
+	GetEngine().GetScreen().Show()
 }
 
 // GetSceneByIndex method finds a scene with the given index. If the index is
@@ -243,6 +244,12 @@ func (m *SceneManager) PushVisibleSceneAsLast(scene IScene) bool {
 
 // RemoveScene method removes the given scene from all scene slices.
 func (m *SceneManager) RemoveScene(scene IScene) bool {
+	// Remove the scene from the focus manager
+	focusManager := GetEngine().GetFocusManager()
+	focusManager.RemoveScene(scene)
+
+	// Remove scene from all scene manager lists: active, visible and
+	// available.
 	m.RemoveSceneAsActive(scene)
 	m.RemoveSceneAsVisible(scene)
 	return m.RemoveSceneAsAvailable(scene)
