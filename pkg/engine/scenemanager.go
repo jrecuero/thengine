@@ -73,6 +73,10 @@ func (m *SceneManager) ActivateScene(scene IScene) bool {
 
 // AddScene method adds a new Scene to be handled by the manager.
 func (m *SceneManager) AddScene(scene IScene) bool {
+	tools.Logger.WithField("module", "scene-manager").
+		WithField("method", "AddScene").
+		Debugf("add scene %s", scene.GetName())
+
 	m.scenes = append(m.scenes, scene)
 	// if the scene manager has been already initialized or started, call
 	// related function for the added scene.
@@ -244,6 +248,10 @@ func (m *SceneManager) PushVisibleSceneAsLast(scene IScene) bool {
 
 // RemoveScene method removes the given scene from all scene slices.
 func (m *SceneManager) RemoveScene(scene IScene) bool {
+	tools.Logger.WithField("module", "scene-manager").
+		WithField("method", "RemoveScene").
+		Debugf("remove scene %s", scene.GetName())
+
 	// Remove the scene from the focus manager
 	focusManager := GetEngine().GetFocusManager()
 	focusManager.RemoveScene(scene)
@@ -258,7 +266,7 @@ func (m *SceneManager) RemoveScene(scene IScene) bool {
 // RemoveSceneAsActive method removes the given scene as an active scene.
 func (m *SceneManager) RemoveSceneAsActive(scene IScene) bool {
 	if index := m.GetActiveSceneIndex(scene); index != InvalidSceneIndex {
-		m.activeScenes = append(m.activeScenes[:index], m.scenes[index+1:]...)
+		m.activeScenes = append(m.activeScenes[:index], m.activeScenes[index+1:]...)
 		return true
 	}
 	return false
@@ -333,6 +341,9 @@ func (m *SceneManager) Stop() {
 // Update method is called by the engine to update all scene manager scenes.
 func (m *SceneManager) Update(event tcell.Event) {
 	for _, scene := range m.activeScenes {
+		//tools.Logger.WithField("module", "scene-manager").
+		//    WithField("method", "Update").
+		//    Debugf("scene %s", scene.GetName())
 		scene.Update(event)
 	}
 }

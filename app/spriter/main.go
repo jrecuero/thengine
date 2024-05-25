@@ -20,7 +20,7 @@ const (
 	theDrawingBoxHeight = 27
 	theEntityBoxWidth   = theCameraWidth
 	theEntityBoxHeight  = 10
-	theFPS              = 10.0
+	theFPS              = 60.0
 )
 
 // -----------------------------------------------------------------------------
@@ -75,8 +75,8 @@ func createDrawingBox(scene engine.IScene) {
 	cursor := NewCursor(api.NewPoint(1, theMenuBoxHeight+1))
 	scene.AddEntity(cursor)
 
-	handler := NewHandler()
-	scene.AddEntity(handler)
+	theHandler = NewHandler()
+	scene.AddEntity(theHandler)
 
 	engine.GetEngine().GetSceneManager().UpdateFocus()
 }
@@ -97,15 +97,40 @@ func newSpriter(ent engine.IEntity, args ...any) bool {
 	return true
 }
 
+func load(ent engine.IEntity, args ...any) bool {
+	scene := args[0].(engine.IScene)
+	filename := args[1].(string)
+	if theHandler == nil {
+		newSpriter(ent, args...)
+	}
+	entities := engine.ImportEntitiesFromJSON(filename, nil)
+	for _, ent := range entities {
+		scene.AddEntity(ent)
+	}
+	return true
+}
+
+func save(ent engine.IEntity, args ...any) bool {
+	if theHandler != nil {
+		theHandler.SaveEntities()
+	}
+	return true
+}
+
+func exit(ent engine.IEntity, args ...any) bool {
+	engine.GetEngine().End()
+	return true
+}
+
 func main() {
 	tools.Logger.WithField("module", "spriter").WithField("function", "main").Infof("Spriter App")
 	drawingScene := engine.NewScene(DrawingSceneName, theCamera)
 
 	topMenuItems := []*widgets.MenuItem{
 		widgets.NewExtendedMenuItem("New", true, nil, newSpriter, []any{drawingScene}),
-		widgets.NewExtendedMenuItem("Save", false, nil, nil, nil),
-		widgets.NewExtendedMenuItem("Load", true, nil, nil, nil),
-		widgets.NewExtendedMenuItem("New Rune", false, nil, nil, nil),
+		widgets.NewExtendedMenuItem("Save", false, nil, save, nil),
+		widgets.NewExtendedMenuItem("Load", true, nil, load, []any{drawingScene, "output.json"}),
+		widgets.NewExtendedMenuItem("Exit", true, nil, exit, nil),
 	}
 	topMenu := widgets.NewTopMenu(TopMenuName, api.NewPoint(0, 0), api.NewSize(theMenuBoxWidth, theMenuBoxHeight), &TheStyleBlackOverWhite, topMenuItems, 0)
 	topMenu.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &TheStyleWhiteOverBlack, engine.CanvasRectSingleLine)

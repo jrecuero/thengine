@@ -32,6 +32,8 @@ type IEntity interface {
 	GetZLevel() int
 	Init(tcell.Screen)
 	IsSolid() bool
+	MarshalJSON() ([]byte, error)
+	MarshalMap() (map[string]any, error)
 	Refresh()
 	SetCanvas(*Canvas)
 	SetCustomInit(func())
@@ -252,11 +254,14 @@ func (e *Entity) MarshalJSON() ([]byte, error) {
 // from an instance.
 func (e *Entity) MarshalMap() (map[string]any, error) {
 	fg, bg, attrs := e.style.Decompose()
+	cell := e.GetCanvas().GetCellAt(nil)
 	content := map[string]any{
+		"class":    e.GetClassName(),
 		"name":     e.name,
 		"position": []int{e.position.X, e.position.Y},
 		"size":     []int{e.size.W, e.size.H},
 		"style":    []string{fg.String(), bg.String(), strconv.Itoa(int(attrs))},
+		"ch":       string(cell.Rune),
 	}
 	return content, nil
 }

@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"github.com/jrecuero/thengine/pkg/tools"
 )
 
 // -----------------------------------------------------------------------------
@@ -38,7 +40,12 @@ func ImportEntitiesFromJSON(filename string, builtin IBuiltIn) []IEntity {
 		panic(fmt.Sprintf("Error unmarshaling %s:%s", filename, err.Error()))
 	}
 	for _, mapEntity := range content {
-		ent := builtin.GetClassFromString(mapEntity["class"].(string))
+		var ent IEntity
+		if builtin == nil {
+			ent = NewEmptyEntity()
+		} else {
+			ent = builtin.GetClassFromString(mapEntity["class"].(string))
+		}
 		if err := ent.UnmarshalMap(mapEntity); err != nil {
 			panic(fmt.Sprintf("Error unmarshaling entitys %s:%s", filename, err.Error()))
 		}
@@ -55,4 +62,28 @@ func ImportEntitiesFromJSON(filename string, builtin IBuiltIn) []IEntity {
 	}
 
 	return result
+}
+
+// ExportEntitiesToJSON function exports given entites to the given JSON file
+// in JSON format.
+func ExportEntitiesToJSON(filename string, entities []IEntity, builtin IBuiltIn) error {
+	var result []map[string]any
+	for _, ent := range entities {
+		if resultMap, err := ent.MarshalMap(); err == nil {
+			tools.Logger.WithField("module", "import").
+				WithField("function", "ExportEntitiesToJSON").
+				Debug(resultMap)
+			result = append(result, resultMap)
+		} else {
+			return err
+		}
+	}
+	if jsonData, err := json.Marshal(result); err == nil {
+		if err = os.WriteFile(filename, jsonData, 0644); err != nil {
+			return err
+		}
+	} else {
+		return err
+	}
+	return nil
 }

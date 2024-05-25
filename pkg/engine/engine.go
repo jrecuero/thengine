@@ -57,6 +57,7 @@ type Engine struct {
 	focusManager *FocusManager
 	ctrlCh       chan bool
 	eventCh      chan tcell.Event
+	isRunning    bool
 	dryRun       bool
 }
 
@@ -67,6 +68,7 @@ func newEngine() *Engine {
 		focusManager: NewFocusManager(),
 		ctrlCh:       make(chan bool, 2),
 		eventCh:      make(chan tcell.Event),
+		isRunning:    true,
 	}
 	return engine
 }
@@ -134,6 +136,10 @@ func (e *Engine) Draw() {
 	e.sceneManager.Draw(e.screen)
 }
 
+func (e *Engine) End() {
+	e.isRunning = false
+}
+
 // GetScreen method returns the tcell.Screen used by the engine.
 func (e *Engine) GetScreen() tcell.Screen {
 	return e.screen
@@ -174,7 +180,6 @@ func (e *Engine) InitResources() {
 // Run method runs the engine in an infinite loop.
 func (e *Engine) Run(fps float64) {
 	var event tcell.Event
-	var isRunning bool = true
 
 	if !e.dryRun {
 		e.startEventPoll()
@@ -207,7 +212,7 @@ func (e *Engine) Run(fps float64) {
 		}()
 	}
 
-	for isRunning {
+	for e.isRunning {
 		nowTime := time.Now()
 		event = nil
 		select {
@@ -222,9 +227,9 @@ func (e *Engine) Run(fps float64) {
 			case *tcell.EventKey:
 				switch ev.Key() {
 				case tcell.KeyEscape:
-					//isRunning = false
+					//h.isRunning = false
 				case tcell.KeyCtrlC:
-					isRunning = false
+					e.isRunning = false
 				case tcell.KeyTab:
 					tools.Logger.WithField("module", "engine").
 						WithField("function", "Run").

@@ -69,6 +69,12 @@ func (s *Size) IsZeroSize() bool {
 	return (s.W == 0) && (s.H == 0)
 }
 
+// IsOneSize method returns if the Size instance has width and height equal to
+// one.
+func (s *Size) IsOneSize() bool {
+	return (s.W == 1) && (s.H == 1)
+}
+
 // ToString method returns size information as a string.
 func (s *Size) ToString() string {
 	return fmt.Sprintf("(%d-%d)", s.W, s.H)

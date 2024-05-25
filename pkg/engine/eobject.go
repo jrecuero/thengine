@@ -30,11 +30,13 @@ func newID() string {
 // IObject interface defines all function that should be implemented by the
 // most basic and common application object.
 type IObject interface {
+	GetClassName() string
 	GetID() string
 	GetName() string
 	IsActive() bool
 	IsVisible() bool
 	SetActive(bool)
+	SetClassName(string)
 	SetName(string)
 	SetVisible(bool)
 }
@@ -47,19 +49,21 @@ type IObject interface {
 
 // EObject structure defines the most basic and common application object.
 type EObject struct {
-	id      string
-	name    string
-	active  bool
-	visible bool
+	id        string
+	name      string
+	active    bool
+	visible   bool
+	className string
 }
 
 // NewEObject function creates a new EObject instance with the given name.
 func NewEObject(name string) *EObject {
 	return &EObject{
-		name:    name,
-		id:      newID(),
-		active:  true,
-		visible: true,
+		name:      name,
+		id:        newID(),
+		active:    true,
+		visible:   true,
+		className: "",
 	}
 }
 
@@ -68,6 +72,11 @@ func NewEObject(name string) *EObject {
 // EObject interface methods
 //
 // -----------------------------------------------------------------------------
+
+// GetClassName method returns the instance class name attribute.
+func (o *EObject) GetClassName() string {
+	return o.className
+}
 
 // GetID method returns the instance unique identification.
 func (o *EObject) GetID() string {
@@ -92,6 +101,11 @@ func (o *EObject) IsVisible() bool {
 // SetActive method sets the instance active with the given value.
 func (o *EObject) SetActive(active bool) {
 	o.active = active
+}
+
+// SetClassName method sets the instance class name attribute.
+func (e *EObject) SetClassName(className string) {
+	e.className = className
 }
 
 // SetName method sets the instance name with the given value.
