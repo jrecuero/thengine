@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/tools"
+	"github.com/jrecuero/thengine/pkg/widgets"
 )
 
 const (
@@ -96,5 +99,12 @@ func (h *Handler) Update(event tcell.Event, scene engine.IScene) {
 	}
 	if TheDrawingBoxRect.IsInside(cursorNewPosition) {
 		cursor.SetPosition(cursorNewPosition)
+		if tmp := scene.GetEntityByName(CursorPosTextName); tmp != nil {
+			if cursorPosText, ok := tmp.(*widgets.Text); ok {
+				pos := api.ClonePoint(cursor.GetPosition())
+				pos.Subtract(TheDrawingBoxOrigin)
+				cursorPosText.SetText(fmt.Sprintf("[%d,%d]", pos.X, pos.Y))
+			}
+		}
 	}
 }

@@ -27,11 +27,12 @@ const (
 // main public constants
 // -----------------------------------------------------------------------------
 const (
-	DrawingSceneName = "scene/drawing/1"
-	EntitySceneName  = "scene/entity/1"
-	TopMenuName      = "menu/top/1"
-	DrawingBoxName   = "entity/drawing-box/1"
-	EntityBoxName    = "entity/entity-box/1"
+	DrawingSceneName  = "scene/drawing/1"
+	EntitySceneName   = "scene/entity/1"
+	TopMenuName       = "menu/top/1"
+	DrawingBoxName    = "entity/drawing-box/1"
+	EntityBoxName     = "entity/entity-box/1"
+	CursorPosTextName = "text/cursor-position/1"
 )
 
 // -----------------------------------------------------------------------------
@@ -74,6 +75,9 @@ func createDrawingBox(scene engine.IScene) {
 
 	cursor := NewCursor(api.NewPoint(1, theMenuBoxHeight+1))
 	scene.AddEntity(cursor)
+
+	cursorPosText := widgets.NewText(CursorPosTextName, api.NewPoint(80, 29), api.NewSize(10, 1), &TheStyleWhiteOverBlack, "[1,1]")
+	scene.AddEntity(cursorPosText)
 
 	theHandler = NewHandler()
 	scene.AddEntity(theHandler)
