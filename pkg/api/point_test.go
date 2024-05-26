@@ -296,6 +296,41 @@ func TestPointAdd(t *testing.T) {
 	}
 }
 
+func TestPointSubtract(t *testing.T) {
+	cases := []struct {
+		input []int
+		exp   []int
+	}{
+		{
+			input: []int{0, 0, 0, 0},
+			exp:   []int{0, 0},
+		},
+		{
+			input: []int{1, 0, 1, 0},
+			exp:   []int{0, 0},
+		},
+		{
+			input: []int{0, 1, 0, 1},
+			exp:   []int{0, 0},
+		},
+		{
+			input: []int{4, 2, 2, 1},
+			exp:   []int{2, 1},
+		},
+	}
+	for i, c := range cases {
+		got := api.NewPoint(c.input[0], c.input[1])
+		p2 := api.NewPoint(c.input[2], c.input[3])
+		got.Subtract(p2)
+		if c.exp[0] != got.X {
+			t.Errorf("[%d] Subtract-X Error exp:%d got:%d", i, c.exp[0], got.X)
+		}
+		if c.exp[1] != got.Y {
+			t.Errorf("[%d] Subtract-Y Error exp:%d got:%d", i, c.exp[1], got.Y)
+		}
+	}
+}
+
 func TestPointDistance(t *testing.T) {
 	cases := []struct {
 		input []int

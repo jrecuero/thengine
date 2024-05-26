@@ -103,7 +103,7 @@ func load(ent engine.IEntity, args ...any) bool {
 	if theHandler == nil {
 		newSpriter(ent, args...)
 	}
-	entities := engine.ImportEntitiesFromJSON(filename, nil)
+	entities := engine.ImportEntitiesFromJSON(filename, TheDrawingBoxOrigin, nil)
 	for _, ent := range entities {
 		scene.AddEntity(ent)
 	}
@@ -129,7 +129,7 @@ func main() {
 	topMenuItems := []*widgets.MenuItem{
 		widgets.NewExtendedMenuItem("New", true, nil, newSpriter, []any{drawingScene}),
 		widgets.NewExtendedMenuItem("Save", false, nil, save, nil),
-		widgets.NewExtendedMenuItem("Load", true, nil, load, []any{drawingScene, "output.json"}),
+		widgets.NewExtendedMenuItem("Load", true, nil, load, []any{drawingScene, "output_0_3.json"}),
 		widgets.NewExtendedMenuItem("Exit", true, nil, exit, nil),
 	}
 	topMenu := widgets.NewTopMenu(TopMenuName, api.NewPoint(0, 0), api.NewSize(theMenuBoxWidth, theMenuBoxHeight), &TheStyleBlackOverWhite, topMenuItems, 0)

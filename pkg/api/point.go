@@ -98,6 +98,12 @@ func (p *Point) Set(x int, y int) {
 	p.Y = y
 }
 
+// Subtract method subtracts the given point coordinates to the point instance.
+func (p *Point) Subtract(point *Point) {
+	p.X -= point.X
+	p.Y -= point.Y
+}
+
 // ToString method returns instance information as a string.
 func (p *Point) ToString() string {
 	return fmt.Sprintf("(%d,%d)", p.X, p.Y)

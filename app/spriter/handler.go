@@ -56,7 +56,7 @@ func (h *Handler) SaveEntities() {
 			WithField("method", "SaveEntites").
 			Debugf("saving %+#v", ent)
 	}
-	if err := engine.ExportEntitiesToJSON("output.json", h.entities, nil); err != nil {
+	if err := engine.ExportEntitiesToJSON("output", h.entities, TheDrawingBoxOrigin, nil); err != nil {
 		tools.Logger.WithField("module", "handler").
 			WithField("method", "SaveEntites").
 			Errorf("error %s", err.Error())

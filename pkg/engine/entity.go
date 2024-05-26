@@ -33,7 +33,7 @@ type IEntity interface {
 	Init(tcell.Screen)
 	IsSolid() bool
 	MarshalJSON() ([]byte, error)
-	MarshalMap() (map[string]any, error)
+	MarshalMap(*api.Point) (map[string]any, error)
 	Refresh()
 	SetCanvas(*Canvas)
 	SetCustomInit(func())
@@ -48,7 +48,7 @@ type IEntity interface {
 	Start()
 	Stop()
 	Update(tcell.Event, IScene)
-	UnmarshalMap(map[string]any) error
+	UnmarshalMap(map[string]any, *api.Point) error
 }
 
 // -----------------------------------------------------------------------------
@@ -104,7 +104,7 @@ func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.St
 func NewEmptyEntity() *Entity {
 	return &Entity{
 		EObject:     NewEObject(""),
-		Focus:       NewFocus(NoFocus),
+		Focus:       NewDisableFocus(),
 		canvas:      nil,
 		position:    nil,
 		size:        nil,
@@ -124,7 +124,7 @@ func NewEmptyEntity() *Entity {
 func NewNamedEntity(name string) *Entity {
 	return &Entity{
 		EObject:     NewEObject(name),
-		Focus:       NewFocus(NoFocus),
+		Focus:       NewDisableFocus(),
 		canvas:      nil,
 		position:    nil,
 		size:        nil,
@@ -243,7 +243,7 @@ func (e *Entity) IsSolid() bool {
 // MarshalJSON method is the custom marshal method to generate JSON from an
 // instance.
 func (e *Entity) MarshalJSON() ([]byte, error) {
-	content, err := e.MarshalMap()
+	content, err := e.MarshalMap(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -252,13 +252,17 @@ func (e *Entity) MarshalJSON() ([]byte, error) {
 
 // MarshalMap method is the custom marshal method to generate a map[string]any
 // from an instance.
-func (e *Entity) MarshalMap() (map[string]any, error) {
+func (e *Entity) MarshalMap(origin *api.Point) (map[string]any, error) {
+	position := api.ClonePoint(e.position)
+	if origin != nil {
+		position.Subtract(origin)
+	}
 	fg, bg, attrs := e.style.Decompose()
 	cell := e.GetCanvas().GetCellAt(nil)
 	content := map[string]any{
 		"class":    e.GetClassName(),
 		"name":     e.name,
-		"position": []int{e.position.X, e.position.Y},
+		"position": []int{position.X, position.Y},
 		"size":     []int{e.size.W, e.size.H},
 		"style":    []string{fg.String(), bg.String(), strconv.Itoa(int(attrs))},
 		"ch":       string(cell.Rune),
@@ -351,17 +355,20 @@ func (e *Entity) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &content); err != nil {
 		return err
 	}
-	return e.UnmarshalMap(content)
+	return e.UnmarshalMap(content, nil)
 }
 
 // UnmarshalMap method is the custom method to unmarshal a map[string]any data
 // into an instance.
-func (e *Entity) UnmarshalMap(content map[string]any) error {
+func (e *Entity) UnmarshalMap(content map[string]any, origin *api.Point) error {
 	if name, ok := content["name"].(string); ok {
 		e.name = name
 	}
 	if position, ok := content["position"].([]any); ok {
 		e.position = api.NewPoint(int(position[0].(float64)), int(position[1].(float64)))
+		if origin != nil {
+			e.position.Add(origin)
+		}
 	}
 	if size, ok := content["size"].([]any); ok {
 		e.size = api.NewSize(int(size[0].(float64)), int(size[1].(float64)))

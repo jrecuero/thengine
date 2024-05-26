@@ -85,7 +85,7 @@ func main() {
 
 	//middleWall := NewWall("widget/wall/middle/1", api.NewPoint(2, 2), api.NewSize(76, 1), &theStyleBlueOverBlack)
 	//mainScene.AddEntity(middleWall)
-	entities := engine.ImportEntitiesFromJSON("app/game/assets/first_map.json", &BuiltIn{})
+	entities := engine.ImportEntitiesFromJSON("app/game/assets/first_map.json", api.NewPoint(1, 1), &BuiltIn{})
 	for _, ent := range entities {
 		mainScene.AddEntity(ent)
 	}
@@ -130,6 +130,7 @@ func main() {
 	theEngine.GetSceneManager().AddScene(mainScene)
 	theEngine.GetSceneManager().SetSceneAsActive(mainScene)
 	theEngine.GetSceneManager().SetSceneAsVisible(mainScene)
+	theEngine.GetSceneManager().UpdateFocus()
 	theEngine.Init()
 	theEngine.Start()
 	theEngine.Run(theFPS)

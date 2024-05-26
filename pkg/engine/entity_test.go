@@ -306,6 +306,8 @@ func TestEntityMarshalJSON(t *testing.T) {
 	position := api.NewPoint(1, 2)
 	size := api.NewSize(10, 5)
 	input := engine.NewEntity(name, position, size, &styleOne)
+	cell := engine.NewCell(&styleOne, 'x')
+	input.GetCanvas().FillWithCell(cell)
 	if input == nil {
 		t.Errorf("[0] MarshalJSON NewEntity Error exp:*Entity got:nil")
 	}
