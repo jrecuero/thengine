@@ -10,6 +10,10 @@ import (
 	"github.com/jrecuero/thengine/pkg/widgets"
 )
 
+// -----------------------------------------------------------------------------
+// Module private constants
+// -----------------------------------------------------------------------------
+
 var (
 	theCamera              = engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
 	theEngine              = engine.GetEngine()
@@ -21,22 +25,58 @@ var (
 	thePlayerName          = "player/hero/1"
 )
 
-const (
-	GameBoxEntityName       = "entity/game-box/1"
-	DataBoxEntityName       = "entity/data-box/1"
-	InfoBoxEntityName       = "entity/info-box/1"
-	CommandLineTextName     = "text/command-line/1"
-	PlayerLiveTextName      = "text/player/live/1"
-	PlayerStrengthTextName  = "text/player/strength/1"
-	PlayerDexterityTextName = "text/player/dexteriry/1"
-	PlayerNameTextName      = "text/player/name/1"
-	PlayerHealthBar         = "health-bar/player/live/1"
-	EnemyNameTextName       = "text/enemy/name/1"
-	EnemyHealthBar          = "health-bar/enemy/live/1"
+// -----------------------------------------------------------------------------
+// Module public constants
+// -----------------------------------------------------------------------------
+
+var (
+	TheGameBoxOrigin        = api.NewPoint(0, 0)
+	TheGameBoxSize          = api.NewSize(80, 20)
+	TheDataBoxOrigin        = api.NewPoint(80, 0)
+	TheDataBoxSize          = api.NewSize(20, 20)
+	TheCommandLineBoxOrigin = api.NewPoint(0, 20)
+	TheCommandLineBoxSize   = api.NewSize(100, 10)
+	TheEnemies              = []*Enemy{}
 )
+
+// -----------------------------------------------------------------------------
+// Module public constants
+// -----------------------------------------------------------------------------
+
+const (
+	GameBoxEntityName        = "entity/game-box/1"
+	DataBoxEntityName        = "entity/data-box/1"
+	CommandLineBoxEntityName = "entity/command-line-box/1"
+	CommandLineTextName      = "text/command-line/1"
+	PlayerLiveTextName       = "text/player/live/1"
+	PlayerStrengthTextName   = "text/player/strength/1"
+	PlayerDexterityTextName  = "text/player/dexteriry/1"
+	PlayerNameTextName       = "text/player/name/1"
+	PlayerHealthBar          = "health-bar/player/live/1"
+	EnemyNameTextName        = "text/enemy/name/1"
+	EnemyHealthBarName       = "health-bar/enemy/live/1"
+)
+
+// -----------------------------------------------------------------------------
+// Module public structures
+// -----------------------------------------------------------------------------
 
 type BuiltIn struct {
 	engine.IBuiltIn
+}
+
+// -----------------------------------------------------------------------------
+// Module private methods
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// Module public methods
+// -----------------------------------------------------------------------------
+
+func GenerateEnemyName() string {
+	enemiesLen := len(TheEnemies) + 1
+	result := fmt.Sprintf("widget/enemy/%d", enemiesLen)
+	return result
 }
 
 func (b *BuiltIn) GetClassFromString(className string) engine.IEntity {
@@ -52,17 +92,17 @@ func main() {
 	tools.Logger.WithField("module", "game/main").Infof("The Game")
 	mainScene := engine.NewScene("scene/main/1", theCamera)
 
-	gameBox := engine.NewEntity(GameBoxEntityName, api.NewPoint(0, 0), api.NewSize(80, 20), &theStyleBlueOverBlack)
+	gameBox := engine.NewEntity(GameBoxEntityName, TheGameBoxOrigin, TheGameBoxSize, &theStyleBlueOverBlack)
 	gameBox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &theStyleBlueOverBlack, engine.CanvasRectSingleLine)
 	mainScene.AddEntity(gameBox)
 
-	dataBox := engine.NewEntity(DataBoxEntityName, api.NewPoint(80, 0), api.NewSize(20, 20), &theStyleBlueOverBlack)
+	dataBox := engine.NewEntity(DataBoxEntityName, TheDataBoxOrigin, TheDataBoxSize, &theStyleBlueOverBlack)
 	dataBox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &theStyleBlueOverBlack, engine.CanvasRectSingleLine)
 	mainScene.AddEntity(dataBox)
 
-	infoBox := engine.NewEntity(InfoBoxEntityName, api.NewPoint(0, 20), api.NewSize(100, 10), &theStyleBlueOverBlack)
-	infoBox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &theStyleBlueOverBlack, engine.CanvasRectSingleLine)
-	mainScene.AddEntity(infoBox)
+	comandLineBox := engine.NewEntity(CommandLineBoxEntityName, TheCommandLineBoxOrigin, TheCommandLineBoxSize, &theStyleBlueOverBlack)
+	comandLineBox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &theStyleBlueOverBlack, engine.CanvasRectSingleLine)
+	mainScene.AddEntity(comandLineBox)
 
 	player := NewPlayer(thePlayerName, api.NewPoint(1, 1), &theStyleBlueOverBlack)
 	mainScene.AddEntity(player)
@@ -83,15 +123,14 @@ func main() {
 	rightWall.SetVisible(false)
 	mainScene.AddEntity(rightWall)
 
-	//middleWall := NewWall("widget/wall/middle/1", api.NewPoint(2, 2), api.NewSize(76, 1), &theStyleBlueOverBlack)
-	//mainScene.AddEntity(middleWall)
 	entities := engine.ImportEntitiesFromJSON("app/game/assets/first_map.json", api.NewPoint(1, 1), &BuiltIn{})
 	for _, ent := range entities {
 		mainScene.AddEntity(ent)
 	}
 
-	enemy := NewEnemy("widget/enemy/1", api.NewPoint(5, 5), &theStyleWhiteOverRed)
+	enemy := NewEnemy(GenerateEnemyName(), api.NewPoint(5, 5), &theStyleWhiteOverRed)
 	mainScene.AddEntity(enemy)
+	TheEnemies = append(TheEnemies, enemy)
 
 	//commandLine := widgets.NewText(CommandLineTextName, api.NewPoint(1, 21), api.NewSize(98, 8), &theStyleBlueOverBlack, ">")
 	commandLine := NewCommandLine(CommandLineTextName, api.NewPoint(1, 21), api.NewSize(98, 8), &theStyleBlueOverBlack)
@@ -117,10 +156,12 @@ func main() {
 	mainScene.AddEntity(playerHealthBar)
 
 	enemyNameText := widgets.NewText(EnemyNameTextName, api.NewPoint(81, 11), api.NewSize(18, 1), &theStyleBlueOverBlack, enemy.GetUName())
+	enemyNameText.SetVisible(false)
 	mainScene.AddEntity(enemyNameText)
 
-	enemyHealthBar := NewHealthBar(EnemyHealthBar, api.NewPoint(81, 12), api.NewSize(18, 1), enemy.GetHitPoints().GetScore())
+	enemyHealthBar := NewHealthBar(EnemyHealthBarName, api.NewPoint(81, 12), api.NewSize(18, 1), enemy.GetHitPoints().GetScore())
 	enemyHealthBar.SetCompleted(enemy.GetHitPoints().GetScore())
+	enemyHealthBar.SetVisible(false)
 	mainScene.AddEntity(enemyHealthBar)
 
 	gameHandler := NewGameHandler()

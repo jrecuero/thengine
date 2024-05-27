@@ -35,6 +35,18 @@ func NewGameHandler() *GameHandler {
 // Module private methods
 // -----------------------------------------------------------------------------
 
+func displayEnemyHealthBar(scene engine.IScene, ent engine.IEntity) {
+	enemy, _ := ent.(*Enemy)
+	tmpText := scene.GetEntityByName(EnemyNameTextName)
+	enemyText, _ := tmpText.(*widgets.Text)
+	tmpHealthBar := scene.GetEntityByName(EnemyHealthBarName)
+	enemyHealthBar, _ := tmpHealthBar.(*HealthBar)
+	enemyText.SetVisible(true)
+	enemyText.SetText(enemy.GetName())
+	enemyHealthBar.SetVisible(true)
+	enemyHealthBar.SetCompleted(enemy.GetHitPoints().GetScore())
+}
+
 func getEnemiesInScene(scene engine.IScene) []engine.IEntity {
 	var result []engine.IEntity
 	for _, ent := range scene.GetEntities() {
@@ -43,6 +55,15 @@ func getEnemiesInScene(scene engine.IScene) []engine.IEntity {
 		}
 	}
 	return result
+}
+
+func hideEnemyHealthBar(scene engine.IScene) {
+	tmpText := scene.GetEntityByName(EnemyNameTextName)
+	enemyText, _ := tmpText.(*widgets.Text)
+	tmpHealthBar := scene.GetEntityByName(EnemyHealthBarName)
+	enemyHealthBar, _ := tmpHealthBar.(*HealthBar)
+	enemyText.SetVisible(false)
+	enemyHealthBar.SetVisible(false)
 }
 
 func isAnyEnemyAdjacent(player engine.IEntity, enemies []engine.IEntity) engine.IEntity {
@@ -67,7 +88,7 @@ func updateDataBox(scene engine.IScene, player *Player, enemy *Enemy) {
 			playerHealthBar.SetCompleted(player.GetHitPoints().GetScore())
 		}
 	}
-	if tmp := scene.GetEntityByName(EnemyHealthBar); tmp != nil {
+	if tmp := scene.GetEntityByName(EnemyHealthBarName); tmp != nil {
 		if enemyHealthBar, ok := tmp.(*HealthBar); ok {
 			enemyHealthBar.UpdateStyle(enemy.GetHitPoints().GetScore())
 			enemyHealthBar.SetCompleted(enemy.GetHitPoints().GetScore())
@@ -148,5 +169,11 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 				player.SetPosition(api.NewPoint(playerX, playerY))
 			}
 		}
+	}
+	enemies := getEnemiesInScene(scene)
+	if enemy := isAnyEnemyAdjacent(player, enemies); enemy != nil {
+		displayEnemyHealthBar(scene, enemy)
+	} else {
+		hideEnemyHealthBar(scene)
 	}
 }
