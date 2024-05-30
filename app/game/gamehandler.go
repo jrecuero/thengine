@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
-	battlelog "github.com/jrecuero/thengine/app/game/dad/battleLog"
+	"github.com/jrecuero/thengine/app/game/dad/battlelog"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/tools"
@@ -140,8 +140,8 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 				enemies := getEnemiesInScene(scene)
 				if enemy := isAnyEnemyAdjacent(player, enemies); enemy != nil {
 					if e, ok := enemy.(*Enemy); ok {
-						player.Attack(e)
-						e.Attack(player)
+						player.RollAttack(e)
+						e.RollAttack(player)
 						writeToCommandLine(scene, fmt.Sprintf("\n> %s [%d] attack to %s [%d]",
 							player.GetName(), player.GetHitPoints().GetScore(),
 							enemy.GetName(), e.GetHitPoints().GetScore()))

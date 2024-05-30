@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/jrecuero/thengine/app/game/dad/gear/weapons"
 	"github.com/jrecuero/thengine/app/game/dad/rules"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
@@ -29,7 +30,9 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 	player.GetAbilities().GetIntelligence().SetScore(10)
 	player.GetAbilities().GetWisdom().SetScore(10)
 	player.GetAbilities().GetCharisma().SetScore(10)
-	attack := rules.NewDefaultAttack(6)
+	player.GetGear().SetMainHand(weapons.NewSwordsword())
+	//attack := rules.NewDefaultAttack(6)
+	attack := rules.NewWeaponAttack(player.GetGear())
 	player.GetAttacks().AddAttack(attack)
 	strengthModifier := player.GetAbilities().GetStrength().GetModifier()
 	tools.Logger.WithField("module", "player").WithField("function", "NewPlayer").Debugf("strength modifier %d", strengthModifier)

@@ -1,6 +1,18 @@
 package rules
 
-import "github.com/jrecuero/thengine/app/game/dad/dices"
+import "github.com/jrecuero/thengine/app/game/dad/dice"
+
+var (
+	DiceThrow1d2  = NewDiceThrow("dice-throw/1d2", "1d2", []dice.IDie{dice.DieTwo})
+	DiceThrow1d3  = NewDiceThrow("dice-throw/1d3", "1d3", []dice.IDie{dice.DieThree})
+	DiceThrow1d4  = NewDiceThrow("dice-throw/1d4", "1d4", []dice.IDie{dice.DieThree})
+	DiceThrow1d5  = NewDiceThrow("dice-throw/1d5", "1d5", []dice.IDie{dice.DieThree})
+	DiceThrow1d6  = NewDiceThrow("dice-throw/1d6", "1d6", []dice.IDie{dice.DieSix})
+	DiceThrow1d8  = NewDiceThrow("dice-throw/1d8", "1d8", []dice.IDie{dice.DieEight})
+	DiceThrow1d10 = NewDiceThrow("dice-throw/1d10", "1d10", []dice.IDie{dice.DieTen})
+	DiceThrow1d12 = NewDiceThrow("dice-throw/1d12", "1d12", []dice.IDie{dice.DieTwelve})
+	DiceThrow2d6  = NewDiceThrow("dice-throw/2d6", "2d6", []dice.IDie{dice.DieSix, dice.DieSix})
+)
 
 // -----------------------------------------------------------------------------
 //
@@ -11,12 +23,12 @@ import "github.com/jrecuero/thengine/app/game/dad/dices"
 // IDiceThrow interface defines all possible methods for any dice throw.
 type IDiceThrow interface {
 	GetDescription() string
-	GetDices() []dices.IDice
+	GetDices() []dice.IDie
 	GetExtra() int
 	GetName() string
 	Roll() int
 	SetDescription(string)
-	SetDices([]dices.IDice)
+	SetDices([]dice.IDie)
 	SetName(string)
 	SetExtra(int)
 	SureRoll() int
@@ -30,19 +42,19 @@ type IDiceThrow interface {
 
 // DiceThrow structure contains all attributes required to define an dice throw.
 type DiceThrow struct {
-	name        string        // dice throw name.
-	shortName   string        // dice throw short name.
-	description string        // dice throw description.
-	dizes       []dices.IDice // dice throw score.
-	extra       int           // dice throw extra score.
+	name        string      // dice throw name.
+	shortName   string      // dice throw short name.
+	description string      // dice throw description.
+	dices       []dice.IDie // dice throw score.
+	extra       int         // dice throw extra score.
 }
 
 // NewDiceThrow function creates a new DiceThrow instance.
-func NewDiceThrow(name, shortname string, dizes []dices.IDice) *DiceThrow {
+func NewDiceThrow(name string, shortname string, dices []dice.IDie) *DiceThrow {
 	return &DiceThrow{
 		name:      name,
 		shortName: shortname,
-		dizes:     dizes,
+		dices:     dices,
 	}
 }
 
@@ -55,8 +67,8 @@ func (d *DiceThrow) GetDescription() string {
 	return d.description
 }
 
-func (d *DiceThrow) GetDices() []dices.IDice {
-	return d.dizes
+func (d *DiceThrow) GetDices() []dice.IDie {
+	return d.dices
 }
 
 // GetExtra method returns dice throw extra score value.
@@ -77,7 +89,7 @@ func (d *DiceThrow) GetShortName() string {
 // Roll method returns dice throw score value.
 func (d *DiceThrow) Roll() int {
 	score := 0
-	for _, dice := range d.dizes {
+	for _, dice := range d.dices {
 		score += dice.Roll()
 	}
 	score += d.GetExtra()
@@ -92,8 +104,8 @@ func (d *DiceThrow) SetDescription(desc string) {
 	d.description = desc
 }
 
-func (d *DiceThrow) SetDices(dizes []dices.IDice) {
-	d.dizes = dizes
+func (d *DiceThrow) SetDices(dices []dice.IDie) {
+	d.dices = dices
 }
 
 // SetExtra method sets dice throw extra score value.

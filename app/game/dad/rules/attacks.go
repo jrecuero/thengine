@@ -1,6 +1,6 @@
 package rules
 
-import "github.com/jrecuero/thengine/app/game/dad/dices"
+import "github.com/jrecuero/thengine/app/game/dad/dice"
 
 // -----------------------------------------------------------------------------
 //
@@ -24,21 +24,21 @@ type IAttack interface {
 
 // Attack struct defines the common and generic structure for any attack.
 type Attack struct {
-	name      string
-	diceThrow IDiceThrow
+	name       string
+	diceThrows []IDiceThrow
 }
 
-func NewAttack(name string, diceThrow IDiceThrow) *Attack {
+func NewAttack(name string, diceThrows []IDiceThrow) *Attack {
 	return &Attack{
-		name:      name,
-		diceThrow: diceThrow,
+		name:       name,
+		diceThrows: diceThrows,
 	}
 }
 
 func NewDefaultAttack(score int) *Attack {
-	dice := dices.NewDice("dice/attack", score)
-	diceThrow := NewDiceThrow("dice-throw/attack", "attack", []dices.IDice{dice})
-	attack := NewAttack("attack/default", diceThrow)
+	die := dice.NewDie("dice/attack", score)
+	diceThrows := NewDiceThrow("dice-throw/attack", "attack", []dice.IDie{die})
+	attack := NewAttack("attack/default", []IDiceThrow{diceThrows})
 	return attack
 }
 
@@ -47,8 +47,11 @@ func NewDefaultAttack(score int) *Attack {
 // -----------------------------------------------------------------------------
 
 func (a *Attack) GetAttack() int {
-	attack := a.diceThrow.Roll()
-	return attack
+	result := 0
+	for _, diceThrow := range a.diceThrows {
+		result += diceThrow.Roll()
+	}
+	return result
 }
 
 func (a *Attack) GetName() string {
@@ -56,8 +59,51 @@ func (a *Attack) GetName() string {
 }
 
 func (a *Attack) Roll() int {
-	return a.diceThrow.SureRoll()
+	result := 0
+	for _, diceThrow := range a.diceThrows {
+		result += diceThrow.SureRoll()
+	}
+	return result
 }
+
+var _ IAttack = (*Attack)(nil)
+
+// -----------------------------------------------------------------------------
+//
+// WeaponAttack
+//
+// -----------------------------------------------------------------------------
+
+type WeaponAttack struct {
+	*Attack
+	gear IGear
+}
+
+func NewWeaponAttack(gear IGear) *WeaponAttack {
+	//var diceThrows []IDiceThrow
+	//if gear.GetMainHand() != nil {
+	//    diceThrows = append(diceThrows, gear.GetMainHand().GetDamage())
+	//}
+	//if gear.GetOffHand() != nil {
+	//    diceThrows = append(diceThrows, gear.GetOffHand().GetDamage())
+	//}
+	//attack := NewAttack("attack/weapon", diceThrows)
+	//return attack
+	return &WeaponAttack{
+		Attack: NewAttack("attack/weapon", nil),
+		gear:   gear,
+	}
+}
+
+// -----------------------------------------------------------------------------
+// WeaponAttack public methods
+// -----------------------------------------------------------------------------
+
+func (a *WeaponAttack) Roll() int {
+	return a.gear.RollDamage()
+}
+
+var _ IAttack = (*WeaponAttack)(nil)
 
 // -----------------------------------------------------------------------------
 //
@@ -121,5 +167,4 @@ func (a *Attacks) RemoveAttack(attack IAttack) {
 	}
 }
 
-var _ IAttack = (*Attack)(nil)
 var _ IAttacks = (*Attacks)(nil)

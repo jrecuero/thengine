@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/jrecuero/thengine/app/game/dad/gear/weapons"
 	"github.com/jrecuero/thengine/app/game/dad/rules"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
@@ -29,7 +30,9 @@ func NewEnemy(name string, position *api.Point, style *tcell.Style) *Enemy {
 	enemy.GetAbilities().GetIntelligence().SetScore(10)
 	enemy.GetAbilities().GetWisdom().SetScore(10)
 	enemy.GetAbilities().GetCharisma().SetScore(10)
-	attack := rules.NewDefaultAttack(6)
+	enemy.GetGear().SetMainHand(weapons.NewSwordsword())
+	//attack := rules.NewDefaultAttack(6)
+	attack := rules.NewWeaponAttack(enemy.GetGear())
 	enemy.GetAttacks().AddAttack(attack)
 	return enemy
 }

@@ -3,8 +3,8 @@ package rules
 import (
 	"fmt"
 
-	battlelog "github.com/jrecuero/thengine/app/game/dad/battleLog"
-	"github.com/jrecuero/thengine/app/game/dad/dices"
+	"github.com/jrecuero/thengine/app/game/dad/battlelog"
+	"github.com/jrecuero/thengine/app/game/dad/dice"
 	"github.com/jrecuero/thengine/pkg/tools"
 )
 
@@ -21,13 +21,12 @@ const (
 
 // IUnit interface  defines all methods required a unit has to implement.
 type IUnit interface {
-	Attack(IUnit) (bool, int)
 	GetAbilities() IAbilities
-	GetArmorClass() int // unit AC 10 + mod(dex) + mod(equipment)
+	GetArmorClass() int // unit AC 10 + mod(dex) + mod(gear)
 	GetAttacks() IAttacks
 	GetDescription() string
 	GetDieRoll() int
-	GetEquipment() any
+	GetGear() IGear
 	GetHitDice() int // unit hit dice.
 	GetHitting(IUnit) bool
 	GetHitPoints() IHitPoints
@@ -40,10 +39,11 @@ type IUnit interface {
 	GetSpells() any
 	GetTraits() any
 	GetUName() string
+	RollAttack(IUnit) (bool, int)
 	SetAbilities(IAbilities)
 	SetAttacks(IAttacks)
 	SetDescription(string)
-	SetEquipment(any)
+	SetGear(IGear)
 	SetHitPoints(IHitPoints)
 	SetLanguages(any)
 	SetSavingThrows(ISavingThrows)
@@ -67,7 +67,7 @@ type IUnit interface {
 //
 // Players create and control their own characters, which can be any of the
 // playable races and classes available in the game. These characters have their
-// own set of abilities, skills, hit points, and equipment, and are used to
+// own set of abilities, skills, hit points, and gear, and are used to
 // navigate the world and interact with other characters, creatures, and objects.
 //
 // Non-player characters (NPCs) are controlled by the game's Dungeon Master (DM)
@@ -90,7 +90,7 @@ type Unit struct {
 	abilities    IAbilities    // unit abilities.
 	savingThrows ISavingThrows // unit saving throws.
 	skills       any           // unit skills
-	equipment    any           // unit equipment
+	gear         IGear         // unit gear
 	attacks      IAttacks      // unit type of attacks
 	spells       any           // unit spells
 	languages    any           // unit languages
@@ -99,7 +99,7 @@ type Unit struct {
 }
 
 func NewUnit(name string) *Unit {
-	die20 := dices.NewDice("dice/die20", Die20)
+	die20 := dice.DieTwenty
 	return &Unit{
 		uname:        name,
 		hitPoints:    NewHitPoints(0),
@@ -107,30 +107,14 @@ func NewUnit(name string) *Unit {
 		abilities:    NewAbilities(),
 		savingThrows: NewSavingThrows(),
 		attacks:      NewAttacks(nil),
-		dieRoll:      NewDiceThrow("dice-throw/die20", "dieroll", []dices.IDice{die20}),
+		dieRoll:      NewDiceThrow("dice-throw/die20", "dieroll", []dice.IDie{die20}),
+		gear:         NewGear(),
 	}
 }
 
 // -----------------------------------------------------------------------------
 // Unit public methods
 // -----------------------------------------------------------------------------
-
-func (u *Unit) Attack(other IUnit) (bool, int) {
-	dieRoll := u.GetDieRoll()
-	ac := other.GetArmorClass()
-	tools.Logger.WithField("module", "unit").WithField("method", "Attack").Debug(dieRoll, ac)
-	// if die-roll is greater than the other unit armor class, it is a hit.
-	if dieRoll < ac {
-		battlelog.BLog.Push(fmt.Sprintf("[%s] no hit ac:%d", u.GetUName(), ac))
-		return false, 0
-	}
-	damage := u.GetAttacks().GetAttacks()[0].Roll()
-	otherHp := other.GetHitPoints().GetScore()
-	battlelog.BLog.Push(fmt.Sprintf("[%s] hit ac:%d damage:%d", u.GetUName(), ac, damage))
-	otherHp -= damage
-	other.GetHitPoints().SetScore(otherHp)
-	return true, damage
-}
 
 func (u *Unit) GetAbilities() IAbilities {
 	return u.abilities
@@ -144,7 +128,7 @@ func (u *Unit) GetAttacks() IAttacks {
 //
 // The Armor Class (AC) in represents a character's ability to dodge attacks
 // and avoid taking damage. The formula for calculating AC varies depending on
-// the character's equipment and abilities, but generally consists of the
+// the character's gear and abilities, but generally consists of the
 // following components:
 //
 // Base AC = 10 + Dexterity Modifier + Shield Bonus (if applicable)
@@ -212,8 +196,8 @@ func (u *Unit) GetDieRoll() int {
 	return result
 }
 
-func (u *Unit) GetEquipment() any {
-	return u.equipment
+func (u *Unit) GetGear() IGear {
+	return u.gear
 }
 
 // GetHitDice method returns the unit hit dice.
@@ -303,7 +287,7 @@ func (u *Unit) GetSkills() any {
 // A character's speed is the distance they can move in a single round of
 // combat or during normal movement. The base speed for most races is 30 feet
 // per round, but this can be increased or decreased based on factors such as
-// race, class, equipment, and other abilities.
+// race, class, gear, and other abilities.
 func (u *Unit) GetSpeed() int {
 	// TODO: to be implemented.
 	return 1
@@ -321,6 +305,25 @@ func (u *Unit) GetUName() string {
 	return u.uname
 }
 
+func (u *Unit) RollAttack(other IUnit) (bool, int) {
+	dieRoll := u.GetDieRoll()
+	ac := other.GetArmorClass()
+	tools.Logger.WithField("module", "unit").WithField("method", "Attack").Debug(dieRoll, ac)
+	// if die-roll is greater than the other unit armor class, it is a hit.
+	if dieRoll < ac {
+		battlelog.BLog.Push(fmt.Sprintf("[%s] no hit ac:%d", u.GetUName(), ac))
+		return false, 0
+	}
+	// TODO: fix to used the first attack, usually attack/weapon
+	weaponAttack := u.GetAttacks().GetAttacks()[0]
+	damage := weaponAttack.Roll()
+	otherHp := other.GetHitPoints().GetScore()
+	battlelog.BLog.Push(fmt.Sprintf("[%s] hit ac:%d damage:%d", u.GetUName(), ac, damage))
+	otherHp -= damage
+	other.GetHitPoints().SetScore(otherHp)
+	return true, damage
+}
+
 func (u *Unit) SetAbilities(abilities IAbilities) {
 	u.abilities = abilities
 }
@@ -333,8 +336,8 @@ func (u *Unit) SetDescription(desc string) {
 	u.description = desc
 }
 
-func (u *Unit) SetEquipment(equip any) {
-	u.equipment = equip
+func (u *Unit) SetGear(gear IGear) {
+	u.gear = gear
 }
 
 func (u *Unit) SetHitPoints(hp IHitPoints) {
