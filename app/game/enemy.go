@@ -31,7 +31,6 @@ func NewEnemy(name string, position *api.Point, style *tcell.Style) *Enemy {
 	enemy.GetAbilities().GetWisdom().SetScore(10)
 	enemy.GetAbilities().GetCharisma().SetScore(10)
 	enemy.GetGear().SetMainHand(weapons.NewSwordsword())
-	//attack := rules.NewDefaultAttack(6)
 	attack := rules.NewWeaponAttack(enemy.GetGear())
 	enemy.GetAttacks().AddAttack(attack)
 	return enemy

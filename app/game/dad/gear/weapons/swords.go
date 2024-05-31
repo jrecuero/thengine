@@ -7,19 +7,11 @@ import (
 
 // -----------------------------------------------------------------------------
 //
-// Sword
+// ShortSword
 //
 // -----------------------------------------------------------------------------
 
-type Shortsword struct {
-	*rules.Weapon
-}
-
-func NewSwordsword() *Shortsword {
+func NewSwordsword() *rules.Weapon {
 	htype := rules.NewHandheldType(1)
-	return &Shortsword{
-		Weapon: rules.NewWeapon("shortsword", 10, 2, htype, rules.DiceThrow1d6, rules.Piercing),
-	}
+	return rules.NewWeapon("weapon/sword/shortsword", 10, 2, htype, rules.DiceThrow1d6, rules.Piercing)
 }
-
-var _ rules.IWeapon = (*Shortsword)(nil)

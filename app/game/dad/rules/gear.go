@@ -19,20 +19,22 @@ import (
 type IGear interface {
 	AC() int
 	GetAccessories() []any
-	GetArms() any
-	GetBody() any
-	GetFeet() any
-	GetHead() any
-	GetLegs() any
+	GetArms() IArmor
+	GetBody() IArmor
+	GetFeet() IArmor
+	GetHands() IArmor
+	GetHead() IArmor
+	GetLegs() IArmor
 	GetMainHand() IHandheld
 	GetOffHand() IHandheld
 	RollDamage() int
 	SetAccessories(...any)
-	SetArms(any)
-	SetBody(any)
-	SetFeet(any)
-	SetHead(any)
-	SetLegs(any)
+	SetArms(IArmor)
+	SetBody(IArmor)
+	SetFeet(IArmor)
+	SetHands(IArmor)
+	SetHead(IArmor)
+	SetLegs(IArmor)
 	SetMainHand(IHandheld)
 	SetOffHand(IHandheld)
 }
@@ -47,11 +49,12 @@ type IGear interface {
 type Gear struct {
 	mainhand    IHandheld
 	offhand     IHandheld
-	head        any
-	body        any
-	arms        any
-	legs        any
-	feet        any
+	head        IArmor
+	body        IArmor
+	arms        IArmor
+	hands       IArmor
+	legs        IArmor
+	feet        IArmor
 	accessories []any
 }
 
@@ -62,6 +65,7 @@ func NewGear() *Gear {
 		head:        nil,
 		body:        nil,
 		arms:        nil,
+		hands:       nil,
 		legs:        nil,
 		feet:        nil,
 		accessories: nil,
@@ -73,30 +77,53 @@ func NewGear() *Gear {
 // -----------------------------------------------------------------------------
 
 func (g *Gear) AC() int {
-	return 0
+	result := 0
+	if g.GetArms() != nil {
+		result += g.GetArms().GetAC()
+	}
+	if g.GetBody() != nil {
+		result += g.GetBody().GetAC()
+	}
+	if g.GetFeet() != nil {
+		result += g.GetFeet().GetAC()
+	}
+	if g.GetHands() != nil {
+		result += g.GetHands().GetAC()
+	}
+	if g.GetHead() != nil {
+		result += g.GetHead().GetAC()
+	}
+	if g.GetLegs() != nil {
+		result += g.GetLegs().GetAC()
+	}
+	return result
 }
 
 func (g *Gear) GetAccessories() []any {
 	return g.accessories
 }
 
-func (g *Gear) GetArms() any {
+func (g *Gear) GetArms() IArmor {
 	return g.arms
 }
 
-func (g *Gear) GetBody() any {
+func (g *Gear) GetBody() IArmor {
 	return g.body
 }
 
-func (g *Gear) GetFeet() any {
+func (g *Gear) GetFeet() IArmor {
 	return g.feet
 }
 
-func (g *Gear) GetHead() any {
+func (g *Gear) GetHands() IArmor {
+	return g.hands
+}
+
+func (g *Gear) GetHead() IArmor {
 	return g.head
 }
 
-func (g *Gear) GetLegs() any {
+func (g *Gear) GetLegs() IArmor {
 	return g.legs
 }
 
@@ -128,23 +155,27 @@ func (g *Gear) SetAccessories(gears ...any) {
 	}
 }
 
-func (g *Gear) SetArms(gear any) {
+func (g *Gear) SetArms(gear IArmor) {
 	g.arms = gear
 }
 
-func (g *Gear) SetBody(gear any) {
+func (g *Gear) SetBody(gear IArmor) {
 	g.body = gear
 }
 
-func (g *Gear) SetFeet(gear any) {
+func (g *Gear) SetFeet(gear IArmor) {
 	g.feet = gear
 }
 
-func (g *Gear) SetHead(gear any) {
+func (g *Gear) SetHands(gear IArmor) {
 	g.head = gear
 }
 
-func (g *Gear) SetLegs(gear any) {
+func (g *Gear) SetHead(gear IArmor) {
+	g.hands = gear
+}
+
+func (g *Gear) SetLegs(gear IArmor) {
 	g.legs = gear
 }
 

@@ -153,7 +153,7 @@ func (u *Unit) GetAttacks() IAttacks {
 // the character sheet and added to the AC calculation as necessary.
 func (u *Unit) GetArmorClass() int {
 	dexModifier := u.GetAbilities().GetDexterity().GetModifier()
-	result := BaseAC + dexModifier
+	result := BaseAC + dexModifier + u.GetGear().AC()
 	return result
 }
 
