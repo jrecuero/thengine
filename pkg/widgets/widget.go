@@ -63,6 +63,16 @@ func NewNamedWidget(name string) *Widget {
 	}
 }
 
+// NewEmtpyWidget function creates a new Widget instance without any
+// information.
+func NewEmptyWidget() *Widget {
+	return &Widget{
+		Entity:       engine.NewEmptyEntity(),
+		callback:     nil,
+		callbackArgs: nil,
+	}
+}
+
 // -----------------------------------------------------------------------------
 // Widget public methods
 // -----------------------------------------------------------------------------

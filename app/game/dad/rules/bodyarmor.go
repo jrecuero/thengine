@@ -12,9 +12,9 @@ type HeadGear struct {
 	*Armor
 }
 
-func NewHeadGear(name string, cost int, weight int) *HeadGear {
+func NewHeadGear(name string, uname string, cost int, weight int) *HeadGear {
 	return &HeadGear{
-		Armor: NewArmor(name, cost, weight, "head"),
+		Armor: NewArmor(name, uname, cost, weight, "head"),
 	}
 }
 
@@ -32,9 +32,9 @@ type BodyGear struct {
 	*Armor
 }
 
-func NewBodyGear(name string, cost int, weight int) *BodyGear {
+func NewBodyGear(name string, uname string, cost int, weight int) *BodyGear {
 	return &BodyGear{
-		Armor: NewArmor(name, cost, weight, "body"),
+		Armor: NewArmor(name, uname, cost, weight, "body"),
 	}
 }
 
@@ -52,9 +52,9 @@ type ArmsGear struct {
 	*Armor
 }
 
-func NewArmsGear(name string, cost int, weight int) *ArmsGear {
+func NewArmsGear(name string, uname string, cost int, weight int) *ArmsGear {
 	return &ArmsGear{
-		Armor: NewArmor(name, cost, weight, "arms"),
+		Armor: NewArmor(name, uname, cost, weight, "arms"),
 	}
 }
 
@@ -72,9 +72,9 @@ type HandsGear struct {
 	*Armor
 }
 
-func NewHandsGear(name string, cost int, weight int) *HandsGear {
+func NewHandsGear(name string, uname string, cost int, weight int) *HandsGear {
 	return &HandsGear{
-		Armor: NewArmor(name, cost, weight, "hands"),
+		Armor: NewArmor(name, uname, cost, weight, "hands"),
 	}
 }
 
@@ -92,9 +92,9 @@ type LegsGear struct {
 	*Armor
 }
 
-func NewLegsGear(name string, cost int, weight int) *LegsGear {
+func NewLegsGear(name string, uname string, cost int, weight int) *LegsGear {
 	return &LegsGear{
-		Armor: NewArmor(name, cost, weight, "legs"),
+		Armor: NewArmor(name, uname, cost, weight, "legs"),
 	}
 }
 
@@ -112,9 +112,9 @@ type FeetGear struct {
 	*Armor
 }
 
-func NewFeetGear(name string, cost int, weight int) *FeetGear {
+func NewFeetGear(name string, uname string, cost int, weight int) *FeetGear {
 	return &FeetGear{
-		Armor: NewArmor(name, cost, weight, "feet"),
+		Armor: NewArmor(name, uname, cost, weight, "feet"),
 	}
 }
 

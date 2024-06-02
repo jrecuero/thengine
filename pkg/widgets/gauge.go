@@ -94,6 +94,11 @@ func (g *Gauge) SetCompleted(completed int) {
 	g.updateCanvas()
 }
 
+// SetTotal method sets a new value for the total attribute.
+func (g *Gauge) SetTotal(total int) {
+	g.total = total
+}
+
 var _ engine.IObject = (*Gauge)(nil)
 var _ engine.IFocus = (*Gauge)(nil)
 var _ engine.IEntity = (*Gauge)(nil)

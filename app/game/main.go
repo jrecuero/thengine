@@ -51,6 +51,7 @@ const (
 	PlayerLiveTextName       = "text/player/live/1"
 	PlayerStrengthTextName   = "text/player/strength/1"
 	PlayerDexterityTextName  = "text/player/dexteriry/1"
+	PlayerACTextName         = "text/player/ac/1"
 	PlayerNameTextName       = "text/player/name/1"
 	PlayerHealthBar          = "health-bar/player/live/1"
 	EnemyNameTextName        = "text/enemy/name/1"
@@ -83,6 +84,12 @@ func (b *BuiltIn) GetClassFromString(className string) engine.IEntity {
 	switch className {
 	case "Wall":
 		return NewEmptyWall()
+	case "Enemy":
+		tools.Logger.WithField("module", "game/main").
+			WithField("struct", "BuiltIn").
+			WithField("method", "GetClassFromString").
+			Infof("Created a new empty enemy")
+		return NewEmptyEnemy()
 	default:
 		return engine.NewEmptyEntity()
 	}
@@ -147,6 +154,10 @@ func main() {
 	dexText := fmt.Sprintf("DEX: %d", player.GetAbilities().GetDexterity().GetScore())
 	playerDexterityText := widgets.NewText(PlayerDexterityTextName, api.NewPoint(81, 3), api.NewSize(10, 1), &theStyleBlueOverBlack, dexText)
 	mainScene.AddEntity(playerDexterityText)
+
+	acText := fmt.Sprintf("AC:  %d", player.GetArmorClass())
+	playerACText := widgets.NewText(PlayerACTextName, api.NewPoint(81, 4), api.NewSize(10, 1), &theStyleBlueOverBlack, acText)
+	mainScene.AddEntity(playerACText)
 
 	playerNameText := widgets.NewText(PlayerNameTextName, api.NewPoint(81, 9), api.NewSize(18, 1), &theStyleBlueOverBlack, player.GetUName())
 	mainScene.AddEntity(playerNameText)

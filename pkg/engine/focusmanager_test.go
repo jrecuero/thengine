@@ -37,9 +37,10 @@ func TestFocusManagerAddEntity(t *testing.T) {
 	got := engine.NewFocusManager()
 
 	// Add one entity in one scene.
+	entity11.SetFocusEnable(true)
 	gotError := got.AddEntity(scene1, entity11)
 	if gotError != nil {
-		t.Errorf("[1] AddEntity Error exp:nil got:%t", gotError)
+		t.Errorf("[1] AddEntity Error exp:nil got:%s", gotError.Error())
 	}
 	gotEntities := got.GetEntities()
 	if len(gotEntities) != 1 {
@@ -58,6 +59,7 @@ func TestFocusManagerAddEntity(t *testing.T) {
 	}
 
 	// Add other entity in same scene.
+	entity21.SetFocusEnable(true)
 	gotError = got.AddEntity(scene1, entity21)
 	if gotError != nil {
 		t.Errorf("[2] AddEntity Error exp:nil got:%t", gotError)

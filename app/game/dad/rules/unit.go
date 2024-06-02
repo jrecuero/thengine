@@ -39,6 +39,7 @@ type IUnit interface {
 	GetSpells() any
 	GetTraits() any
 	GetUName() string
+	Populate(map[string]any, map[string]any)
 	RollAttack(IUnit) (bool, int)
 	SetAbilities(IAbilities)
 	SetAttacks(IAttacks)
@@ -303,6 +304,45 @@ func (u *Unit) GetTraits() any {
 
 func (u *Unit) GetUName() string {
 	return u.uname
+}
+
+func (u *Unit) Populate(defaults map[string]any, content map[string]any) {
+	var hp int = defaults["hp"].(int)
+	var strength int = defaults["strength"].(int)
+	var dexterity int = defaults["dexterity"].(int)
+	var constitution int = defaults["constitution"].(int)
+	var intelligence int = defaults["intelligence"].(int)
+	var wisdom int = defaults["wisdom"].(int)
+	var charisma int = defaults["charisma"].(int)
+	if _hp, ok := content["hp"].(float64); ok {
+		hp = int(_hp)
+	}
+	if _strength, ok := content["strength"].(float64); ok {
+		strength = int(_strength)
+	}
+	if _dexterity, ok := content["dexterity"].(float64); ok {
+		dexterity = int(_dexterity)
+	}
+	if _constitution, ok := content["constitution"].(float64); ok {
+		constitution = int(_constitution)
+	}
+	if _intelligence, ok := content["intelligence"].(float64); ok {
+		intelligence = int(_intelligence)
+	}
+	if _wisdom, ok := content["wisdom"].(float64); ok {
+		wisdom = int(_wisdom)
+	}
+	if _charisma, ok := content["charisma"].(float64); ok {
+		charisma = int(_charisma)
+	}
+	u.GetHitPoints().SetMaxScore(hp)
+	u.GetHitPoints().SetScore(hp)
+	u.GetAbilities().GetStrength().SetScore(strength)
+	u.GetAbilities().GetDexterity().SetScore(dexterity)
+	u.GetAbilities().GetConstitution().SetScore(constitution)
+	u.GetAbilities().GetIntelligence().SetScore(intelligence)
+	u.GetAbilities().GetWisdom().SetScore(wisdom)
+	u.GetAbilities().GetCharisma().SetScore(charisma)
 }
 
 func (u *Unit) RollAttack(other IUnit) (bool, int) {

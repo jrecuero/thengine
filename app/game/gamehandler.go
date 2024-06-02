@@ -42,8 +42,10 @@ func displayEnemyHealthBar(scene engine.IScene, ent engine.IEntity) {
 	tmpHealthBar := scene.GetEntityByName(EnemyHealthBarName)
 	enemyHealthBar, _ := tmpHealthBar.(*HealthBar)
 	enemyText.SetVisible(true)
-	enemyText.SetText(enemy.GetName())
+	enemyText.SetText(enemy.GetUName())
 	enemyHealthBar.SetVisible(true)
+	enemyHealthBar.SetTotal(enemy.GetHitPoints().GetMaxScore())
+	enemyHealthBar.UpdateStyle(enemy.GetHitPoints().GetScore())
 	enemyHealthBar.SetCompleted(enemy.GetHitPoints().GetScore())
 }
 
@@ -75,7 +77,7 @@ func isAnyEnemyAdjacent(player engine.IEntity, enemies []engine.IEntity) engine.
 	return nil
 }
 
-func updateDataBox(scene engine.IScene, player *Player, enemy *Enemy) {
+func updateDataBox(scene engine.IScene, player *Player) {
 	if tmp := scene.GetEntityByName(PlayerLiveTextName); tmp != nil {
 		if playerLiveText, ok := tmp.(*widgets.Text); ok {
 			hpText := fmt.Sprintf("HP:  %d", player.GetHitPoints().GetScore())
@@ -86,12 +88,6 @@ func updateDataBox(scene engine.IScene, player *Player, enemy *Enemy) {
 		if playerHealthBar, ok := tmp.(*HealthBar); ok {
 			playerHealthBar.UpdateStyle(player.GetHitPoints().GetScore())
 			playerHealthBar.SetCompleted(player.GetHitPoints().GetScore())
-		}
-	}
-	if tmp := scene.GetEntityByName(EnemyHealthBarName); tmp != nil {
-		if enemyHealthBar, ok := tmp.(*HealthBar); ok {
-			enemyHealthBar.UpdateStyle(enemy.GetHitPoints().GetScore())
-			enemyHealthBar.SetCompleted(enemy.GetHitPoints().GetScore())
 		}
 	}
 }
@@ -146,7 +142,7 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 							player.GetName(), player.GetHitPoints().GetScore(),
 							enemy.GetName(), e.GetHitPoints().GetScore()))
 						//writeToCommandLine(scene, fmt.Sprintf("\n> player attack with damage %d", damage))
-						updateDataBox(scene, player, e)
+						updateDataBox(scene, player)
 						tools.Logger.WithField("module", "gameHandler").WithField("method", "Update").Debugf("player can attack to %s", enemy.GetName())
 						for battlelog.BLog.IsAny() {
 							writeToCommandLine(scene, fmt.Sprintf("\n> %s", battlelog.BLog.Pop()))

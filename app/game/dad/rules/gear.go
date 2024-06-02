@@ -5,6 +5,7 @@ package rules
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jrecuero/thengine/app/game/dad/battlelog"
 )
@@ -37,6 +38,7 @@ type IGear interface {
 	SetLegs(IArmor)
 	SetMainHand(IHandheld)
 	SetOffHand(IHandheld)
+	UnmarshalMap(map[string]any)
 }
 
 // -----------------------------------------------------------------------------
@@ -78,6 +80,12 @@ func NewGear() *Gear {
 
 func (g *Gear) AC() int {
 	result := 0
+	if g.GetMainHand() != nil {
+		result += g.GetMainHand().GetAC()
+	}
+	if g.GetOffHand() != nil {
+		result += g.GetOffHand().GetAC()
+	}
 	if g.GetArms() != nil {
 		result += g.GetArms().GetAC()
 	}
@@ -140,11 +148,11 @@ func (g *Gear) RollDamage() int {
 	offHandDamage := 0
 	if g.mainhand != nil {
 		mainHandDamage = g.mainhand.RollDamage()
-		battlelog.BLog.Push(fmt.Sprintf("main-hand damage: %d", mainHandDamage))
+		battlelog.BLog.Push(fmt.Sprintf("main-hand %s damage: %d", g.mainhand.GetUName(), mainHandDamage))
 	}
 	if g.offhand != nil {
 		offHandDamage = g.offhand.RollDamage()
-		battlelog.BLog.Push(fmt.Sprintf("off-hand damage: %d", offHandDamage))
+		battlelog.BLog.Push(fmt.Sprintf("off-hand %s damage: %d", g.offhand.GetUName(), offHandDamage))
 	}
 	return mainHandDamage + offHandDamage
 }
@@ -185,6 +193,32 @@ func (g *Gear) SetMainHand(handheld IHandheld) {
 
 func (g *Gear) SetOffHand(handheld IHandheld) {
 	g.offhand = handheld
+}
+func (g *Gear) UnmarshalMap(content map[string]any) {
+	if gears, ok := content["gear"].([][]string); ok {
+		for _, gear := range gears {
+			gearSlot := gear[0]
+			gearName := gear[1]
+			switch gearSlot {
+			case "mainhand":
+				//dbEntry := DBase.GetSections()[DbSectionGear].GetSections()[DbSectionWeapon].GetEntries()[gearName]
+				//dbEntryCreator := dbEntry.GetCreator().(func() *Weapon)
+				weapon := DBase.GetCreator([]string{DbSectionGear, DbSectionWeapon}, gearName).(func() *Weapon)()
+				g.SetMainHand(weapon)
+			case "offhand":
+				switch strings.Split(gearName, "/")[0] {
+				case "shield":
+					shield := DBase.GetCreator([]string{DbSectionGear, DbSectionShield}, gearName).(func() *Shield)()
+					g.SetOffHand(shield)
+				case "weapon":
+					weapon := DBase.GetCreator([]string{DbSectionGear, DbSectionWeapon}, gearName).(func() *Weapon)()
+					g.SetOffHand(weapon)
+				default:
+				}
+			default:
+			}
+		}
+	}
 }
 
 var _ IGear = (*Gear)(nil)

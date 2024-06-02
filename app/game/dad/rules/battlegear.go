@@ -20,6 +20,7 @@ type IBattleGear interface {
 	GetName() string
 	GetProps() []any
 	GetQuality() string
+	GetUName() string
 	GetWeight() int
 	RollDamage() int
 	SetAC(int)
@@ -30,6 +31,7 @@ type IBattleGear interface {
 	SetName(string)
 	SetProps([]any)
 	SetQuality(string)
+	SetUName(string)
 	SetWeight(int)
 }
 
@@ -51,10 +53,11 @@ type BattleGear struct {
 	name        string
 	props       []any
 	quality     string
+	uname       string
 	weight      int
 }
 
-func NewBattleGear(name string, cost int, weight int) *BattleGear {
+func NewBattleGear(name string, uname string, cost int, weight int) *BattleGear {
 	return &BattleGear{
 		ac:          0,
 		cost:        cost,
@@ -64,6 +67,7 @@ func NewBattleGear(name string, cost int, weight int) *BattleGear {
 		name:        name,
 		props:       nil,
 		quality:     "",
+		uname:       uname,
 		weight:      weight,
 	}
 }
@@ -104,6 +108,10 @@ func (h *BattleGear) GetQuality() string {
 	return h.quality
 }
 
+func (h *BattleGear) GetUName() string {
+	return h.uname
+}
+
 func (h *BattleGear) GetWeight() int {
 	return h.weight
 }
@@ -142,6 +150,10 @@ func (h *BattleGear) SetProps(props []any) {
 
 func (h *BattleGear) SetQuality(quality string) {
 	h.quality = quality
+}
+
+func (h *BattleGear) SetUName(uname string) {
+	h.uname = uname
 }
 
 func (h *BattleGear) SetWeight(weight int) {

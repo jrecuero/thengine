@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/app/game/dad/gear/body"
+	"github.com/jrecuero/thengine/app/game/dad/gear/shields"
 	"github.com/jrecuero/thengine/app/game/dad/gear/weapons"
 	"github.com/jrecuero/thengine/app/game/dad/rules"
 	"github.com/jrecuero/thengine/pkg/api"
@@ -31,7 +32,15 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 	player.GetAbilities().GetIntelligence().SetScore(10)
 	player.GetAbilities().GetWisdom().SetScore(10)
 	player.GetAbilities().GetCharisma().SetScore(10)
-	player.GetGear().SetMainHand(weapons.NewSwordsword())
+
+	weaponEntry := rules.DBase.GetSections()[rules.DbSectionGear].GetSections()[rules.DbSectionWeapon].GetEntries()[weapons.ShortswordName]
+	weaponCreator := weaponEntry.GetCreator().(func() *rules.Weapon)
+	player.GetGear().SetMainHand(weaponCreator())
+	//player.GetGear().SetMainHand(weapons.NewShortsword())
+
+	shieldCreator := rules.DBase.GetCreator([]string{rules.DbSectionGear, rules.DbSectionShield}, shields.ShieldName).(func() *rules.Shield)
+	player.GetGear().SetOffHand(shieldCreator())
+
 	player.GetGear().SetBody(body.NewPaddedBodyArmor())
 	attack := rules.NewWeaponAttack(player.GetGear())
 	player.GetAttacks().AddAttack(attack)

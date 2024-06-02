@@ -21,5 +21,7 @@ func (g *HealthBar) UpdateStyle(completed int) {
 		//tools.Logger.WithField("module", "healthBar").
 		//    WithField("method", "UpdateCanvas").
 		//    Debugf("%s", tools.StyleToString(g.GetStyle()))
+	} else {
+		g.SetStyle(&theStyleGreenOverBlack)
 	}
 }

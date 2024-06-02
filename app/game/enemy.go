@@ -6,6 +6,7 @@ import (
 	"github.com/jrecuero/thengine/app/game/dad/rules"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
+	"github.com/jrecuero/thengine/pkg/tools"
 	"github.com/jrecuero/thengine/pkg/widgets"
 )
 
@@ -14,24 +15,56 @@ type Enemy struct {
 	*rules.Unit
 }
 
+func NewEmptyEnemy() *Enemy {
+	enemy := &Enemy{
+		Widget: widgets.NewEmptyWidget(),
+		Unit:   rules.NewUnit("enemy"),
+	}
+	return enemy
+}
+
 func NewEnemy(name string, position *api.Point, style *tcell.Style) *Enemy {
-	cell := engine.NewCell(style, 'X')
 	enemy := &Enemy{
 		Widget: widgets.NewWidget(name, position, nil, style),
 		Unit:   rules.NewUnit("enemy"),
 	}
+	cell := engine.NewCell(enemy.GetStyle(), 'X')
 	enemy.GetCanvas().SetCellAt(nil, cell)
-	enemy.SetSolid(true)
-	enemy.GetHitPoints().SetMaxScore(50)
-	enemy.GetHitPoints().SetScore(50)
-	enemy.GetAbilities().GetStrength().SetScore(10)
-	enemy.GetAbilities().GetDexterity().SetScore(10)
-	enemy.GetAbilities().GetConstitution().SetScore(10)
-	enemy.GetAbilities().GetIntelligence().SetScore(10)
-	enemy.GetAbilities().GetWisdom().SetScore(10)
-	enemy.GetAbilities().GetCharisma().SetScore(10)
-	enemy.GetGear().SetMainHand(weapons.NewSwordsword())
-	attack := rules.NewWeaponAttack(enemy.GetGear())
-	enemy.GetAttacks().AddAttack(attack)
+	enemy.populate(nil)
 	return enemy
+}
+
+func (e *Enemy) populate(content map[string]any) {
+	//tools.Logger.WithField("module", "enemy").
+	//    WithField("method", "populate").
+	//    Debugf("%+v", content)
+	e.SetSolid(true)
+	defaults := map[string]any{
+		"hp":           50,
+		"strength":     10,
+		"dexterity":    10,
+		"constitution": 10,
+		"intelligence": 10,
+		"wisdom":       10,
+		"charisma":     10,
+	}
+	e.Populate(defaults, content)
+	e.GetGear().SetMainHand(weapons.NewDagger())
+	attack := rules.NewWeaponAttack(e.GetGear())
+	e.GetAttacks().AddAttack(attack)
+}
+
+func (e *Enemy) UnmarshalMap(content map[string]any, origin *api.Point) error {
+	if err := e.Entity.UnmarshalMap(content, origin); err != nil {
+		return err
+	}
+	if uname, ok := content["uname"].(string); ok {
+		e.SetUName(uname)
+	}
+	tools.Logger.WithField("module", "enemy").
+		WithField("method", "UnmarshalJSON").
+		Debugf("%s|%s is being unmarshal", e.GetName(), e.GetUName())
+
+	e.populate(content)
+	return nil
 }

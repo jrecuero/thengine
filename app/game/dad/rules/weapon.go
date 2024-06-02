@@ -23,9 +23,9 @@ type Weapon struct {
 	*Handheld
 }
 
-func NewWeapon(name string, cost int, weight int, htype *HandheldType, diceThrow IDiceThrow, damageType DamageType) *Weapon {
+func NewWeapon(name string, uname string, cost int, weight int, htype *HandheldType, diceThrow IDiceThrow, damageType DamageType) *Weapon {
 	weapon := &Weapon{
-		Handheld: NewHandheld(name, cost, weight, htype),
+		Handheld: NewHandheld(name, uname, cost, weight, htype),
 	}
 	weapon.Damage = NewDamage(diceThrow, damageType)
 	return weapon

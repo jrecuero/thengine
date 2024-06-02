@@ -30,6 +30,17 @@ func NewHandheldType(hands int) *HandheldType {
 	}
 }
 
+func NewShieldHandheldType() *HandheldType {
+	return &HandheldType{
+		hands:     1,
+		offhand:   true,
+		dualHands: false,
+		dualGrip:  false,
+		finesse:   false,
+		martial:   false,
+	}
+}
+
 // -----------------------------------------------------------------------------
 // HandheldType public methods
 // -----------------------------------------------------------------------------
@@ -114,9 +125,9 @@ type Handheld struct {
 	htype *HandheldType
 }
 
-func NewHandheld(name string, cost int, weight int, htype *HandheldType) *Handheld {
+func NewHandheld(name string, uname string, cost int, weight int, htype *HandheldType) *Handheld {
 	return &Handheld{
-		BattleGear: NewBattleGear(name, cost, weight),
+		BattleGear: NewBattleGear(name, uname, cost, weight),
 		htype:      htype,
 	}
 }

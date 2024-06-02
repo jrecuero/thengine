@@ -3,6 +3,15 @@ package body
 
 import "github.com/jrecuero/thengine/app/game/dad/rules"
 
+const (
+	PaddedArmorName = "armor/body/light/padded"
+)
+
+func init() {
+	sections := []string{rules.DbSectionGear, rules.DbSectionBody}
+	rules.DBase.Add(sections, rules.NewDatabaseEntry(PaddedArmorName, NewPaddedBodyArmor))
+}
+
 // -----------------------------------------------------------------------------
 //
 // PaddedBodyArmor
@@ -10,7 +19,7 @@ import "github.com/jrecuero/thengine/app/game/dad/rules"
 // -----------------------------------------------------------------------------
 
 func NewPaddedBodyArmor() *rules.BodyGear {
-	armor := rules.NewBodyGear("armor/body/light/padded", 5, 8)
+	armor := rules.NewBodyGear(PaddedArmorName, "paddedarmor", 5, 8)
 	armor.SetAC(1)
 	return armor
 }

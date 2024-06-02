@@ -27,9 +27,9 @@ type Armor struct {
 	bodypart string
 }
 
-func NewArmor(name string, cost int, weight int, bodypart string) *Armor {
+func NewArmor(name string, uname string, cost int, weight int, bodypart string) *Armor {
 	return &Armor{
-		BattleGear: NewBattleGear(name, cost, weight),
+		BattleGear: NewBattleGear(name, uname, cost, weight),
 		bodypart:   bodypart,
 	}
 }

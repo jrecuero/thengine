@@ -22,6 +22,19 @@
 		"size": [1, 1],
 		"style": ["red", "black", "0"],
 		"ch": "#"
+	},
+	{
+		"class": "Enemy",
+		"name": "widget/enemy/2",
+		"uname": "goblin",
+		"position": [41, 6],
+		"size": [1, 1],
+		"style": ["red", "white", "0"],
+		"ch": "X",
+		"hp": 20,
+		"gear": [
+			["mainhand", "weapon/dagger/dagger"]
+		]
 	}
 ]
 
