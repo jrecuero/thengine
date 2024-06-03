@@ -33,7 +33,6 @@ type IUnit interface {
 	GetInitiative() int // unit initiative 1d20 + mod(dex)
 	GetLanguages() any
 	GetProficiencyBonus() int // unit proficiency bonus.
-	GetSavingThrows() ISavingThrows
 	GetSkills() any
 	GetSpeed() int // unit speed
 	GetSpells() any
@@ -47,7 +46,6 @@ type IUnit interface {
 	SetGear(IGear)
 	SetHitPoints(IHitPoints)
 	SetLanguages(any)
-	SetSavingThrows(ISavingThrows)
 	SetSkills(any)
 	SetSpells(any)
 	SetTraits(any)
@@ -84,32 +82,30 @@ type IUnit interface {
 // representing a unique entity with its own attributes, abilities, and role in
 // the game world.
 type Unit struct {
-	uname        string        // unit name
-	description  string        // unit description.
-	hitPoints    IHitPoints    // unit hit points.
-	level        ILevel        // unit level.
-	abilities    IAbilities    // unit abilities.
-	savingThrows ISavingThrows // unit saving throws.
-	skills       any           // unit skills
-	gear         IGear         // unit gear
-	attacks      IAttacks      // unit type of attacks
-	spells       any           // unit spells
-	languages    any           // unit languages
-	traits       any           // unit personality traits
-	dieRoll      IDiceThrow    // unit die roll
+	uname       string     // unit name
+	description string     // unit description.
+	hitPoints   IHitPoints // unit hit points.
+	level       ILevel     // unit level.
+	abilities   IAbilities // unit abilities.
+	skills      any        // unit skills
+	gear        IGear      // unit gear
+	attacks     IAttacks   // unit type of attacks
+	spells      any        // unit spells
+	languages   any        // unit languages
+	traits      any        // unit personality traits
+	dieRoll     IDiceThrow // unit die roll
 }
 
 func NewUnit(name string) *Unit {
 	die20 := dice.DieTwenty
 	return &Unit{
-		uname:        name,
-		hitPoints:    NewHitPoints(0),
-		level:        NewLevel(0, 0),
-		abilities:    NewAbilities(),
-		savingThrows: NewSavingThrows(),
-		attacks:      NewAttacks(nil),
-		dieRoll:      NewDiceThrow("dice-throw/die20", "dieroll", []dice.IDie{die20}),
-		gear:         NewGear(),
+		uname:     name,
+		hitPoints: NewHitPoints(0),
+		level:     NewLevel(0, 0),
+		abilities: NewAbilities(),
+		attacks:   NewAttacks(nil),
+		dieRoll:   NewDiceThrow("dice-throw/die20", "dieroll", []dice.IDie{die20}),
+		gear:      NewGear(),
 	}
 }
 
@@ -275,10 +271,6 @@ func (u *Unit) GetProficiencyBonus() int {
 	return 1
 }
 
-func (u *Unit) GetSavingThrows() ISavingThrows {
-	return u.savingThrows
-}
-
 func (u *Unit) GetSkills() any {
 	return u.skills
 }
@@ -386,10 +378,6 @@ func (u *Unit) SetHitPoints(hp IHitPoints) {
 
 func (u *Unit) SetLanguages(langs any) {
 	u.languages = langs
-}
-
-func (u *Unit) SetSavingThrows(savingThrows ISavingThrows) {
-	u.savingThrows = savingThrows
 }
 
 func (u *Unit) SetSkills(skills any) {

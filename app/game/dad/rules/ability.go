@@ -1,5 +1,25 @@
 package rules
 
+const (
+	StrengthAS     AbilityScore = "strength"
+	DexterityAS    AbilityScore = "dexterity"
+	ConstitutionAS AbilityScore = "constitution"
+	IntelligenceAS AbilityScore = "intelligence"
+	WisdomAS       AbilityScore = "wisdom"
+	CharismaAS     AbilityScore = "charisma"
+
+	StrengthShortNameAS     AbilityScoreShortName = "str"
+	DexterityShortNameAS    AbilityScoreShortName = "dex"
+	ConstitutionShortNameAS AbilityScoreShortName = "con"
+	IntelligenceShortNameAS AbilityScoreShortName = "int"
+	WisdomShortNameAS       AbilityScoreShortName = "wis"
+	CharismaShortNameAS     AbilityScoreShortName = "cha"
+)
+
+type AbilityScore string
+
+type AbilityScoreShortName string
+
 // -----------------------------------------------------------------------------
 //
 // IAbility
@@ -8,10 +28,10 @@ package rules
 
 // IAbility interface defines all possible methods for any ability.
 type IAbility interface {
-	GetName() string
-	SetName(string)
-	GetShortName() string
-	SetShortName(string)
+	GetName() AbilityScore
+	SetName(AbilityScore)
+	GetShortName() AbilityScoreShortName
+	SetShortName(AbilityScoreShortName)
 	GetDescription() string
 	SetDescription(string)
 	GetScore() int
@@ -30,15 +50,15 @@ type IAbility interface {
 
 // Ability structure contains all attributes required to define an ability.
 type Ability struct {
-	name        string // ability name.
-	shortName   string // ability short name.
-	description string // ability description.
-	score       int    // ability score.
-	extra       int    // ability extra score.
+	name        AbilityScore          // ability name.
+	shortName   AbilityScoreShortName // ability short name.
+	description string                // ability description.
+	score       int                   // ability score.
+	extra       int                   // ability extra score.
 }
 
 // NewAbility function creates a new Ability instance.
-func NewAbility(name, shortname string, score int) *Ability {
+func NewAbility(name AbilityScore, shortname AbilityScoreShortName, score int) *Ability {
 	return &Ability{
 		name:      name,
 		shortName: shortname,
@@ -51,22 +71,22 @@ func NewAbility(name, shortname string, score int) *Ability {
 // -----------------------------------------------------------------------------
 
 // GetName method returns ability name.
-func (a *Ability) GetName() string {
+func (a *Ability) GetName() AbilityScore {
 	return a.name
 }
 
 // SetName method sets ability name.
-func (a *Ability) SetName(name string) {
+func (a *Ability) SetName(name AbilityScore) {
 	a.name = name
 }
 
 // GetShortName method returns ability short name.
-func (a *Ability) GetShortName() string {
+func (a *Ability) GetShortName() AbilityScoreShortName {
 	return a.shortName
 }
 
 // SetShortName method sets ability short name.
-func (a *Ability) SetShortName(name string) {
+func (a *Ability) SetShortName(name AbilityScoreShortName) {
 	a.shortName = name
 }
 
@@ -194,7 +214,7 @@ func (a *Ability) GetScorePoint() int {
 
 // IAbilities interfaces defines all abilities methods to be implemented.
 type IAbilities interface {
-	GetAbilityByName(string) IAbility
+	GetAbilityByName(AbilityScore) IAbility
 	GetConstitution() IAbility
 	GetStrength() IAbility
 	GetDexterity() IAbility
@@ -248,12 +268,12 @@ type Abilities struct {
 // NewAbilities function creates a new Abilities instance.
 func NewAbilities() *Abilities {
 	return &Abilities{
-		Constitution: NewAbility("constitution", "con", 0),
-		Strength:     NewAbility("strength", "str", 0),
-		Dexterity:    NewAbility("dexterity", "dex", 0),
-		Intelligence: NewAbility("intelligence", "int", 0),
-		Wisdom:       NewAbility("wisdom", "wis", 0),
-		Charisma:     NewAbility("charisma", "char", 0),
+		Constitution: NewAbility(ConstitutionAS, ConstitutionShortNameAS, 0),
+		Strength:     NewAbility(StrengthAS, StrengthShortNameAS, 0),
+		Dexterity:    NewAbility(DexterityAS, DexterityShortNameAS, 0),
+		Intelligence: NewAbility(IntelligenceAS, IntelligenceShortNameAS, 0),
+		Wisdom:       NewAbility(WisdomAS, WisdomShortNameAS, 0),
+		Charisma:     NewAbility(CharismaAS, CharismaShortNameAS, 0),
 	}
 }
 
@@ -262,20 +282,20 @@ func NewAbilities() *Abilities {
 // -----------------------------------------------------------------------------
 
 // GetAbilityByName method return the ability for the given name.
-func (a *Abilities) GetAbilityByName(name string) IAbility {
+func (a *Abilities) GetAbilityByName(name AbilityScore) IAbility {
 	result := (IAbility)(nil)
 	switch name {
-	case ConstitutionStr:
+	case ConstitutionAS:
 		result = a.Constitution
-	case StrengthStr:
+	case StrengthAS:
 		result = a.Strength
-	case DexterityStr:
+	case DexterityAS:
 		result = a.Dexterity
-	case IntelligenceStr:
+	case IntelligenceAS:
 		result = a.Intelligence
-	case WisdomStr:
+	case WisdomAS:
 		result = a.Wisdom
-	case CharismaStr:
+	case CharismaAS:
 		result = a.Charisma
 	}
 	return result

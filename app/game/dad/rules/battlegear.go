@@ -58,7 +58,7 @@ type BattleGear struct {
 }
 
 func NewBattleGear(name string, uname string, cost int, weight int) *BattleGear {
-	return &BattleGear{
+	shield := &BattleGear{
 		ac:          0,
 		cost:        cost,
 		description: name,
@@ -70,6 +70,8 @@ func NewBattleGear(name string, uname string, cost int, weight int) *BattleGear 
 		uname:       uname,
 		weight:      weight,
 	}
+	shield.Damage = NewNoDamage()
+	return shield
 }
 
 // -----------------------------------------------------------------------------

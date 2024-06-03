@@ -11,6 +11,7 @@ var (
 	DiceThrow1d8  = NewDiceThrow("dice-throw/1d8", "1d8", []dice.IDie{dice.DieEight})
 	DiceThrow1d10 = NewDiceThrow("dice-throw/1d10", "1d10", []dice.IDie{dice.DieTen})
 	DiceThrow1d12 = NewDiceThrow("dice-throw/1d12", "1d12", []dice.IDie{dice.DieTwelve})
+	DiceThrow1d20 = NewDiceThrow("dice-throw/1d20", "1d20", []dice.IDie{dice.DieTwenty})
 	DiceThrow2d6  = NewDiceThrow("dice-throw/2d6", "2d6", []dice.IDie{dice.DieSix, dice.DieSix})
 )
 
