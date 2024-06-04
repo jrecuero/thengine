@@ -35,9 +35,9 @@ func NewEnemy(name string, position *api.Point, style *tcell.Style) *Enemy {
 }
 
 func (e *Enemy) populate(content map[string]any) {
-	//tools.Logger.WithField("module", "enemy").
-	//    WithField("method", "populate").
-	//    Debugf("%+v", content)
+	tools.Logger.WithField("module", "enemy").
+		WithField("method", "populate").
+		Debugf("%+v", content)
 	e.SetSolid(true)
 	defaults := map[string]any{
 		"hp":           50,
@@ -49,7 +49,12 @@ func (e *Enemy) populate(content map[string]any) {
 		"charisma":     10,
 	}
 	e.Populate(defaults, content)
-	e.GetGear().SetMainHand(weapons.NewDagger())
+	if _, ok := content["gear"]; ok {
+		e.GetGear().UnmarshalMap(content)
+	} else {
+		//e.GetGear().SetMainHand(weapons.NewDagger())
+		e.GetGear().SetMainHand(weapons.NewPoisonDagger())
+	}
 	attack := rules.NewWeaponAttack(e.GetGear())
 	e.GetAttacks().AddAttack(attack)
 }

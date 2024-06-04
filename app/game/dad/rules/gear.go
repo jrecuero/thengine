@@ -195,28 +195,31 @@ func (g *Gear) SetOffHand(handheld IHandheld) {
 	g.offhand = handheld
 }
 func (g *Gear) UnmarshalMap(content map[string]any) {
-	if gears, ok := content["gear"].([][]string); ok {
-		for _, gear := range gears {
-			gearSlot := gear[0]
-			gearName := gear[1]
-			switch gearSlot {
-			case "mainhand":
-				//dbEntry := DBase.GetSections()[DbSectionGear].GetSections()[DbSectionWeapon].GetEntries()[gearName]
-				//dbEntryCreator := dbEntry.GetCreator().(func() *Weapon)
-				weapon := DBase.GetCreator([]string{DbSectionGear, DbSectionWeapon}, gearName).(func() *Weapon)()
-				g.SetMainHand(weapon)
-			case "offhand":
-				switch strings.Split(gearName, "/")[0] {
-				case "shield":
-					shield := DBase.GetCreator([]string{DbSectionGear, DbSectionShield}, gearName).(func() *Shield)()
-					g.SetOffHand(shield)
-				case "weapon":
+	if gears, ok := content["gear"].([]any); ok {
+		for _, tmp := range gears {
+			if gear, ok := tmp.([]any); ok {
+				gearSlot := gear[0].(string)
+				gearName := gear[1].(string)
+				switch gearSlot {
+				case "mainhand":
+					//dbEntry := DBase.GetSections()[DbSectionGear].GetSections()[DbSectionWeapon].GetEntries()[gearName]
+					//dbEntryCreator := dbEntry.GetCreator().(func() *Weapon)
 					weapon := DBase.GetCreator([]string{DbSectionGear, DbSectionWeapon}, gearName).(func() *Weapon)()
-					g.SetOffHand(weapon)
+					g.SetMainHand(weapon)
+				case "offhand":
+					switch strings.Split(gearName, "/")[0] {
+					case "shield":
+						shield := DBase.GetCreator([]string{DbSectionGear, DbSectionShield}, gearName).(func() *Shield)()
+						g.SetOffHand(shield)
+					case "weapon":
+						weapon := DBase.GetCreator([]string{DbSectionGear, DbSectionWeapon}, gearName).(func() *Weapon)()
+						g.SetOffHand(weapon)
+					default:
+					}
 				default:
 				}
-			default:
 			}
+
 		}
 	}
 }

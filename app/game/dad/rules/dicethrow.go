@@ -1,6 +1,10 @@
 package rules
 
-import "github.com/jrecuero/thengine/app/game/dad/dice"
+import (
+	"fmt"
+
+	"github.com/jrecuero/thengine/app/game/dad/dice"
+)
 
 var (
 	DiceThrow1d2  = NewDiceThrow("dice-throw/1d2", "1d2", []dice.IDie{dice.DieTwo})
@@ -33,6 +37,7 @@ type IDiceThrow interface {
 	SetName(string)
 	SetExtra(int)
 	SureRoll() int
+	ToString() string
 }
 
 // -----------------------------------------------------------------------------
@@ -130,6 +135,10 @@ func (d *DiceThrow) SureRoll() int {
 		result = 1
 	}
 	return result
+}
+
+func (d *DiceThrow) ToString() string {
+	return fmt.Sprintf("dice-throw %s %s", d.name, d.dices[0].ToString())
 }
 
 var _ IDiceThrow = (*DiceThrow)(nil)

@@ -1,6 +1,9 @@
 package dice
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 var (
 	DieOne       = NewDie("die/one", 1)
@@ -37,6 +40,7 @@ type IDie interface {
 	GetName() string // returns the name of the die.
 	GetFaces() int   // returns the number of faces for the die.
 	Roll() int       // returns a roll die.
+	ToString() string
 }
 
 // -----------------------------------------------------------------------------
@@ -93,6 +97,10 @@ func (d *Die) Roll() int {
 		return d.loaded
 	}
 	return rand.Intn(d.GetFaces() + 1)
+}
+
+func (d *Die) ToString() string {
+	return fmt.Sprintf("die %s %d/%d", d.name, d.faces, d.loaded)
 }
 
 var _ IDie = (*Die)(nil)

@@ -14,6 +14,7 @@ type IBattleGear interface {
 	IDamage
 	GetAC() int
 	GetCost() int
+	GetDamage() *Damage
 	GetDescription() string
 	GetMaterial() string
 	GetModifiers() []any
@@ -25,6 +26,7 @@ type IBattleGear interface {
 	RollDamage() int
 	SetAC(int)
 	SetCost(int)
+	SetDamage(*Damage)
 	SetDescription(string)
 	SetMaterial(string)
 	SetModifiers([]any)
@@ -86,6 +88,10 @@ func (h *BattleGear) GetCost() int {
 	return h.cost
 }
 
+func (h *BattleGear) GetDamage() *Damage {
+	return h.Damage
+}
+
 func (h *BattleGear) GetDescription() string {
 	return h.description
 }
@@ -128,6 +134,10 @@ func (h *BattleGear) SetAC(ac int) {
 
 func (h *BattleGear) SetCost(cost int) {
 	h.cost = cost
+}
+
+func (h *BattleGear) SetDamage(damage *Damage) {
+	h.Damage = damage
 }
 
 func (h *BattleGear) SetDescription(description string) {

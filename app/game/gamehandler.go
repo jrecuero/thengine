@@ -105,6 +105,43 @@ func writeToCommandLine(scene engine.IScene, str string) {
 // GameHandler public methods
 // -----------------------------------------------------------------------------
 
+func (h *GameHandler) PlayerAttack(scene engine.IScene, player *Player, attackIndex int, attackName string) {
+	enemies := getEnemiesInScene(scene)
+	if enemy := isAnyEnemyAdjacent(player, enemies); enemy != nil {
+		if e, ok := enemy.(*Enemy); ok {
+			player.RollAttack(attackIndex, e)
+			e.RollAttack(0, player)
+			writeToCommandLine(scene, fmt.Sprintf("\n> %s [%d] %s to %s [%d]",
+				player.GetName(), player.GetHitPoints().GetScore(),
+				enemy.GetName(), attackName, e.GetHitPoints().GetScore()))
+			//writeToCommandLine(scene, fmt.Sprintf("\n> player attack with damage %d", damage))
+			updateDataBox(scene, player)
+			tools.Logger.WithField("module", "gameHandler").
+				WithField("method", "Update").
+				Debugf("player %s to %s", attackName, enemy.GetName())
+			for battlelog.BLog.IsAny() {
+				writeToCommandLine(scene, fmt.Sprintf("\n> %s", battlelog.BLog.Pop()))
+			}
+		}
+	} else {
+		writeToCommandLine(scene, fmt.Sprintf("\n> Player attack not available"))
+	}
+}
+
+func (h *GameHandler) PlayerMove(scene engine.IScene, player *Player, playerNewPosition *api.Point) {
+	playerX, playerY := player.GetPosition().Get()
+	player.SetPosition(playerNewPosition)
+	collisions := scene.CheckCollisionWith(player)
+	for _, ent := range collisions {
+		switch ent.(type) {
+		case *Wall:
+			player.SetPosition(api.NewPoint(playerX, playerY))
+		case *Enemy:
+			player.SetPosition(api.NewPoint(playerX, playerY))
+		}
+	}
+}
+
 func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 	if !h.HasFocus() {
 		return
@@ -119,6 +156,8 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 	}
 	playerX, playerY := player.GetPosition().Get()
 	var playerNewPosition *api.Point
+	var attackIndex int = -1
+	var attackName string = "no attack"
 	switch ev := event.(type) {
 	case *tcell.EventKey:
 		switch ev.Key() {
@@ -133,38 +172,19 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 		case tcell.KeyRune:
 			switch ev.Rune() {
 			case 'A', 'a':
-				enemies := getEnemiesInScene(scene)
-				if enemy := isAnyEnemyAdjacent(player, enemies); enemy != nil {
-					if e, ok := enemy.(*Enemy); ok {
-						player.RollAttack(e)
-						e.RollAttack(player)
-						writeToCommandLine(scene, fmt.Sprintf("\n> %s [%d] attack to %s [%d]",
-							player.GetName(), player.GetHitPoints().GetScore(),
-							enemy.GetName(), e.GetHitPoints().GetScore()))
-						//writeToCommandLine(scene, fmt.Sprintf("\n> player attack with damage %d", damage))
-						updateDataBox(scene, player)
-						tools.Logger.WithField("module", "gameHandler").WithField("method", "Update").Debugf("player can attack to %s", enemy.GetName())
-						for battlelog.BLog.IsAny() {
-							writeToCommandLine(scene, fmt.Sprintf("\n> %s", battlelog.BLog.Pop()))
-						}
-					}
-				} else {
-					writeToCommandLine(scene, fmt.Sprintf("\n> Player attack not available"))
-				}
+				attackIndex = 0
+				attackName = "weapon attack"
+			case 'M', 'm':
+				attackIndex = 1
+				attackName = "magical attack"
 			}
 		}
 	}
+	if attackIndex != -1 {
+		h.PlayerAttack(scene, player, attackIndex, attackName)
+	}
 	if playerNewPosition != nil {
-		player.SetPosition(playerNewPosition)
-		collisions := scene.CheckCollisionWith(player)
-		for _, ent := range collisions {
-			switch ent.(type) {
-			case *Wall:
-				player.SetPosition(api.NewPoint(playerX, playerY))
-			case *Enemy:
-				player.SetPosition(api.NewPoint(playerX, playerY))
-			}
-		}
+		h.PlayerMove(scene, player, playerNewPosition)
 	}
 	enemies := getEnemiesInScene(scene)
 	if enemy := isAnyEnemyAdjacent(player, enemies); enemy != nil {

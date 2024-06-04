@@ -1,5 +1,11 @@
 package rules
 
+import (
+	"fmt"
+
+	"github.com/jrecuero/thengine/pkg/tools"
+)
+
 // -----------------------------------------------------------------------------
 //
 // ISavingThrow
@@ -14,6 +20,7 @@ type ISavingThrow interface {
 	Roll() int
 	SetAS(AbilityScore)
 	SetDC(int)
+	ToString() string
 }
 
 // -----------------------------------------------------------------------------
@@ -80,7 +87,11 @@ func (s *SavingThrow) GetDC() int {
 // the required difficulty class.
 func (s *SavingThrow) Pass(unit IUnit) bool {
 	score := unit.GetAbilities().GetAbilityByName(s.GetAS()).GetScorePoint()
-	return (s.Roll() + score) > s.GetDC()
+	roll := s.Roll()
+	tools.Logger.WithField("module", "savingThrow").
+		WithField("method", "Pass").
+		Debugf("saving throw roll:%d score:%d dc:%d", roll, score, s.dc)
+	return (roll + score) > s.GetDC()
 }
 
 func (s *SavingThrow) Roll() int {
@@ -93,6 +104,10 @@ func (s *SavingThrow) SetAS(as AbilityScore) {
 
 func (s *SavingThrow) SetDC(dc int) {
 	s.dc = dc
+}
+
+func (s *SavingThrow) ToString() string {
+	return fmt.Sprintf("saving-throw %s:%d %s", s.as, s.dc, s.diceThrow.ToString())
 }
 
 var _ ISavingThrow = (*SavingThrow)(nil)

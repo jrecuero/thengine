@@ -14,6 +14,7 @@ type IAttack interface {
 	GetAttack() int
 	GetName() string
 	Roll() int
+	RollSavingThrows(IUnit) int
 }
 
 // -----------------------------------------------------------------------------
@@ -66,6 +67,10 @@ func (a *Attack) Roll() int {
 	return result
 }
 
+func (a *Attack) RollSavingThrows(unit IUnit) int {
+	return 0
+}
+
 var _ IAttack = (*Attack)(nil)
 
 // -----------------------------------------------------------------------------
@@ -80,15 +85,6 @@ type WeaponAttack struct {
 }
 
 func NewWeaponAttack(gear IGear) *WeaponAttack {
-	//var diceThrows []IDiceThrow
-	//if gear.GetMainHand() != nil {
-	//    diceThrows = append(diceThrows, gear.GetMainHand().GetDamage())
-	//}
-	//if gear.GetOffHand() != nil {
-	//    diceThrows = append(diceThrows, gear.GetOffHand().GetDamage())
-	//}
-	//attack := NewAttack("attack/weapon", diceThrows)
-	//return attack
 	return &WeaponAttack{
 		Attack: NewAttack("attack/weapon", nil),
 		gear:   gear,
@@ -100,7 +96,62 @@ func NewWeaponAttack(gear IGear) *WeaponAttack {
 // -----------------------------------------------------------------------------
 
 func (a *WeaponAttack) Roll() int {
-	return a.gear.RollDamage()
+	//return a.gear.RollDamage()
+	if a.gear.GetMainHand() != nil {
+		return a.gear.GetMainHand().GetDamage().RollDamageValue()
+	}
+	return 0
+}
+
+func (a *WeaponAttack) RollSavingThrows(unit IUnit) int {
+	if a.gear.GetMainHand() != nil {
+		if savingThrows := a.gear.GetMainHand().GetSavingThrows(); savingThrows != nil {
+			return a.gear.GetMainHand().GetDamage().RollSavingThrowsDamage(unit)
+		}
+	}
+	return 0
+}
+
+var _ IAttack = (*WeaponAttack)(nil)
+
+// -----------------------------------------------------------------------------
+//
+// MagicalAttack
+//
+// -----------------------------------------------------------------------------
+
+type MagicalAttack struct {
+	*Attack
+	damage IDamage
+	gear   IGear
+}
+
+func NewMagicalAttack(damage IDamage, gear IGear) *MagicalAttack {
+	return &MagicalAttack{
+		Attack: NewAttack("attack/magical", nil),
+		damage: damage,
+		gear:   gear,
+	}
+}
+
+// -----------------------------------------------------------------------------
+// MagicalAttack public methods
+// -----------------------------------------------------------------------------
+
+func (a *MagicalAttack) Roll() int {
+	if a.damage != nil {
+		return a.damage.RollDamageValue()
+	}
+	return 0
+}
+
+func (a *MagicalAttack) RollSavingThrows(unit IUnit) int {
+	if a.damage != nil {
+		if savingThrows := a.damage.GetSavingThrows(); savingThrows != nil {
+			return a.damage.RollSavingThrowsDamage(unit)
+		}
+	}
+	return 0
 }
 
 var _ IAttack = (*WeaponAttack)(nil)

@@ -42,8 +42,14 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 	player.GetGear().SetOffHand(shieldCreator())
 
 	player.GetGear().SetBody(body.NewPaddedBodyArmor())
-	attack := rules.NewWeaponAttack(player.GetGear())
-	player.GetAttacks().AddAttack(attack)
+
+	weaponAttack := rules.NewWeaponAttack(player.GetGear())
+	player.GetAttacks().AddAttack(weaponAttack)
+
+	magicalDamage := rules.NewDamage(rules.DiceThrow1d8, rules.Magical)
+	magicalAttack := rules.NewMagicalAttack(magicalDamage, player.GetGear())
+	player.GetAttacks().AddAttack(magicalAttack)
+
 	strengthModifier := player.GetAbilities().GetStrength().GetModifier()
 	tools.Logger.WithField("module", "player").WithField("function", "NewPlayer").Debugf("strength modifier %d", strengthModifier)
 	return player

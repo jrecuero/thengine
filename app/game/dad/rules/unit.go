@@ -39,7 +39,7 @@ type IUnit interface {
 	GetTraits() any
 	GetUName() string
 	Populate(map[string]any, map[string]any)
-	RollAttack(IUnit) (bool, int)
+	RollAttack(int, IUnit) (bool, int)
 	SetAbilities(IAbilities)
 	SetAttacks(IAttacks)
 	SetDescription(string)
@@ -337,7 +337,7 @@ func (u *Unit) Populate(defaults map[string]any, content map[string]any) {
 	u.GetAbilities().GetCharisma().SetScore(charisma)
 }
 
-func (u *Unit) RollAttack(other IUnit) (bool, int) {
+func (u *Unit) RollAttack(index int, other IUnit) (bool, int) {
 	dieRoll := u.GetDieRoll()
 	ac := other.GetArmorClass()
 	tools.Logger.WithField("module", "unit").WithField("method", "Attack").Debug(dieRoll, ac)
@@ -347,10 +347,12 @@ func (u *Unit) RollAttack(other IUnit) (bool, int) {
 		return false, 0
 	}
 	// TODO: fix to used the first attack, usually attack/weapon
-	weaponAttack := u.GetAttacks().GetAttacks()[0]
+	weaponAttack := u.GetAttacks().GetAttacks()[index]
 	damage := weaponAttack.Roll()
+	stDamage := weaponAttack.RollSavingThrows(other)
 	otherHp := other.GetHitPoints().GetScore()
-	battlelog.BLog.Push(fmt.Sprintf("[%s] hit ac:%d damage:%d", u.GetUName(), ac, damage))
+	battlelog.BLog.Push(fmt.Sprintf("[%s] hit ac:%d damage:%d saving-throw damage:%d", u.GetUName(), ac, damage, stDamage))
+	damage += stDamage
 	otherHp -= damage
 	other.GetHitPoints().SetScore(otherHp)
 	return true, damage
