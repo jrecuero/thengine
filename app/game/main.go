@@ -166,7 +166,8 @@ func main() {
 	playerHealthBar.SetCompleted(player.GetHitPoints().GetScore())
 	mainScene.AddEntity(playerHealthBar)
 
-	enemyNameText := widgets.NewText(EnemyNameTextName, api.NewPoint(81, 11), api.NewSize(18, 1), &theStyleBlueOverBlack, enemy.GetUName())
+	enemyText := fmt.Sprintf("%s\t[AC:%d]", enemy.GetUName(), enemy.GetArmorClass())
+	enemyNameText := widgets.NewText(EnemyNameTextName, api.NewPoint(81, 11), api.NewSize(18, 1), &theStyleBlueOverBlack, enemyText)
 	enemyNameText.SetVisible(false)
 	mainScene.AddEntity(enemyNameText)
 

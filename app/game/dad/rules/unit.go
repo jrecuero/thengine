@@ -24,6 +24,8 @@ type IUnit interface {
 	GetAbilities() IAbilities
 	GetArmorClass() int // unit AC 10 + mod(dex) + mod(gear)
 	GetAttacks() IAttacks
+	GetConditions() []ICondition
+	GetConditionResistances() map[string]string
 	GetDescription() string
 	GetDieRoll() int
 	GetGear() IGear
@@ -42,6 +44,8 @@ type IUnit interface {
 	RollAttack(int, IUnit) (bool, int)
 	SetAbilities(IAbilities)
 	SetAttacks(IAttacks)
+	SetConditions([]ICondition)
+	SetConditionResistances(map[string]string)
 	SetDescription(string)
 	SetGear(IGear)
 	SetHitPoints(IHitPoints)
@@ -82,30 +86,34 @@ type IUnit interface {
 // representing a unique entity with its own attributes, abilities, and role in
 // the game world.
 type Unit struct {
-	uname       string     // unit name
-	description string     // unit description.
-	hitPoints   IHitPoints // unit hit points.
-	level       ILevel     // unit level.
-	abilities   IAbilities // unit abilities.
-	skills      any        // unit skills
-	gear        IGear      // unit gear
-	attacks     IAttacks   // unit type of attacks
-	spells      any        // unit spells
-	languages   any        // unit languages
-	traits      any        // unit personality traits
-	dieRoll     IDiceThrow // unit die roll
+	uname                string            // unit name
+	description          string            // unit description.
+	hitPoints            IHitPoints        // unit hit points.
+	level                ILevel            // unit level.
+	abilities            IAbilities        // unit abilities.
+	skills               any               // unit skills
+	gear                 IGear             // unit gear
+	attacks              IAttacks          // unit type of attacks
+	spells               any               // unit spells
+	languages            any               // unit languages
+	traits               any               // unit personality traits
+	dieRoll              IDiceThrow        // unit die roll
+	conditions           []ICondition      // unit conditions or status effects
+	conditionResistances map[string]string // unit condition resistances
 }
 
 func NewUnit(name string) *Unit {
 	die20 := dice.DieTwenty
 	return &Unit{
-		uname:     name,
-		hitPoints: NewHitPoints(0),
-		level:     NewLevel(0, 0),
-		abilities: NewAbilities(),
-		attacks:   NewAttacks(nil),
-		dieRoll:   NewDiceThrow("dice-throw/die20", "dieroll", []dice.IDie{die20}),
-		gear:      NewGear(),
+		uname:                name,
+		hitPoints:            NewHitPoints(0),
+		level:                NewLevel(0, 0),
+		abilities:            NewAbilities(),
+		attacks:              NewAttacks(nil),
+		dieRoll:              NewDiceThrow("dice-throw/die20", "dieroll", []dice.IDie{die20}),
+		gear:                 NewGear(),
+		conditions:           nil,
+		conditionResistances: make(map[string]string),
 	}
 }
 
@@ -154,6 +162,14 @@ func (u *Unit) GetArmorClass() int {
 	return result
 }
 
+func (u *Unit) GetConditions() []ICondition {
+	return u.conditions
+}
+
+func (u *Unit) GetConditionResistances() map[string]string {
+	return u.conditionResistances
+}
+
 func (u *Unit) GetDescription() string {
 	return u.description
 }
@@ -189,7 +205,7 @@ func (u *Unit) GetDieRoll() int {
 	// TODO: Ability modifier FIXED to strength.
 	strengthModifier := u.GetAbilities().GetStrength().GetModifier()
 	result := die20 + strengthModifier
-	battlelog.BLog.Push(fmt.Sprintf("[%s] die-roll %d+%d", u.GetUName(), die20, strengthModifier))
+	battlelog.BLog.PushDebug(fmt.Sprintf("[%s] die-roll %d+%d", u.GetUName(), die20, strengthModifier))
 	return result
 }
 
@@ -343,7 +359,7 @@ func (u *Unit) RollAttack(index int, other IUnit) (bool, int) {
 	tools.Logger.WithField("module", "unit").WithField("method", "Attack").Debug(dieRoll, ac)
 	// if die-roll is greater than the other unit armor class, it is a hit.
 	if dieRoll < ac {
-		battlelog.BLog.Push(fmt.Sprintf("[%s] no hit ac:%d", u.GetUName(), ac))
+		battlelog.BLog.PushInfo(fmt.Sprintf("[%s] roll:%dvs%d", u.GetUName(), dieRoll, ac))
 		return false, 0
 	}
 	// TODO: fix to used the first attack, usually attack/weapon
@@ -351,7 +367,7 @@ func (u *Unit) RollAttack(index int, other IUnit) (bool, int) {
 	damage := weaponAttack.Roll()
 	stDamage := weaponAttack.RollSavingThrows(other)
 	otherHp := other.GetHitPoints().GetScore()
-	battlelog.BLog.Push(fmt.Sprintf("[%s] hit ac:%d damage:%d saving-throw damage:%d", u.GetUName(), ac, damage, stDamage))
+	battlelog.BLog.PushInfo(fmt.Sprintf("[%s] roll:%dvs%d ^%d :%d", u.GetUName(), dieRoll, ac, damage, stDamage))
 	damage += stDamage
 	otherHp -= damage
 	other.GetHitPoints().SetScore(otherHp)
@@ -364,6 +380,14 @@ func (u *Unit) SetAbilities(abilities IAbilities) {
 
 func (u *Unit) SetAttacks(attacks IAttacks) {
 	u.attacks = attacks
+}
+
+func (u *Unit) SetConditions(conditions []ICondition) {
+	u.conditions = conditions
+}
+
+func (u *Unit) SetConditionResistances(resitances map[string]string) {
+	u.conditionResistances = resitances
 }
 
 func (u *Unit) SetDescription(desc string) {

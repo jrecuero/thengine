@@ -148,11 +148,11 @@ func (g *Gear) RollDamage() int {
 	offHandDamage := 0
 	if g.mainhand != nil {
 		mainHandDamage = g.mainhand.RollDamage()
-		battlelog.BLog.Push(fmt.Sprintf("main-hand %s damage: %d", g.mainhand.GetUName(), mainHandDamage))
+		battlelog.BLog.PushDebug(fmt.Sprintf("main-hand %s damage: %d", g.mainhand.GetUName(), mainHandDamage))
 	}
 	if g.offhand != nil {
 		offHandDamage = g.offhand.RollDamage()
-		battlelog.BLog.Push(fmt.Sprintf("off-hand %s damage: %d", g.offhand.GetUName(), offHandDamage))
+		battlelog.BLog.PushDebug(fmt.Sprintf("off-hand %s damage: %d", g.offhand.GetUName(), offHandDamage))
 	}
 	return mainHandDamage + offHandDamage
 }

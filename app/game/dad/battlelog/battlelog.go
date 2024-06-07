@@ -2,6 +2,16 @@
 // data.
 package battlelog
 
+import (
+	"fmt"
+	"strings"
+)
+
+const (
+	debugStr = "[DEBUG]"
+	infoStr  = "[INFO]"
+)
+
 var (
 	BLog *BattleLog = NewBattleLog()
 )
@@ -36,6 +46,14 @@ func (l *BattleLog) Push(str string) {
 	}
 }
 
+func (l *BattleLog) PushDebug(str string) {
+	l.Push(fmt.Sprintf("%s %s", debugStr, str))
+}
+
+func (l *BattleLog) PushInfo(str string) {
+	l.Push(fmt.Sprintf("%s %s", infoStr, str))
+}
+
 func (l *BattleLog) Pop() string {
 	var result string
 	if l.IsAny() {
@@ -43,6 +61,22 @@ func (l *BattleLog) Pop() string {
 		l.index++
 	}
 	return result
+}
+
+func (l *BattleLog) PopDebug() string {
+	str := l.Pop()
+	if strings.HasPrefix(str, debugStr) {
+		return str
+	}
+	return ""
+}
+
+func (l *BattleLog) PopInfo() string {
+	str := l.Pop()
+	if strings.HasPrefix(str, infoStr) {
+		return str
+	}
+	return ""
 }
 
 func (l *BattleLog) Cache() []string {

@@ -15,20 +15,35 @@ var (
 	theGameHandler *GameHandler
 )
 
-type GameHandler struct {
-	*engine.Entity
+// -----------------------------------------------------------------------------
+// Private private types
+// -----------------------------------------------------------------------------
+
+type attackInfo struct {
+	index int
+	name  string
 }
 
-func NewGameHandler() *GameHandler {
-	if theGameHandler == nil {
-		tools.Logger.WithField("module", "gameHandler").WithField("function", "NewGameHandler").Debugf("handler/game/1")
-		theGameHandler = &GameHandler{
-			Entity: engine.NewHandler("handler/game/1"),
-		}
-		theGameHandler.SetFocusType(engine.MultiFocus)
-		theGameHandler.SetFocusEnable(true)
+type inputAction struct {
+	attack *attackInfo
+	pos    *api.Point
+}
+
+func newInputActionWithAttack(index int, name string) *inputAction {
+	return &inputAction{
+		attack: &attackInfo{
+			index: index,
+			name:  name,
+		},
+		pos: nil,
 	}
-	return theGameHandler
+}
+
+func newInputActionWithPosition(pos *api.Point) *inputAction {
+	return &inputAction{
+		attack: nil,
+		pos:    pos,
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -42,7 +57,7 @@ func displayEnemyHealthBar(scene engine.IScene, ent engine.IEntity) {
 	tmpHealthBar := scene.GetEntityByName(EnemyHealthBarName)
 	enemyHealthBar, _ := tmpHealthBar.(*HealthBar)
 	enemyText.SetVisible(true)
-	enemyText.SetText(enemy.GetUName())
+	enemyText.SetText(fmt.Sprintf("%s\t[AC:%d]", enemy.GetUName(), enemy.GetArmorClass()))
 	enemyHealthBar.SetVisible(true)
 	enemyHealthBar.SetTotal(enemy.GetHitPoints().GetMaxScore())
 	enemyHealthBar.UpdateStyle(enemy.GetHitPoints().GetScore())
@@ -77,6 +92,14 @@ func isAnyEnemyAdjacent(player engine.IEntity, enemies []engine.IEntity) engine.
 	return nil
 }
 
+func readFromBattleLog(scene engine.IScene) {
+	for battlelog.BLog.IsAny() {
+		if str := battlelog.BLog.PopInfo(); str != "" {
+			writeToCommandLine(scene, fmt.Sprintf("\n> %s", str))
+		}
+	}
+}
+
 func updateDataBox(scene engine.IScene, player *Player) {
 	if tmp := scene.GetEntityByName(PlayerLiveTextName); tmp != nil {
 		if playerLiveText, ok := tmp.(*widgets.Text); ok {
@@ -102,44 +125,128 @@ func writeToCommandLine(scene engine.IScene, str string) {
 }
 
 // -----------------------------------------------------------------------------
+//
+// GameHandler
+//
+// -----------------------------------------------------------------------------
+
+type GameHandler struct {
+	*engine.Entity
+	player *Player
+	enemy  *Enemy
+}
+
+func NewGameHandler() *GameHandler {
+	if theGameHandler == nil {
+		tools.Logger.WithField("module", "gameHandler").WithField("function", "NewGameHandler").Debugf("handler/game/1")
+		theGameHandler = &GameHandler{
+			Entity: engine.NewHandler("handler/game/1"),
+			player: nil,
+			enemy:  nil,
+		}
+		theGameHandler.SetFocusType(engine.MultiFocus)
+		theGameHandler.SetFocusEnable(true)
+	}
+	return theGameHandler
+}
+
+// -----------------------------------------------------------------------------
 // GameHandler public methods
 // -----------------------------------------------------------------------------
 
-func (h *GameHandler) PlayerAttack(scene engine.IScene, player *Player, attackIndex int, attackName string) {
+func (h *GameHandler) EnemyAttack(scene engine.IScene) {
+	if h.enemy != nil {
+		h.enemy.RollAttack(0, h.player)
+		updateDataBox(scene, h.player)
+		tools.Logger.WithField("module", "gameHandler").
+			WithField("method", "Update").
+			Debugf("Enemy %s to %s", h.enemy.GetName(), h.player.GetName())
+		readFromBattleLog(scene)
+	}
+}
+
+func (h *GameHandler) PlayerAttack(scene engine.IScene, attack *attackInfo) {
 	enemies := getEnemiesInScene(scene)
-	if enemy := isAnyEnemyAdjacent(player, enemies); enemy != nil {
+	if enemy := isAnyEnemyAdjacent(h.player, enemies); enemy != nil {
 		if e, ok := enemy.(*Enemy); ok {
-			player.RollAttack(attackIndex, e)
-			e.RollAttack(0, player)
-			writeToCommandLine(scene, fmt.Sprintf("\n> %s [%d] %s to %s [%d]",
-				player.GetName(), player.GetHitPoints().GetScore(),
-				enemy.GetName(), attackName, e.GetHitPoints().GetScore()))
-			//writeToCommandLine(scene, fmt.Sprintf("\n> player attack with damage %d", damage))
-			updateDataBox(scene, player)
+			h.enemy = e
+			h.player.RollAttack(attack.index, e)
+			updateDataBox(scene, h.player)
 			tools.Logger.WithField("module", "gameHandler").
 				WithField("method", "Update").
-				Debugf("player %s to %s", attackName, enemy.GetName())
-			for battlelog.BLog.IsAny() {
-				writeToCommandLine(scene, fmt.Sprintf("\n> %s", battlelog.BLog.Pop()))
-			}
+				Debugf("player %s to %s", attack.name, enemy.GetName())
+			readFromBattleLog(scene)
 		}
 	} else {
 		writeToCommandLine(scene, fmt.Sprintf("\n> Player attack not available"))
 	}
 }
 
-func (h *GameHandler) PlayerMove(scene engine.IScene, player *Player, playerNewPosition *api.Point) {
-	playerX, playerY := player.GetPosition().Get()
-	player.SetPosition(playerNewPosition)
-	collisions := scene.CheckCollisionWith(player)
+func (h *GameHandler) PlayerMove(scene engine.IScene, playerNewPosition *api.Point) {
+	playerX, playerY := h.player.GetPosition().Get()
+	h.player.SetPosition(playerNewPosition)
+	collisions := scene.CheckCollisionWith(h.player)
 	for _, ent := range collisions {
 		switch ent.(type) {
 		case *Wall:
-			player.SetPosition(api.NewPoint(playerX, playerY))
+			h.player.SetPosition(api.NewPoint(playerX, playerY))
 		case *Enemy:
-			player.SetPosition(api.NewPoint(playerX, playerY))
+			h.player.SetPosition(api.NewPoint(playerX, playerY))
 		}
 	}
+}
+
+func (h *GameHandler) RunEndTurn(scene engine.IScene, input *inputAction) {
+	h.player = nil
+	h.enemy = nil
+	h.RunStateMachineTurn(scene, input)
+}
+
+func (h *GameHandler) RunEnemyTurn(scene engine.IScene, input *inputAction) {
+	h.EnemyAttack(scene)
+	h.RunStateMachineTurn(scene, input)
+}
+
+func (h *GameHandler) RunPlayerTurn(scene engine.IScene, input *inputAction) {
+	if input.attack != nil {
+		h.PlayerAttack(scene, input.attack)
+	}
+	if input.pos != nil {
+		h.PlayerMove(scene, input.pos)
+	}
+	h.RunStateMachineTurn(scene, input)
+}
+
+func (h *GameHandler) RunStartTurn(scene engine.IScene, input *inputAction) {
+	h.RunStateMachineTurn(scene, input)
+}
+
+func (h *GameHandler) RunStateMachineTurn(scene engine.IScene, input *inputAction) {
+	TheStateMachine.Next()
+	state := TheStateMachine.GetState()
+	switch state {
+	case WaitingSM:
+		// do nothing
+		h.RunWaitingTurn(scene, input)
+	case StartSM:
+		// run everything required at the start of the turn
+		h.RunStartTurn(scene, input)
+	case PlayerSM:
+		// run player action (move or attack)
+		h.RunPlayerTurn(scene, input)
+	case EnemySM:
+		// run selected enemy action (attack)
+		h.RunEnemyTurn(scene, input)
+	case EndSM:
+		// run everything required at the end of the turn
+		h.RunEndTurn(scene, input)
+	}
+	//tools.Logger.WithField("module", "gamehandler").
+	//    WithField("method", "Next State").
+	//    Debugf("state is %d", state)
+}
+
+func (h *GameHandler) RunWaitingTurn(scene engine.IScene, input *inputAction) {
 }
 
 func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
@@ -154,38 +261,44 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 	if !ok {
 		return
 	}
+	if !TheStateMachine.IsWaiting() {
+		return
+	}
+	h.player = player
+
 	playerX, playerY := player.GetPosition().Get()
-	var playerNewPosition *api.Point
-	var attackIndex int = -1
-	var attackName string = "no attack"
+	var input *inputAction
 	switch ev := event.(type) {
 	case *tcell.EventKey:
 		switch ev.Key() {
 		case tcell.KeyUp:
-			playerNewPosition = api.NewPoint(playerX, playerY-1)
+			input = newInputActionWithPosition(api.NewPoint(playerX, playerY-1))
 		case tcell.KeyDown:
-			playerNewPosition = api.NewPoint(playerX, playerY+1)
+			input = newInputActionWithPosition(api.NewPoint(playerX, playerY+1))
 		case tcell.KeyLeft:
-			playerNewPosition = api.NewPoint(playerX-1, playerY)
+			input = newInputActionWithPosition(api.NewPoint(playerX-1, playerY))
 		case tcell.KeyRight:
-			playerNewPosition = api.NewPoint(playerX+1, playerY)
+			input = newInputActionWithPosition(api.NewPoint(playerX+1, playerY))
 		case tcell.KeyRune:
 			switch ev.Rune() {
 			case 'A', 'a':
-				attackIndex = 0
-				attackName = "weapon attack"
+				input = newInputActionWithAttack(0, "weapon attack")
 			case 'M', 'm':
-				attackIndex = 1
-				attackName = "magical attack"
+				input = newInputActionWithAttack(1, "magical attack")
 			}
 		}
 	}
-	if attackIndex != -1 {
-		h.PlayerAttack(scene, player, attackIndex, attackName)
+	if input != nil {
+		//    if input.attack != nil {
+		//        h.PlayerAttack(scene, input.attack)
+		//    }
+		//    if input.pos != nil {
+		//        h.PlayerMove(scene, input.pos)
+		//    }
+		TheStateMachine.Next()
+		h.RunStateMachineTurn(scene, input)
 	}
-	if playerNewPosition != nil {
-		h.PlayerMove(scene, player, playerNewPosition)
-	}
+
 	enemies := getEnemiesInScene(scene)
 	if enemy := isAnyEnemyAdjacent(player, enemies); enemy != nil {
 		displayEnemyHealthBar(scene, enemy)
