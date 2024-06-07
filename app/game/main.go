@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/jrecuero/thengine/app/game/assets"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/tools"
@@ -175,6 +176,18 @@ func main() {
 	enemyHealthBar.SetCompleted(enemy.GetHitPoints().GetScore())
 	enemyHealthBar.SetVisible(false)
 	mainScene.AddEntity(enemyHealthBar)
+
+	//diceOneAnimWidget := widgets.NewAnimWidget("anim-widget/dice/1", api.NewPoint(65, 13), api.NewSize(6, 6), assets.NewAsciiFramesForAllNumbers(10), 0)
+	//diceOneAnimWidget.Shuffle()
+	//mainScene.AddEntity(diceOneAnimWidget)
+	//diceTwoAnimWidget := widgets.NewAnimWidget("anim-widget/dice/1", api.NewPoint(72, 13), api.NewSize(6, 6), assets.NewAsciiFramesForAllNumbers(10), 0)
+	//diceTwoAnimWidget.Shuffle()
+	//mainScene.AddEntity(diceTwoAnimWidget)
+
+	diceOneAnimWidget := assets.NewShuffleDieWidget("widget/anim-dice/1", api.NewPoint(72, 16), &theStyleRedOverBlack, 6, 10)
+	mainScene.AddEntity(diceOneAnimWidget)
+	diceTwoAnimWidget := assets.NewShuffleDieWidget("widget/anim-dice/1", api.NewPoint(75, 16), &theStyleBlueOverBlack, 20, 10)
+	mainScene.AddEntity(diceTwoAnimWidget)
 
 	gameHandler := NewGameHandler()
 	mainScene.AddEntity(gameHandler)

@@ -4,7 +4,18 @@ package tools
 
 import (
 	"math"
+	"math/rand"
+	"time"
 )
+
+var (
+	RandomRing *rand.Rand
+)
+
+func init() {
+	source := rand.NewSource(time.Now().UnixNano())
+	RandomRing = rand.New(source)
+}
 
 // -----------------------------------------------------------------------------
 // Public functions

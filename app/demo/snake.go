@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
@@ -453,11 +452,11 @@ func (h *AppHandler) SetUpMainScene(mainScene engine.IScene) {
 
 	foodTimer := widgets.NewTimer(TimerFoodWidgetName, 5*time.Second, widgets.ForeverTimer)
 	foodTimer.SetWidgetCallback(func(entity engine.IEntity, args ...any) bool {
-		x := rand.Intn(78) + 1
-		y := rand.Intn(18) + 2
+		x := tools.RandomRing.Intn(78) + 1
+		y := tools.RandomRing.Intn(18) + 2
 		FoodPieceCounter++
 		foodPieceName := fmt.Sprintf(TimerFoodPieceWidgetName, FoodPieceCounter)
-		duration := rand.Intn(30) + 10
+		duration := tools.RandomRing.Intn(30) + 10
 		var points int
 		var style tcell.Style
 		if duration < 20 {

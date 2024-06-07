@@ -2,7 +2,8 @@ package dice
 
 import (
 	"fmt"
-	"math/rand"
+
+	"github.com/jrecuero/thengine/pkg/tools"
 )
 
 var (
@@ -40,6 +41,7 @@ type IDie interface {
 	GetName() string // returns the name of the die.
 	GetFaces() int   // returns the number of faces for the die.
 	Roll() int       // returns a roll die.
+	SureRoll() int   // returns a roll die without a zero
 	ToString() string
 }
 
@@ -96,7 +98,15 @@ func (d *Die) Roll() int {
 	if d.isLoaded {
 		return d.loaded
 	}
-	return rand.Intn(d.GetFaces() + 1)
+	return tools.RandomRing.Intn(d.GetFaces() + 1)
+}
+
+// SureRoll method returns a roll die without a zero.
+func (d *Die) SureRoll() int {
+	if d.isLoaded {
+		return d.loaded
+	}
+	return tools.RandomRing.Intn(d.GetFaces()) + 1
 }
 
 func (d *Die) ToString() string {

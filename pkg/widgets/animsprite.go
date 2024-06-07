@@ -5,6 +5,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
+	"github.com/jrecuero/thengine/pkg/tools"
 )
 
 // -----------------------------------------------------------------------------
@@ -63,6 +64,8 @@ type AnimSprite struct {
 	*Sprite
 	frames        []*SpriteFrame
 	frameTraverse int
+	isfrozen      bool
+	isshuffle     bool
 }
 
 // NewAnimSprite function creates a new AnimSprite instance.
@@ -71,6 +74,8 @@ func NewAnimSprite(name string, position *api.Point, frames []*SpriteFrame, init
 		Sprite:        NewSprite(name, position, nil),
 		frames:        frames,
 		frameTraverse: initFrame,
+		isfrozen:      false,
+		isshuffle:     false,
 	}
 	widget.updateSprite()
 	return widget
@@ -89,13 +94,40 @@ func (w *AnimSprite) updateSprite() {
 // AnimSprite public methods
 // -----------------------------------------------------------------------------
 
+func (w *AnimSprite) Freeze(index int) {
+	w.isfrozen = true
+	if index >= 0 && index < len(w.frames) {
+		w.frameTraverse = index
+		w.updateSprite()
+	}
+}
+
+func (w *AnimSprite) Shuffle() {
+	w.isshuffle = true
+}
+
+func (w *AnimSprite) UnFreeze() {
+	w.isfrozen = false
+}
+
+func (w *AnimSprite) UnShuffle() {
+	w.isshuffle = false
+}
+
 // Update method updates the entity instance.
 func (w *AnimSprite) Update(event tcell.Event, scene engine.IScene) {
 	if w.IsActive() {
 		frame := w.frames[w.frameTraverse]
+		if w.isfrozen {
+			return
+		}
 		if frame.Inc() {
 			frame.Reset()
-			w.frameTraverse = (w.frameTraverse + 1) % len(w.frames)
+			if w.isshuffle {
+				w.frameTraverse = tools.RandomRing.Intn(len(w.frames))
+			} else {
+				w.frameTraverse = (w.frameTraverse + 1) % len(w.frames)
+			}
 			w.updateSprite()
 		}
 	}
