@@ -4,6 +4,8 @@
 package widgets
 
 import (
+	"fmt"
+
 	"github.com/jrecuero/thengine/pkg/tools"
 )
 
@@ -43,6 +45,15 @@ func (i *iterScroller) GetOffset() int {
 func (i *iterScroller) Next() {
 	i.index++
 	i.offset = i.index * i.delta
+}
+
+// SetIndex method sets index attribute to the given value.
+func (i *iterScroller) SetIndex(index int) {
+	i.index = index
+}
+
+func (i *iterScroller) ToString() string {
+	return fmt.Sprintf("%d:%d:%d", i.index, i.offset, i.delta)
 }
 
 // -----------------------------------------------------------------------------
@@ -105,8 +116,9 @@ func NewVerticalScroller(totalNbrOfSelections int, nbrOfSelectionToDisplay int) 
 // -----------------------------------------------------------------------------
 
 // CreateIter method created a new scroller iterator.
-func (s *Scroller) CreateIter() {
+func (s *Scroller) CreateIter() *iterScroller {
 	s.sIter = newIterScroller(s.StartSelection, s.SelectionLength)
+	return s.sIter
 }
 
 // IterHasNext method checks if there are still some entries in the scroller
@@ -122,6 +134,10 @@ func (s *Scroller) IterGetNext() (int, int) {
 	offset := s.sIter.GetOffset()
 	s.sIter.Next()
 	return index, offset
+}
+
+func (s *Scroller) ToString() string {
+	return fmt.Sprintf("%d:%d:%d %d:%d", s.TotalSelectionLength, s.MaxLength, s.SelectionLength, s.StartSelection, s.EndSelection)
 }
 
 // Update method update the scroller StartSelection and EndSelection based on

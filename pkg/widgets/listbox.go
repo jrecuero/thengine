@@ -28,13 +28,18 @@ type ListBox struct {
 
 // NewListBox function creates a new ListBox instance.
 func NewListBox(name string, position *api.Point, size *api.Size, style *tcell.Style, selections []string, selectionIndex int) *ListBox {
+	tools.Logger.WithField("module", "list-box").
+		WithField("function", "NewListBox").
+		Infof("%s %s %s %+v", name, position.ToString(), size.ToString(), selections)
 	selectionsLength := len(selections)
 	// Add padding for every menu item to fill the whole horizontal length.
 	paddingSelections := make([]string, selectionsLength)
 	for i, s := range selections {
 		paddingSelections[i] = fmt.Sprintf("%-*s", size.W-2, s)
 	}
-	tools.Logger.WithField("module", "list-box").WithField("function", "NewListBox").Debugf("%s %+v", name, paddingSelections)
+	//tools.Logger.WithField("module", "list-box").
+	//    WithField("function", "NewListBox").
+	//    Debugf("%s %+v", name, paddingSelections)
 	listBox := &ListBox{
 		Widget:         NewWidget(name, position, size, style),
 		selections:     paddingSelections,
@@ -52,7 +57,7 @@ func NewListBox(name string, position *api.Point, size *api.Size, style *tcell.S
 // -----------------------------------------------------------------------------
 
 func (l *ListBox) execute(args ...any) {
-	tools.Logger.WithField("module", "list-box").WithField("function", "execute").Debugf("%s %+v", l.GetName(), args)
+	tools.Logger.WithField("module", "list-box").WithField("method", "execute").Debugf("%s %+v", l.GetName(), args)
 	switch args[0].(string) {
 	case "up":
 		if l.selectionIndex > 0 {
@@ -74,15 +79,19 @@ func (l *ListBox) updateCanvas() {
 	// update the scroller with the selection index.
 	l.scroller.Update(l.selectionIndex)
 	canvas := l.GetCanvas()
+	canvas.WriteRectangleInCanvasAt(nil, nil, l.GetStyle(), engine.CanvasRectSingleLine)
 	l.scroller.CreateIter()
-	for x := 1; l.scroller.IterHasNext(); {
-		index, y := l.scroller.IterGetNext()
+	//tools.Logger.WithField("module", "listbox").
+	//    WithField("method", "updateCanvas").
+	//    Debugf("iter %s", iter.ToString())
+	for x, y := 1, 1; l.scroller.IterHasNext(); y++ {
+		index, _ := l.scroller.IterGetNext()
 		selection := l.selections[index]
 		if index == l.selectionIndex {
-			canvas.WriteStringInCanvasAt(selection, l.GetStyle(), api.NewPoint(x, y+1))
-		} else {
 			reverseStyle := tools.ReverseStyle(l.GetStyle())
-			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y+1))
+			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
+		} else {
+			canvas.WriteStringInCanvasAt(selection, l.GetStyle(), api.NewPoint(x, y))
 		}
 	}
 }

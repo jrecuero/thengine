@@ -462,18 +462,31 @@ func demoEleven(dryRun bool) {
 	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-eleven")
 	fmt.Println("ThEngine demo-eleven")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(20, 10))
-	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)
 	scene := engine.NewScene("scene", camera)
 
-	listBox := widgets.NewListBox("list-box/1", api.NewPoint(1, 1), api.NewSize(20, 5), &styleOne, []string{"one", "two", "three"}, 0)
+	listBox := widgets.NewListBox("list-box/1", api.NewPoint(1, 1), api.NewSize(20, 5), &styleOne, []string{"one", "two", "three", "four", "five", "six"}, 0)
 	scene.AddEntity(listBox)
+
+	checkbox := widgets.NewCheckBox("check-box/1", api.NewPoint(25, 1), api.NewSize(10, 5), &styleTwo, []string{"One", "Two", "Three", "Four", "Five", "Six"}, 0)
+	scene.AddEntity(checkbox)
+
+	menuItems := []*widgets.MenuItem{
+		widgets.NewMenuItem("one"),
+		widgets.NewMenuItem("two"),
+		widgets.NewMenuItem("three"),
+	}
+	menu := widgets.NewTopMenu("menu/1", api.NewPoint(1, 6), api.NewSize(40, 3), &styleOne, menuItems, 0)
+	scene.AddEntity(menu)
 
 	appEngine := engine.GetEngine()
 	appEngine.InitResources()
 	appEngine.GetSceneManager().AddScene(scene)
 	appEngine.GetSceneManager().SetSceneAsActive(scene)
 	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.GetSceneManager().UpdateFocus()
 	appEngine.Init()
+	appEngine.Start()
 	appEngine.Run(60.0)
 }
 
@@ -584,7 +597,7 @@ func demoFourteen(dryRun bool) {
 	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-fourteen")
 	fmt.Println("ThEngine demo-fourteen")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
-	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)
 	//styleTwo := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorRed)
 	scene := engine.NewScene("scene", camera)
 
@@ -604,6 +617,10 @@ func demoFourteen(dryRun bool) {
 	animSprite := widgets.NewAnimSprite("anim-sprite", api.NewPoint(1, 1), frames, 0)
 	scene.AddEntity(animSprite)
 
+	selections := []string{"alberto", "pedro", "federico", "jose", "joshua", "juan", "javier"}
+	comboBox := widgets.NewComboBox("combo-box/1", api.NewPoint(2, 5), api.NewSize(20, 6), &styleOne, selections, 0)
+	scene.AddEntity(comboBox)
+
 	appEngine := engine.GetEngine()
 	appEngine.InitResources()
 	appEngine.GetSceneManager().AddScene(scene)
@@ -615,6 +632,8 @@ func demoFourteen(dryRun bool) {
 }
 
 func main() {
-	demoEight(false)
+	demoEleven(false)
+	//demoTwelve(false)
+	//demoFourteen(false)
 	//demoSnake(false)
 }

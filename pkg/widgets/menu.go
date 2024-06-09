@@ -222,18 +222,20 @@ func (m *Menu) prevMenuItem() {
 func (m *Menu) updateTopMenuCanvas() {
 	m.scroller.Update(m.menuItemIndex)
 	canvas := m.GetCanvas()
+	canvas.WriteRectangleInCanvasAt(nil, nil, m.GetStyle(), engine.CanvasRectSingleLine)
 	m.scroller.CreateIter()
 	for y := 1; m.scroller.IterHasNext(); {
 		index, x := m.scroller.IterGetNext()
 		selection := m.getMenuItemLabel(index)
 		if index == m.menuItemIndex {
-			canvas.WriteStringInCanvasAt(selection, m.GetStyle(), api.NewPoint(x+1, y))
-		} else {
 			reverseStyle := tools.ReverseStyle(m.GetStyle())
-			if !m.menuItems[index].IsEnabled() {
-				reverseStyle = tools.SetAttrToStyle(reverseStyle, tcell.AttrDim)
-			}
 			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x+1, y))
+		} else {
+			style := m.GetStyle()
+			if !m.menuItems[index].IsEnabled() {
+				style = tools.SetAttrToStyle(style, tcell.AttrDim)
+			}
+			canvas.WriteStringInCanvasAt(selection, style, api.NewPoint(x+1, y))
 		}
 	}
 }
@@ -241,6 +243,7 @@ func (m *Menu) updateTopMenuCanvas() {
 func (m *Menu) updateSubMenuCanvas() {
 	m.scroller.Update(m.menuItemIndex)
 	canvas := m.GetCanvas()
+	canvas.WriteRectangleInCanvasAt(nil, nil, m.GetStyle(), engine.CanvasRectSingleLine)
 	m.scroller.CreateIter()
 	for x := 1; m.scroller.IterHasNext(); {
 		index, y := m.scroller.IterGetNext()

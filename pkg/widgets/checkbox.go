@@ -77,9 +77,10 @@ func (c *CheckBox) updateCanvas() {
 	// update the scroller with the selection index.
 	c.scroller.Update(c.selectionIndex)
 	canvas := c.GetCanvas()
+	canvas.WriteRectangleInCanvasAt(nil, nil, c.GetStyle(), engine.CanvasRectSingleLine)
 	c.scroller.CreateIter()
-	for x := 1; c.scroller.IterHasNext(); {
-		index, y := c.scroller.IterGetNext()
+	for x, y := 1, 1; c.scroller.IterHasNext(); y++ {
+		index, _ := c.scroller.IterGetNext()
 		selection := c.selections[index]
 		if c.selected[index] {
 			selection = "x " + selection
@@ -87,10 +88,10 @@ func (c *CheckBox) updateCanvas() {
 			selection = "- " + selection
 		}
 		if index == c.selectionIndex {
-			canvas.WriteStringInCanvasAt(selection, c.GetStyle(), api.NewPoint(x, y+1))
-		} else {
 			reverseStyle := tools.ReverseStyle(c.GetStyle())
-			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y+1))
+			canvas.WriteStringInCanvasAt(selection, reverseStyle, api.NewPoint(x, y))
+		} else {
+			canvas.WriteStringInCanvasAt(selection, c.GetStyle(), api.NewPoint(x, y))
 		}
 	}
 }
