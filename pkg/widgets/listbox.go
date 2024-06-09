@@ -70,6 +70,13 @@ func (l *ListBox) execute(args ...any) {
 			l.updateCanvas()
 		}
 	case "run":
+		if l.callback != nil {
+			if l.callbackArgs != nil {
+				l.callback(l, l.callbackArgs...)
+			} else {
+				l.callback(l)
+			}
+		}
 	}
 }
 
@@ -103,6 +110,11 @@ func (l *ListBox) updateCanvas() {
 // GetSelection method returns the option for the selected index.
 func (l *ListBox) GetSelection() string {
 	return strings.TrimSpace(l.selections[l.selectionIndex])
+}
+
+// GetSelectionIndex method returns the selected index.
+func (l *ListBox) GetSelectionIndex() int {
+	return l.selectionIndex
 }
 
 // Update method executes all listbox functionality every tick time. Keyboard

@@ -25,12 +25,22 @@ type attackInfo struct {
 }
 
 type inputAction struct {
-	attack *attackInfo
-	pos    *api.Point
+	selAttack bool
+	attack    *attackInfo
+	pos       *api.Point
+}
+
+func newInputActionWithSelectAttack() *inputAction {
+	return &inputAction{
+		selAttack: true,
+		attack:    nil,
+		pos:       nil,
+	}
 }
 
 func newInputActionWithAttack(index int, name string) *inputAction {
 	return &inputAction{
+		selAttack: false,
 		attack: &attackInfo{
 			index: index,
 			name:  name,
@@ -41,8 +51,9 @@ func newInputActionWithAttack(index int, name string) *inputAction {
 
 func newInputActionWithPosition(pos *api.Point) *inputAction {
 	return &inputAction{
-		attack: nil,
-		pos:    pos,
+		selAttack: false,
+		attack:    nil,
+		pos:       pos,
 	}
 }
 
@@ -132,22 +143,40 @@ func writeToCommandLine(scene engine.IScene, str string) {
 
 type GameHandler struct {
 	*engine.Entity
-	player *Player
-	enemy  *Enemy
+	player             *Player
+	enemy              *Enemy
+	playerActionOption int
 }
 
 func NewGameHandler() *GameHandler {
 	if theGameHandler == nil {
 		tools.Logger.WithField("module", "gameHandler").WithField("function", "NewGameHandler").Debugf("handler/game/1")
 		theGameHandler = &GameHandler{
-			Entity: engine.NewHandler("handler/game/1"),
-			player: nil,
-			enemy:  nil,
+			Entity:             engine.NewHandler("handler/game/1"),
+			player:             nil,
+			enemy:              nil,
+			playerActionOption: -1,
 		}
-		theGameHandler.SetFocusType(engine.MultiFocus)
+		theGameHandler.SetFocusType(engine.SingleFocus)
 		theGameHandler.SetFocusEnable(true)
 	}
 	return theGameHandler
+}
+
+// -----------------------------------------------------------------------------
+// GameHandler private methods
+// -----------------------------------------------------------------------------
+
+func (h *GameHandler) playerSelection(entity engine.IEntity, args ...any) bool {
+	scene := args[0].(engine.IScene)
+	tools.Logger.WithField("module", "gamehandler").
+		WithField("module", "playerSelection").
+		Debugf("selection %d", entity.(*widgets.ListBox).GetSelectionIndex())
+	lb := entity.(*widgets.ListBox)
+	scene.RemoveEntity(entity)
+	newInput := newInputActionWithAttack(lb.GetSelectionIndex(), lb.GetSelection())
+	h.RunStateMachineTurn(scene, newInput)
+	return true
 }
 
 // -----------------------------------------------------------------------------
@@ -197,27 +226,52 @@ func (h *GameHandler) PlayerMove(scene engine.IScene, playerNewPosition *api.Poi
 }
 
 func (h *GameHandler) RunEndTurn(scene engine.IScene, input *inputAction) {
+	tools.Logger.WithField("module", "gameHandler").
+		WithField("method", "RunEndTurn").
+		Debugf("END TURN %+v", input)
 	h.player = nil
 	h.enemy = nil
 	h.RunStateMachineTurn(scene, input)
 }
 
 func (h *GameHandler) RunEnemyTurn(scene engine.IScene, input *inputAction) {
+	tools.Logger.WithField("module", "gameHandler").
+		WithField("method", "EnemyTurn").
+		Debugf("ENEMY TURN %+v", input)
 	h.EnemyAttack(scene)
 	h.RunStateMachineTurn(scene, input)
 }
 
 func (h *GameHandler) RunPlayerTurn(scene engine.IScene, input *inputAction) {
-	if input.attack != nil {
+	tools.Logger.WithField("module", "gameHandler").
+		WithField("method", "PlayerTurn").
+		Debugf("PLAYER TURN %+v", input)
+	if input != nil && input.attack != nil {
 		h.PlayerAttack(scene, input.attack)
 	}
-	if input.pos != nil {
+	if input != nil && input.pos != nil {
 		h.PlayerMove(scene, input.pos)
 	}
 	h.RunStateMachineTurn(scene, input)
 }
 
 func (h *GameHandler) RunStartTurn(scene engine.IScene, input *inputAction) {
+	tools.Logger.WithField("module", "gameHandler").
+		WithField("method", "StartTurn").
+		Debugf("START TURN %+v", input)
+	enemies := getEnemiesInScene(scene)
+	if input != nil && input.selAttack {
+		if enemy := isAnyEnemyAdjacent(h.player, enemies); enemy != nil {
+			x, y := h.player.GetPosition().Get()
+			options := widgets.NewListBox("list-box/player-options/1",
+				api.NewPoint(x, y), api.NewSize(10, 5), &theStyleBlueOverBlack,
+				[]string{"weapon", "power", "magical"}, 0)
+			options.SetWidgetCallback(h.playerSelection, scene)
+			scene.AddEntity(options)
+			theEngine.GetSceneManager().UpdateFocus()
+			return
+		}
+	}
 	h.RunStateMachineTurn(scene, input)
 }
 
@@ -247,6 +301,9 @@ func (h *GameHandler) RunStateMachineTurn(scene engine.IScene, input *inputActio
 }
 
 func (h *GameHandler) RunWaitingTurn(scene engine.IScene, input *inputAction) {
+	tools.Logger.WithField("module", "gameHandler").
+		WithField("method", "WaitingTurn").
+		Debugf("WAITING TURN %+v", input)
 }
 
 func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
@@ -282,9 +339,12 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 		case tcell.KeyRune:
 			switch ev.Rune() {
 			case 'A', 'a':
-				input = newInputActionWithAttack(0, "weapon attack")
-			case 'M', 'm':
-				input = newInputActionWithAttack(1, "magical attack")
+				input = newInputActionWithSelectAttack()
+				//h.RunStateMachineTurn(scene, input)
+				//case 'A', 'a':
+				//    input = newInputActionWithAttack(0, "weapon attack")
+				//case 'M', 'm':
+				//    input = newInputActionWithAttack(1, "magical attack")
 			}
 		}
 	}
@@ -295,7 +355,10 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 		//    if input.pos != nil {
 		//        h.PlayerMove(scene, input.pos)
 		//    }
-		TheStateMachine.Next()
+		//TheStateMachine.Next()
+		tools.Logger.WithField("module", "gamehandler").
+			WithField("methomethod", "Update").
+			Debugf("CALL RunStateMachineTurn %+v", input)
 		h.RunStateMachineTurn(scene, input)
 	}
 

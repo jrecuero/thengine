@@ -116,6 +116,49 @@ var _ IAttack = (*WeaponAttack)(nil)
 
 // -----------------------------------------------------------------------------
 //
+// PowerAttack
+//
+// -----------------------------------------------------------------------------
+
+type PowerAttack struct {
+	*Attack
+	gear IGear
+}
+
+func NewPowerAttack(gear IGear) *PowerAttack {
+	return &PowerAttack{
+		Attack: NewAttack("attack/skill/power", nil),
+		gear:   gear,
+	}
+}
+
+// -----------------------------------------------------------------------------
+// WeaponAttack public methods
+// -----------------------------------------------------------------------------
+
+func (a *PowerAttack) Roll() int {
+	// Power attack rolls x2 weapon damage.
+	if a.gear.GetMainHand() != nil {
+		result := a.gear.GetMainHand().GetDamage().RollDamageValue()
+		result += a.gear.GetMainHand().GetDamage().RollDamageValue()
+		return result
+	}
+	return 0
+}
+
+func (a *PowerAttack) RollSavingThrows(unit IUnit) int {
+	if a.gear.GetMainHand() != nil {
+		if savingThrows := a.gear.GetMainHand().GetSavingThrows(); savingThrows != nil {
+			return a.gear.GetMainHand().GetDamage().RollSavingThrowsDamage(unit)
+		}
+	}
+	return 0
+}
+
+var _ IAttack = (*PowerAttack)(nil)
+
+// -----------------------------------------------------------------------------
+//
 // MagicalAttack
 //
 // -----------------------------------------------------------------------------

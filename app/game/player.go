@@ -46,6 +46,9 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 	weaponAttack := rules.NewWeaponAttack(player.GetGear())
 	player.GetAttacks().AddAttack(weaponAttack)
 
+	powerAttack := rules.NewPowerAttack(player.GetGear())
+	player.GetAttacks().AddAttack(powerAttack)
+
 	magicalDamage := rules.NewDamage(rules.DiceThrow1d8, rules.Magical)
 	magicalAttack := rules.NewMagicalAttack(magicalDamage, player.GetGear())
 	player.GetAttacks().AddAttack(magicalAttack)

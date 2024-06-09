@@ -219,6 +219,8 @@ func (s *Scene) RemoveEntity(entity IEntity) error {
 	if index := s.findEntity(entity); index != InvalidEntityIndex {
 		s.entities = append(s.entities[:index], s.entities[index+1:]...)
 		s.sortEntities()
+		focusManager := GetEngine().GetFocusManager()
+		focusManager.RemoveEntity(s, entity)
 	}
 	return nil
 }

@@ -231,6 +231,9 @@ func (m *FocusManager) RemoveEntity(scene IScene, entity IEntity) error {
 			delete(m.withFocus, sceneName)
 		}
 	}
+	// after entity has been removed from all list, update the focus for the
+	// scene for the next available entity.
+	m.UpdateFocusForScene(scene)
 	return nil
 }
 

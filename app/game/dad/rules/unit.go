@@ -359,15 +359,15 @@ func (u *Unit) RollAttack(index int, other IUnit) (bool, int) {
 	tools.Logger.WithField("module", "unit").WithField("method", "Attack").Debug(dieRoll, ac)
 	// if die-roll is greater than the other unit armor class, it is a hit.
 	if dieRoll < ac {
-		battlelog.BLog.PushInfo(fmt.Sprintf("[%s] roll:%dvs%d", u.GetUName(), dieRoll, ac))
+		battlelog.BLog.PushInfo(fmt.Sprintf("[%s] miss! roll:%dvs%d", u.GetUName(), dieRoll, ac))
 		return false, 0
 	}
 	// TODO: fix to used the first attack, usually attack/weapon
-	weaponAttack := u.GetAttacks().GetAttacks()[index]
-	damage := weaponAttack.Roll()
-	stDamage := weaponAttack.RollSavingThrows(other)
+	attack := u.GetAttacks().GetAttacks()[index]
+	damage := attack.Roll()
+	stDamage := attack.RollSavingThrows(other)
 	otherHp := other.GetHitPoints().GetScore()
-	battlelog.BLog.PushInfo(fmt.Sprintf("[%s] roll:%dvs%d ^%d :%d", u.GetUName(), dieRoll, ac, damage, stDamage))
+	battlelog.BLog.PushInfo(fmt.Sprintf("[%s] %s roll:%dvs%d ^%d :%d", u.GetUName(), attack.GetName(), dieRoll, ac, damage, stDamage))
 	damage += stDamage
 	otherHp -= damage
 	other.GetHitPoints().SetScore(otherHp)
