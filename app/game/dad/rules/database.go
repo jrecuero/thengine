@@ -16,6 +16,8 @@ const (
 	DbSectionLegs        = "legs"
 	DbSectionFeet        = "feet"
 	DbSectionAccessories = "accessories"
+	DbSectionSpells      = "spells"
+	DbSectionSkills      = "skills"
 )
 
 var (
@@ -134,6 +136,7 @@ func NewDatabase(name string) *Database {
 	}
 	dbase.sections[DbSectionUnit] = NewDatabaseSection(DbSectionUnit)
 	dbase.sections[DbSectionUnit].entries = make(map[string]*DatabaseEntry)
+
 	dbase.sections[DbSectionGear] = NewDatabaseSection(DbSectionGear)
 	dbase.sections[DbSectionGear].sections = make(map[string]*DatabaseSection)
 	dbase.sections[DbSectionGear].sections[DbSectionWeapon] = NewDatabaseSection(DbSectionWeapon)
@@ -154,6 +157,12 @@ func NewDatabase(name string) *Database {
 	dbase.sections[DbSectionGear].sections[DbSectionFeet].entries = make(map[string]*DatabaseEntry)
 	dbase.sections[DbSectionGear].sections[DbSectionAccessories] = NewDatabaseSection(DbSectionAccessories)
 	dbase.sections[DbSectionGear].sections[DbSectionAccessories].entries = make(map[string]*DatabaseEntry)
+
+	dbase.sections[DbSectionSpells] = NewDatabaseSection(DbSectionSpells)
+	dbase.sections[DbSectionSpells].entries = make(map[string]*DatabaseEntry)
+
+	dbase.sections[DbSectionSkills] = NewDatabaseSection(DbSectionSkills)
+	dbase.sections[DbSectionSkills].entries = make(map[string]*DatabaseEntry)
 	return dbase
 }
 

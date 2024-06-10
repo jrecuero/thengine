@@ -6,6 +6,11 @@ import (
 	"github.com/jrecuero/thengine/app/game/dad/rules"
 )
 
+const (
+	dbSections     = 4
+	dbGearSections = 9
+)
+
 func weaponCreator() *rules.Weapon {
 	return nil
 }
@@ -19,11 +24,11 @@ func TestDatabase(t *testing.T) {
 	if dbase == nil {
 		t.Errorf("[0] NewDatabase error exp:*Database got:nil")
 	}
-	if len(dbase.GetSections()) != 2 {
-		t.Errorf("[0] Add database sections len error exp:%d got:%d", 2, len(dbase.GetSections()))
+	if len(dbase.GetSections()) != dbSections {
+		t.Errorf("[0] Add database sections len error exp:%d got:%d", dbSections, len(dbase.GetSections()))
 	}
-	if len(dbase.GetSections()[rules.DbSectionGear].GetSections()) != 9 {
-		t.Errorf("[0] Add gear sections len error exp:%d got:%d", 9, len(dbase.GetSections()[rules.DbSectionGear].GetSections()))
+	if len(dbase.GetSections()[rules.DbSectionGear].GetSections()) != dbGearSections {
+		t.Errorf("[0] Add gear sections len error exp:%d got:%d", dbGearSections, len(dbase.GetSections()[rules.DbSectionGear].GetSections()))
 	}
 	if err := dbase.Add([]string{rules.DbSectionUnit}, rules.NewDatabaseEntry("unit/test/1", unitCreator)); err != nil {
 		t.Errorf("[0] Add error exp:nil got:%s", err.Error())

@@ -3,6 +3,25 @@ package rules
 import "github.com/jrecuero/thengine/app/game/dad/dice"
 
 // -----------------------------------------------------------------------------
+// Module public types
+// -----------------------------------------------------------------------------
+
+type AttackType string
+
+// -----------------------------------------------------------------------------
+// Module public constants
+// -----------------------------------------------------------------------------
+
+const (
+	WeaponMeleeAttackType       AttackType = "attack/weapon/melee"
+	WeaponRangedAttackType      AttackType = "attack/weapon/ranged"
+	SpellMeleeAttackType        AttackType = "attack/spell/melee"
+	SpellRangedAttackType       AttackType = "attack/spell/ranged"
+	SpellAreaOfEffectAttackType AttackType = "attack/spell/aoe"
+	SpecialAttackType           AttackType = "attack/special"
+)
+
+// -----------------------------------------------------------------------------
 //
 // IAttack
 //
@@ -26,6 +45,7 @@ type IAttack interface {
 // Attack struct defines the common and generic structure for any attack.
 type Attack struct {
 	name       string
+	atype      AttackType
 	diceThrows []IDiceThrow
 }
 
@@ -176,6 +196,108 @@ func NewMagicalAttack(damage IDamage, gear IGear) *MagicalAttack {
 		gear:   gear,
 	}
 }
+
+var _ IAttack = (*MagicalAttack)(nil)
+
+// -----------------------------------------------------------------------------
+//
+// WeaponMeleeAttack
+//
+// -----------------------------------------------------------------------------
+
+type WeaponMeleeAttack struct {
+	*Attack
+	gear IGear
+}
+
+func NewWeaponMeleeAttack(gear IGear) *WeaponMeleeAttack {
+	return &WeaponMeleeAttack{
+		Attack: NewAttack(string(WeaponMeleeAttackType), nil),
+		gear:   gear,
+	}
+}
+
+var _ IAttack = (*WeaponMeleeAttack)(nil)
+
+// -----------------------------------------------------------------------------
+//
+// WeaponRangedAttack
+//
+// -----------------------------------------------------------------------------
+
+type WeaponRangedAttack struct {
+	*Attack
+	gear IGear
+}
+
+func NewWeaponRangedAttack(gear IGear) *WeaponRangedAttack {
+	return &WeaponRangedAttack{
+		Attack: NewAttack(string(WeaponRangedAttackType), nil),
+		gear:   gear,
+	}
+}
+
+var _ IAttack = (*WeaponRangedAttack)(nil)
+
+// -----------------------------------------------------------------------------
+//
+// SpellRangedAttack
+//
+// -----------------------------------------------------------------------------
+
+type SpellRangedAttack struct {
+	*Attack
+	spell ISpell
+}
+
+func NewSpelRangedAttack(spell ISpell) *SpellRangedAttack {
+	return &SpellRangedAttack{
+		Attack: NewAttack(string(SpellRangedAttackType), nil),
+		spell:  spell,
+	}
+}
+
+var _ IAttack = (*SpellRangedAttack)(nil)
+
+// -----------------------------------------------------------------------------
+//
+// SpellAreaOfEffectAttack
+//
+// -----------------------------------------------------------------------------
+
+type SpellAreaOfEffectAttack struct {
+	*Attack
+	spell ISpell
+}
+
+func NewSpelAreaOfEffectAttack(spell ISpell) *SpellAreaOfEffectAttack {
+	return &SpellAreaOfEffectAttack{
+		Attack: NewAttack(string(SpellAreaOfEffectAttackType), nil),
+		spell:  spell,
+	}
+}
+
+var _ IAttack = (*SpellAreaOfEffectAttack)(nil)
+
+// -----------------------------------------------------------------------------
+//
+// SpecialAttack
+//
+// -----------------------------------------------------------------------------
+
+type SpecialAttack struct {
+	*Attack
+	gear IGear
+}
+
+func NewSpecialAttack(diceThrows []IDiceThrow, gear IGear) *SpecialAttack {
+	return &SpecialAttack{
+		Attack: NewAttack(string(SpecialAttackType), diceThrows),
+		gear:   gear,
+	}
+}
+
+var _ IAttack = (*SpecialAttack)(nil)
 
 // -----------------------------------------------------------------------------
 // MagicalAttack public methods
