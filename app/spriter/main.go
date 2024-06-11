@@ -101,15 +101,16 @@ func newSpriter(ent engine.IEntity, args ...any) bool {
 	return true
 }
 
-func load(ent engine.IEntity, args ...any) bool {
+func load(entity engine.IEntity, args ...any) bool {
 	scene := args[0].(engine.IScene)
 	filename := args[1].(string)
 	if theHandler == nil {
-		newSpriter(ent, args...)
+		newSpriter(entity, args...)
 	}
 	entities := engine.ImportEntitiesFromJSON(filename, TheDrawingBoxOrigin, nil)
-	for _, ent := range entities {
-		scene.AddEntity(ent)
+	for _, entity := range entities {
+		theHandler.entities = append(theHandler.entities, entity)
+		scene.AddEntity(entity)
 	}
 	return true
 }

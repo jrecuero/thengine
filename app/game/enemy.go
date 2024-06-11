@@ -55,7 +55,7 @@ func (e *Enemy) populate(content map[string]any) {
 		//e.GetGear().SetMainHand(weapons.NewDagger())
 		e.GetGear().SetMainHand(weapons.NewPoisonDagger())
 	}
-	attack := rules.NewWeaponAttack(e.GetGear())
+	attack := rules.NewWeaponMeleeAttack("attack/weapon/melee", e.GetGear())
 	e.GetAttacks().AddAttack(attack)
 }
 

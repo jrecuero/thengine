@@ -6,11 +6,31 @@ import (
 	"github.com/jrecuero/thengine/app/game/dad/gear/shields"
 	"github.com/jrecuero/thengine/app/game/dad/gear/weapons"
 	"github.com/jrecuero/thengine/app/game/dad/rules"
+	"github.com/jrecuero/thengine/app/game/dad/spells"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/tools"
 	"github.com/jrecuero/thengine/pkg/widgets"
 )
+
+type PowerAttack struct {
+	rules.IAttackRoll
+	gear rules.IGear
+}
+
+func NewPowerAttack(gear rules.IGear) *PowerAttack {
+	return &PowerAttack{
+		gear: gear,
+	}
+}
+
+func (a *PowerAttack) Roll() int {
+	return 2 * a.gear.GetMainHand().RollDamage()
+}
+
+func (a *PowerAttack) RollSavingThrows(rules.IUnit) int {
+	return 0
+}
 
 type Player struct {
 	*widgets.Widget
@@ -43,14 +63,13 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 
 	player.GetGear().SetBody(body.NewPaddedBodyArmor())
 
-	weaponAttack := rules.NewWeaponAttack(player.GetGear())
+	weaponAttack := rules.NewWeaponMeleeAttack("attack/weapon/melee", player.GetGear())
 	player.GetAttacks().AddAttack(weaponAttack)
 
-	powerAttack := rules.NewPowerAttack(player.GetGear())
+	powerAttack := rules.NewSpecialAttack("attack/special/power", NewPowerAttack(player.GetGear()))
 	player.GetAttacks().AddAttack(powerAttack)
 
-	magicalDamage := rules.NewDamage(rules.DiceThrow1d8, rules.Magical)
-	magicalAttack := rules.NewMagicalAttack(magicalDamage, player.GetGear())
+	magicalAttack := rules.NewSpellMeleeAttack("attack/spell/melee/guiding-bolt", spells.NewGuidingBolt())
 	player.GetAttacks().AddAttack(magicalAttack)
 
 	strengthModifier := player.GetAbilities().GetStrength().GetModifier()
