@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jrecuero/thengine/app/game/dad/battlelog"
+	"github.com/jrecuero/thengine/app/game/dad/constants"
 	"github.com/jrecuero/thengine/app/game/dad/dice"
 	"github.com/jrecuero/thengine/pkg/tools"
 )
@@ -203,9 +204,17 @@ func (u *Unit) GetDescription() string {
 func (u *Unit) GetDieRoll() int {
 	die20 := u.dieRoll.Roll()
 	// TODO: Ability modifier FIXED to strength.
-	strengthModifier := u.GetAbilities().GetStrength().GetModifier()
-	result := die20 + strengthModifier
-	battlelog.BLog.PushDebug(fmt.Sprintf("[%s] die-roll %d+%d", u.GetUName(), die20, strengthModifier))
+	//strModifier := u.GetAbilities().GetStrength().GetModifier()
+	strModifier := u.GetAbilities().DieRollBonus(constants.Strength)
+	weaponStrModifier := 0
+	if u.GetGear() != nil {
+		weaponStrModifier = u.GetGear().DieRollBonus(constants.Strength)
+	}
+	result := die20 + strModifier + weaponStrModifier
+	battlelog.BLog.PushDebug(fmt.Sprintf("[%s] die-roll %d+%d+%d", u.GetUName(), die20, strModifier, weaponStrModifier))
+	tools.Logger.WithField("module", "unit").
+		WithField("method", "GetDieRoll").
+		Debugf(fmt.Sprintf("[%s] die-roll %d+%d+%d", u.GetUName(), die20, strModifier, weaponStrModifier))
 	return result
 }
 

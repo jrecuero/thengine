@@ -145,5 +145,6 @@ func (h *Handheld) SetHType(htype *HandheldType) {
 }
 
 var _ IDamage = (*Handheld)(nil)
+var _ IDieRollBonus = (*Handheld)(nil)
 var _ IBattleGear = (*Handheld)(nil)
 var _ IHandheld = (*Handheld)(nil)

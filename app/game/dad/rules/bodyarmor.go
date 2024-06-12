@@ -19,6 +19,7 @@ func NewHeadGear(name string, uname string, cost int, weight int) *HeadGear {
 }
 
 var _ IDamage = (*HeadGear)(nil)
+var _ IDieRollBonus = (*HeadGear)(nil)
 var _ IBattleGear = (*HeadGear)(nil)
 var _ IArmor = (*HeadGear)(nil)
 
@@ -39,6 +40,7 @@ func NewBodyGear(name string, uname string, cost int, weight int) *BodyGear {
 }
 
 var _ IDamage = (*BodyGear)(nil)
+var _ IDieRollBonus = (*BodyGear)(nil)
 var _ IBattleGear = (*BodyGear)(nil)
 var _ IArmor = (*BodyGear)(nil)
 
@@ -59,6 +61,7 @@ func NewArmsGear(name string, uname string, cost int, weight int) *ArmsGear {
 }
 
 var _ IDamage = (*ArmsGear)(nil)
+var _ IDieRollBonus = (*ArmsGear)(nil)
 var _ IBattleGear = (*ArmsGear)(nil)
 var _ IArmor = (*ArmsGear)(nil)
 
@@ -79,6 +82,7 @@ func NewHandsGear(name string, uname string, cost int, weight int) *HandsGear {
 }
 
 var _ IDamage = (*HandsGear)(nil)
+var _ IDieRollBonus = (*HandsGear)(nil)
 var _ IBattleGear = (*HandsGear)(nil)
 var _ IArmor = (*HandsGear)(nil)
 
@@ -99,6 +103,7 @@ func NewLegsGear(name string, uname string, cost int, weight int) *LegsGear {
 }
 
 var _ IDamage = (*LegsGear)(nil)
+var _ IDieRollBonus = (*LegsGear)(nil)
 var _ IBattleGear = (*LegsGear)(nil)
 var _ IArmor = (*LegsGear)(nil)
 
@@ -119,5 +124,6 @@ func NewFeetGear(name string, uname string, cost int, weight int) *FeetGear {
 }
 
 var _ IDamage = (*FeetGear)(nil)
+var _ IDieRollBonus = (*FeetGear)(nil)
 var _ IBattleGear = (*FeetGear)(nil)
 var _ IArmor = (*FeetGear)(nil)

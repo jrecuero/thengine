@@ -6,6 +6,8 @@
 // description of the spell.
 package rules
 
+import "github.com/jrecuero/thengine/app/game/dad/constants"
+
 // -----------------------------------------------------------------------------
 // Module public types
 // -----------------------------------------------------------------------------
@@ -18,20 +20,20 @@ type MagicComponent string
 // Module public constants
 // -----------------------------------------------------------------------------
 
-const (
-	AbjurationMagic    MagicSchool = "abjuration"
-	ConjurationMagic   MagicSchool = "conjuration"
-	DivinationMagic    MagicSchool = "divination"
-	EnchantmentMagic   MagicSchool = "enchantment"
-	EvocationMagic     MagicSchool = "evocation"
-	IllusionMagic      MagicSchool = "illusion"
-	NecromancyMagic    MagicSchool = "necromacy"
-	TransmutationMagic MagicSchool = "transmutation"
+//const (
+//    AbjurationMagic    MagicSchool = "abjuration"
+//    ConjurationMagic   MagicSchool = "conjuration"
+//    DivinationMagic    MagicSchool = "divination"
+//    EnchantmentMagic   MagicSchool = "enchantment"
+//    EvocationMagic     MagicSchool = "evocation"
+//    IllusionMagic      MagicSchool = "illusion"
+//    NecromancyMagic    MagicSchool = "necromacy"
+//    TransmutationMagic MagicSchool = "transmutation"
 
-	VerbalComponent  MagicComponent = "verbal"
-	SomaticComponent MagicComponent = "somatic"
-	MaterialCompoent MagicComponent = "material"
-)
+//    VerbalComponent  MagicComponent = "verbal"
+//    SomaticComponent MagicComponent = "somatic"
+//    MaterialCompoent MagicComponent = "material"
+//)
 
 // -----------------------------------------------------------------------------
 //
@@ -114,7 +116,7 @@ func NewSpell(name string, uname string, school MagicSchool, level int, damage I
 		school:      school,
 		castingTime: 0,
 		srange:      0,
-		components:  []MagicComponent{VerbalComponent},
+		components:  []MagicComponent{constants.Verbal},
 		duration:    0,
 		higherLevel: nil,
 		damage:      damage,

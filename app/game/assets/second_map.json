@@ -1,0 +1,339 @@
+[
+    {
+        "ch": "#",
+        "class": "",
+        "name": "wall/5",
+        "position": [
+            4,
+            4
+        ],
+        "size": [
+            82,
+            2
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "",
+        "name": "wall/6",
+        "position": [
+            4,
+            7
+        ],
+        "size": [
+            82,
+            4
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "",
+        "name": "wall/1",
+        "position": [
+            1,
+            1
+        ],
+        "size": [
+            88,
+            2
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "",
+        "name": "wall/2",
+        "position": [
+            1,
+            24
+        ],
+        "size": [
+            88,
+            2
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "",
+        "name": "wall/3",
+        "position": [
+            1,
+            3
+        ],
+        "size": [
+            2,
+            21
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "",
+        "name": "wall/4",
+        "position": [
+            87,
+            3
+        ],
+        "size": [
+            2,
+            21
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/10",
+        "position": [
+            4,
+            12
+        ],
+        "size": [
+            10,
+            11
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/11",
+        "position": [
+            15,
+            12
+        ],
+        "size": [
+            10,
+            11
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/12",
+        "position": [
+            26,
+            12
+        ],
+        "size": [
+            20,
+            11
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/13",
+        "position": [
+            47,
+            12
+        ],
+        "size": [
+            1,
+            11
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/14",
+        "position": [
+            49,
+            12
+        ],
+        "size": [
+            20,
+            11
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/20",
+        "position": [
+            70,
+            12
+        ],
+        "size": [
+            15,
+            2
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/21",
+        "position": [
+            85,
+            12
+        ],
+        "size": [
+            1,
+            5
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/22",
+        "position": [
+            70,
+            15
+        ],
+        "size": [
+            5,
+            2
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/30",
+        "position": [
+            76,
+            15
+        ],
+        "size": [
+            5,
+            5
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/31",
+        "position": [
+            82,
+            15
+        ],
+        "size": [
+            2,
+            10
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/40",
+        "position": [
+            70,
+            18
+        ],
+        "size": [
+            5,
+            5
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+    {
+        "ch": "#",
+        "class": "Wall",
+        "name": "wall/50",
+        "position": [
+            76,
+            21
+        ],
+        "size": [
+            5,
+            2
+        ],
+        "style": [
+            "white",
+            "black",
+            "0"
+        ]
+    },
+	{
+		"class": "Enemy",
+		"name": "widget/enemy/2",
+		"uname": "goblin",
+		"position": [41, 6],
+		"size": [1, 1],
+		"style": ["red", "white", "0"],
+		"ch": "X",
+		"hp": 20,
+		"gear": [
+			["mainhand", "weapon/dagger/dagger"]
+		]
+	}
+]

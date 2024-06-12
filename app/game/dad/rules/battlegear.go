@@ -12,6 +12,7 @@ package rules
 // implementing
 type IBattleGear interface {
 	IDamage
+	IDieRollBonus
 	GetAC() int
 	GetCost() int
 	GetDamage() *Damage
@@ -79,6 +80,10 @@ func NewBattleGear(name string, uname string, cost int, weight int) *BattleGear 
 // -----------------------------------------------------------------------------
 // BattleGear public methods
 // -----------------------------------------------------------------------------
+
+func (h *BattleGear) DieRollBonus(string) int {
+	return 0
+}
 
 func (h *BattleGear) GetAC() int {
 	return h.ac
@@ -173,4 +178,5 @@ func (h *BattleGear) SetWeight(weight int) {
 }
 
 var _ IDamage = (*BattleGear)(nil)
+var _ IDieRollBonus = (*BattleGear)(nil)
 var _ IBattleGear = (*BattleGear)(nil)

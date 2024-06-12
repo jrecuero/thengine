@@ -2,6 +2,7 @@
 package weapons
 
 import (
+	"github.com/jrecuero/thengine/app/game/dad/constants"
 	"github.com/jrecuero/thengine/app/game/dad/rules"
 )
 
@@ -20,7 +21,20 @@ func init() {
 //
 // -----------------------------------------------------------------------------
 
-func NewShortsword() *rules.Weapon {
+type ShortSword struct {
+	*rules.Weapon
+}
+
+func NewShortsword() rules.IHandheld {
 	htype := rules.NewHandheldType(1)
-	return rules.NewWeapon(ShortswordName, "shortsword", 10, 2, htype, rules.DiceThrow1d6, rules.Piercing)
+	return &ShortSword{
+		Weapon: rules.NewWeapon(ShortswordName, "shortsword", 10, 2, htype, rules.DiceThrow1d6, constants.Piercing),
+	}
+}
+
+func (w *ShortSword) DieRollBonus(bonus string) int {
+	if bonus == constants.Strength {
+		return 2
+	}
+	return 0
 }

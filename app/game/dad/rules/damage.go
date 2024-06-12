@@ -4,6 +4,7 @@ package rules
 import (
 	"fmt"
 
+	"github.com/jrecuero/thengine/app/game/dad/constants"
 	"github.com/jrecuero/thengine/pkg/tools"
 )
 
@@ -16,14 +17,14 @@ import (
 // DamageType type for any weapon.
 type DamageType string
 
-const (
-	NullDamage  DamageType = "null"
-	Bludgeoning DamageType = "bludgeoning"
-	Piercing    DamageType = "piercing"
-	Slashing    DamageType = "slashing"
-	Magical     DamageType = "magical"
-	Poison      DamageType = "poison"
-)
+//const (
+//    NullDamage  DamageType = "null"
+//    Bludgeoning DamageType = "bludgeoning"
+//    Piercing    DamageType = "piercing"
+//    Slashing    DamageType = "slashing"
+//    Magical     DamageType = "magical"
+//    Poison      DamageType = "poison"
+//)
 
 // -----------------------------------------------------------------------------
 //
@@ -88,7 +89,7 @@ func NewDamage(diceThrow IDiceThrow, damageType DamageType) *Damage {
 func NewNoDamage() *Damage {
 	return &Damage{
 		diceThrow:    nil,
-		damageType:   NullDamage,
+		damageType:   constants.NullDamage,
 		applyStatus:  nil,
 		savingThrows: nil,
 	}

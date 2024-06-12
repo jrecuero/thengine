@@ -112,7 +112,7 @@ func main() {
 	comandLineBox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &theStyleBlueOverBlack, engine.CanvasRectSingleLine)
 	mainScene.AddEntity(comandLineBox)
 
-	player := NewPlayer(thePlayerName, api.NewPoint(1, 1), &theStyleBlueOverBlack)
+	player := NewPlayer(thePlayerName, api.NewPoint(2, 2), &theStyleGreenOverBlack)
 	mainScene.AddEntity(player)
 
 	topWall := NewWall("widget/wall/top/1", api.NewPoint(0, 0), api.NewSize(80, 1), nil)

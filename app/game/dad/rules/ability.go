@@ -1,20 +1,22 @@
 package rules
 
-const (
-	StrengthAS     AbilityScore = "strength"
-	DexterityAS    AbilityScore = "dexterity"
-	ConstitutionAS AbilityScore = "constitution"
-	IntelligenceAS AbilityScore = "intelligence"
-	WisdomAS       AbilityScore = "wisdom"
-	CharismaAS     AbilityScore = "charisma"
+import "github.com/jrecuero/thengine/app/game/dad/constants"
 
-	StrengthShortNameAS     AbilityScoreShortName = "str"
-	DexterityShortNameAS    AbilityScoreShortName = "dex"
-	ConstitutionShortNameAS AbilityScoreShortName = "con"
-	IntelligenceShortNameAS AbilityScoreShortName = "int"
-	WisdomShortNameAS       AbilityScoreShortName = "wis"
-	CharismaShortNameAS     AbilityScoreShortName = "cha"
-)
+//const (
+//    StrengthAS     AbilityScore = constants.Strength
+//    DexterityAS    AbilityScore = constants.Dexterity
+//    ConstitutionAS AbilityScore = constants.Constitution
+//    IntelligenceAS AbilityScore = constants.Intelligence
+//    WisdomAS       AbilityScore = constants.Wisdom
+//    CharismaAS     AbilityScore = constants.Charisma
+
+//    StrengthShortNameAS     AbilityScoreShortName = constants.STR
+//    DexterityShortNameAS    AbilityScoreShortName = constants.DEX
+//    ConstitutionShortNameAS AbilityScoreShortName = constants.CON
+//    IntelligenceShortNameAS AbilityScoreShortName = constants.INT
+//    WisdomShortNameAS       AbilityScoreShortName = constants.WIS
+//    CharismaShortNameAS     AbilityScoreShortName = constants.CHA
+//)
 
 type AbilityScore string
 
@@ -214,6 +216,7 @@ func (a *Ability) GetScorePoint() int {
 
 // IAbilities interfaces defines all abilities methods to be implemented.
 type IAbilities interface {
+	IDieRollBonus
 	GetAbilityByName(AbilityScore) IAbility
 	GetConstitution() IAbility
 	GetStrength() IAbility
@@ -268,12 +271,12 @@ type Abilities struct {
 // NewAbilities function creates a new Abilities instance.
 func NewAbilities() *Abilities {
 	return &Abilities{
-		Constitution: NewAbility(ConstitutionAS, ConstitutionShortNameAS, 0),
-		Strength:     NewAbility(StrengthAS, StrengthShortNameAS, 0),
-		Dexterity:    NewAbility(DexterityAS, DexterityShortNameAS, 0),
-		Intelligence: NewAbility(IntelligenceAS, IntelligenceShortNameAS, 0),
-		Wisdom:       NewAbility(WisdomAS, WisdomShortNameAS, 0),
-		Charisma:     NewAbility(CharismaAS, CharismaShortNameAS, 0),
+		Constitution: NewAbility(constants.Constitution, constants.CON, 0),
+		Strength:     NewAbility(constants.Strength, constants.STR, 0),
+		Dexterity:    NewAbility(constants.Dexterity, constants.DEX, 0),
+		Intelligence: NewAbility(constants.Intelligence, constants.INT, 0),
+		Wisdom:       NewAbility(constants.Wisdom, constants.WIS, 0),
+		Charisma:     NewAbility(constants.Charisma, constants.CHA, 0),
 	}
 }
 
@@ -281,21 +284,28 @@ func NewAbilities() *Abilities {
 // Abilities public methods
 // -----------------------------------------------------------------------------
 
+func (a *Abilities) DieRollBonus(bonus string) int {
+	if ability := a.GetAbilityByName(AbilityScore(bonus)); ability != nil {
+		return ability.GetModifier()
+	}
+	return 0
+}
+
 // GetAbilityByName method return the ability for the given name.
 func (a *Abilities) GetAbilityByName(name AbilityScore) IAbility {
 	result := (IAbility)(nil)
 	switch name {
-	case ConstitutionAS:
+	case constants.Constitution:
 		result = a.Constitution
-	case StrengthAS:
+	case constants.Strength:
 		result = a.Strength
-	case DexterityAS:
+	case constants.Dexterity:
 		result = a.Dexterity
-	case IntelligenceAS:
+	case constants.Intelligence:
 		result = a.Intelligence
-	case WisdomAS:
+	case constants.Wisdom:
 		result = a.Wisdom
-	case CharismaAS:
+	case constants.Charisma:
 		result = a.Charisma
 	}
 	return result

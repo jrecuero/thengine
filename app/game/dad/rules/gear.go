@@ -18,6 +18,7 @@ import (
 
 // IGear interfaces defines all methods any Geara structure should implement.
 type IGear interface {
+	IDieRollBonus
 	AC() int
 	GetAccessories() []any
 	GetArms() IArmor
@@ -103,6 +104,35 @@ func (g *Gear) AC() int {
 	}
 	if g.GetLegs() != nil {
 		result += g.GetLegs().GetAC()
+	}
+	return result
+}
+
+func (g *Gear) DieRollBonus(bonus string) int {
+	result := 0
+	if g.GetMainHand() != nil {
+		result += g.GetMainHand().DieRollBonus(bonus)
+	}
+	if g.GetOffHand() != nil {
+		result += g.GetOffHand().DieRollBonus(bonus)
+	}
+	if g.GetArms() != nil {
+		result += g.GetArms().DieRollBonus(bonus)
+	}
+	if g.GetBody() != nil {
+		result += g.GetBody().DieRollBonus(bonus)
+	}
+	if g.GetFeet() != nil {
+		result += g.GetFeet().DieRollBonus(bonus)
+	}
+	if g.GetHands() != nil {
+		result += g.GetHands().DieRollBonus(bonus)
+	}
+	if g.GetHead() != nil {
+		result += g.GetHead().DieRollBonus(bonus)
+	}
+	if g.GetLegs() != nil {
+		result += g.GetLegs().DieRollBonus(bonus)
 	}
 	return result
 }
@@ -224,4 +254,5 @@ func (g *Gear) UnmarshalMap(content map[string]any) {
 	}
 }
 
+var _ IDieRollBonus = (*Gear)(nil)
 var _ IGear = (*Gear)(nil)

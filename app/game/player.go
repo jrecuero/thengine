@@ -54,7 +54,7 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 	player.GetAbilities().GetCharisma().SetScore(10)
 
 	weaponEntry := rules.DBase.GetSections()[rules.DbSectionGear].GetSections()[rules.DbSectionWeapon].GetEntries()[weapons.ShortswordName]
-	weaponCreator := weaponEntry.GetCreator().(func() *rules.Weapon)
+	weaponCreator := weaponEntry.GetCreator().(func() rules.IHandheld)
 	player.GetGear().SetMainHand(weaponCreator())
 	//player.GetGear().SetMainHand(weapons.NewShortsword())
 
