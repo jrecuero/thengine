@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
@@ -93,6 +95,12 @@ func (b *builtin) GetClassFromString(class string) engine.IEntity {
 	return engine.NewEmptyEntity()
 }
 
+type colorinput struct {
+	Fg    *widgets.TextInput
+	Bg    *widgets.TextInput
+	Attrs *widgets.TextInput
+}
+
 // -----------------------------------------------------------------------------
 // main private methods
 // -----------------------------------------------------------------------------
@@ -104,6 +112,7 @@ func createDrawingBox(scene engine.IScene) {
 	scene.AddEntity(drawingBox)
 
 	cursor := NewCursor(api.NewPoint(1, theMenuBoxHeight+1))
+	cursor.SetZLevel(1)
 	scene.AddEntity(cursor)
 
 	cursorPosText := widgets.NewText(CursorPosTextName, api.NewPoint(80, 29), api.NewSize(10, 1), &TheStyleWhiteOverBlack, "[1,1]")
@@ -121,9 +130,9 @@ func newSpriter(ent engine.IEntity, args ...any) bool {
 		Tracef("%s %+v", ent.GetName(), args)
 	if menu, ok := ent.(*widgets.Menu); ok {
 		menu.DisableMenuItemForIndex(0)
-		menu.EnableMenuItemForIndex(3)
+		menu.EnableMenuItemForIndex(3, 5)
 		menu.EnableMenuItemsForLabel("Save")
-		menu.SetSelectionToIndex(5)
+		menu.SetSelectionToIndex(6)
 		menu.Refresh()
 	}
 	if scene, ok := args[0].(engine.IScene); ok {
@@ -214,6 +223,136 @@ func saveSprite(ent engine.IEntity, args ...any) bool {
 	return true
 }
 
+func color(ent engine.IEntity, args ...any) bool {
+	var scene engine.IScene
+	var ok bool
+	if scene, ok = args[0].(engine.IScene); !ok {
+		return false
+	}
+
+	camera := scene.GetCamera()
+	colorScene := engine.NewScene("scene/color/1", camera)
+
+	background := engine.NewEntity("entity/color/background/1", api.NewPoint(20, 5), api.NewSize(25, 7), &TheStyleBoldBlackOverGreen)
+	background.GetCanvas().FillWithCell(engine.NewCell(&TheStyleWhiteOverBlack, ' '))
+	background.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &TheStyleBoldGreenOverBlack, engine.CanvasRectSingleLine)
+	colorScene.AddEntity(background)
+
+	c := scene.GetEntityByName(CursorName)
+	if c == nil {
+		return false
+	}
+	cursor, ok := c.(*Cursor)
+	if !ok {
+		return false
+	}
+	cursorFg, cursorBg, cursorAttrs := cursor.GetStyle().Decompose()
+
+	fg := widgets.NewText("text/color/fg/1",
+		api.NewPoint(22, 7), api.NewSize(10, 1), &TheStyleBoldGreenOverBlack, "Fg   : ")
+	colorScene.AddEntity(fg)
+
+	fgInput := widgets.NewTextInput("text-input/color/fg/1",
+		api.NewPoint(32, 7), api.NewSize(10, 1), &TheStyleBoldBlackOverGreen, cursorFg.String())
+	colorScene.AddEntity(fgInput)
+
+	bg := widgets.NewText("text/color/bg/1", api.NewPoint(22, 8),
+		api.NewSize(10, 1), &TheStyleBoldGreenOverBlack, "Bg   : ")
+	colorScene.AddEntity(bg)
+
+	bgInput := widgets.NewTextInput("text-input/color/bg/1",
+		api.NewPoint(32, 8), api.NewSize(10, 1), &TheStyleBoldBlackOverGreen, cursorBg.String())
+	colorScene.AddEntity(bgInput)
+
+	attrs := widgets.NewText("text/color/attrs/1",
+		api.NewPoint(22, 9), api.NewSize(10, 1), &TheStyleBoldGreenOverBlack, "attrs: ")
+	colorScene.AddEntity(attrs)
+
+	attrsInput := widgets.NewTextInput("text-input/color/attrs/1",
+		api.NewPoint(32, 9), api.NewSize(10, 1), &TheStyleBoldBlackOverGreen, strconv.Itoa(int(cursorAttrs)))
+	colorScene.AddEntity(attrsInput)
+
+	input := &colorinput{
+		Fg:    fgInput,
+		Bg:    bgInput,
+		Attrs: attrsInput,
+	}
+
+	accept := widgets.NewButton("button/color/accept/1",
+		api.NewPoint(23, 11), api.NewSize(10, 1), &TheStyleBoldGreenOverBlack, "Accept")
+	accept.SetWidgetCallback(acceptColor, colorScene, scene, input)
+	colorScene.AddEntity(accept)
+
+	cancel := widgets.NewButton("button/color/cancel/1",
+		api.NewPoint(37, 11), api.NewSize(10, 1), &TheStyleBoldGreenOverBlack, "Cancel")
+	cancel.SetWidgetCallback(cancelColor, colorScene, scene)
+	colorScene.AddEntity(cancel)
+
+	theEngine := engine.GetEngine()
+	sceneManager := theEngine.GetSceneManager()
+
+	sceneManager.RemoveSceneAsActive(scene)
+	sceneManager.AddScene(colorScene)
+	sceneManager.SetSceneAsActive(colorScene)
+	sceneManager.SetSceneAsVisible(colorScene)
+	sceneManager.UpdateFocus()
+
+	return true
+}
+
+func acceptColor(entity engine.IEntity, args ...any) bool {
+	tools.Logger.WithField("module", "spriter").
+		WithField("function", "acceptColor").
+		Tracef("%s args: %+#v", entity.GetName(), args)
+
+	colorScene := args[0].(engine.IScene)
+	drawingScene := args[1].(engine.IScene)
+	input := args[2].(*colorinput)
+	fg := input.Fg.GetInputText()
+	bg := input.Bg.GetInputText()
+	tmp := input.Attrs.GetInputText()
+	attrs, _ := strconv.Atoi(tmp)
+	style := tcell.StyleDefault.
+		Foreground(tcell.GetColor(fg)).
+		Background(tcell.GetColor(bg)).
+		Attributes(tcell.AttrMask(attrs))
+
+	c := drawingScene.GetEntityByName(CursorName)
+	if c == nil {
+		return false
+	}
+	cursor, ok := c.(*Cursor)
+	if !ok {
+		return false
+	}
+	cursor.SetStyle(&style)
+
+	theEngine := engine.GetEngine()
+	sceneManager := theEngine.GetSceneManager()
+	sceneManager.RemoveScene(colorScene)
+	sceneManager.SetSceneAsActive(drawingScene)
+	sceneManager.SetSceneAsVisible(drawingScene)
+	sceneManager.UpdateFocus()
+	return true
+}
+
+func cancelColor(entity engine.IEntity, args ...any) bool {
+	tools.Logger.WithField("module", "spriter").
+		WithField("function", "cancelColor").
+		Tracef("%s args: %+#v", entity.GetName(), args)
+
+	colorScene := args[0].(engine.IScene)
+	drawingScene := args[1].(engine.IScene)
+
+	theEngine := engine.GetEngine()
+	sceneManager := theEngine.GetSceneManager()
+	sceneManager.RemoveScene(colorScene)
+	sceneManager.SetSceneAsActive(drawingScene)
+	sceneManager.SetSceneAsVisible(drawingScene)
+	sceneManager.UpdateFocus()
+	return true
+}
+
 func exit(ent engine.IEntity, args ...any) bool {
 	engine.GetEngine().End()
 	return true
@@ -223,14 +362,15 @@ func main() {
 	tools.Logger.WithField("module", "spriter").WithField("function", "main").Infof("Spriter App")
 	drawingScene := engine.NewScene(DrawingSceneName, theCamera)
 
-	createSpriteMenuItem := widgets.NewExtendedMenuItem("Create Sprite", false, nil, nil, nil)
-	saveSpriteMenuItem := widgets.NewExtendedMenuItem("Save Sprite", false, nil, nil, nil)
+	createSpriteMenuItem := widgets.NewExtendedMenuItem("New SPR", false, nil, nil, nil)
+	saveSpriteMenuItem := widgets.NewExtendedMenuItem("Save SPR", false, nil, nil, nil)
 	topMenuItems := []*widgets.MenuItem{
 		widgets.NewExtendedMenuItem("New", true, nil, newSpriter, []any{drawingScene}),
 		widgets.NewExtendedMenuItem("Save", false, nil, save, nil),
 		widgets.NewExtendedMenuItem("Load", true, nil, load, []any{drawingScene, "output_0_3.json"}),
 		createSpriteMenuItem,
 		saveSpriteMenuItem,
+		widgets.NewExtendedMenuItem("Color", false, nil, color, []any{drawingScene}),
 		widgets.NewExtendedMenuItem("Exit", true, nil, exit, nil),
 	}
 	topMenu := &topmenu{

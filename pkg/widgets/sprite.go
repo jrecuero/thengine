@@ -135,7 +135,7 @@ func (s *Sprite) GetSpriteCells() []*SpriteCell {
 func (s *Sprite) MarshalMap(origin *api.Point) (map[string]any, error) {
 	tools.Logger.WithField("module", "sprite").
 		WithField("function", "MarshalMap").
-		Debugf("sprite %s", s.GetName())
+		Debugf("sprite %s origin: %s", s.GetName(), origin.ToString())
 
 	content := map[string]any{
 		"class":    "Sprite",
@@ -145,7 +145,10 @@ func (s *Sprite) MarshalMap(origin *api.Point) (map[string]any, error) {
 	}
 	sprites := []map[string]any{}
 	for _, spriteCell := range s.GetSpriteCells() {
-		pos := spriteCell.position
+		pos := api.ClonePoint(spriteCell.position)
+		if origin != nil {
+			pos.Subtract(origin)
+		}
 		cell := spriteCell.cell
 		ch := cell.Rune
 		fg, bg, attrs := cell.Style.Decompose()
@@ -157,6 +160,9 @@ func (s *Sprite) MarshalMap(origin *api.Point) (map[string]any, error) {
 		}
 		sprites = append(sprites, sprite)
 		content["sprites"] = sprites
+		tools.Logger.WithField("module", "sprite").
+			WithField("method", "MarshalMap").
+			Debugf("sprite %+#v", sprite)
 	}
 	return content, nil
 }
@@ -196,9 +202,9 @@ func (s *Sprite) UnmarshalMap(content map[string]any, origin *api.Point) error {
 		cell := engine.NewCell(nil, 0)
 		if position, ok := sprite["position"].([]any); ok {
 			pos := api.NewPoint(int(position[0].(float64)), int(position[1].(float64)))
-			if origin != nil {
-				pos.Add(origin)
-			}
+			//if origin != nil {
+			//    pos.Add(origin)
+			//}
 			spriteCell.SetPosition(pos)
 		}
 		if style, ok := sprite["style"].([]any); ok {

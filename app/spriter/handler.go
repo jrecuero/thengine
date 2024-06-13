@@ -41,7 +41,7 @@ func NewHandler() *Handler {
 // -----------------------------------------------------------------------------
 
 func (h *Handler) updateCursorRune(cursor *Cursor, ch rune) {
-	cell := engine.NewCell(&TheStyleWhiteOverBlack, ch)
+	cell := engine.NewCell(cursor.GetStyle(), ch)
 	cursor.GetCanvas().SetCellAt(nil, cell)
 }
 
