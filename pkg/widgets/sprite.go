@@ -4,8 +4,12 @@
 package widgets
 
 import (
+	"strconv"
+
+	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
+	"github.com/jrecuero/thengine/pkg/tools"
 )
 
 const (
@@ -76,6 +80,7 @@ func NewSprite(name string, position *api.Point, spriteCells []*SpriteCell) *Spr
 		Widget:      NewWidget(name, position, nil, nil),
 		spriteCells: spriteCells,
 	}
+	sprite.SetSize(nil)
 	sprite.SetCanvas(nil)
 	return sprite
 }
@@ -125,6 +130,37 @@ func (s *Sprite) GetSpriteCells() []*SpriteCell {
 	return s.spriteCells
 }
 
+// MarshalMap method is the custom marshal method to generate a map[string]any
+// from an instance.
+func (s *Sprite) MarshalMap(origin *api.Point) (map[string]any, error) {
+	tools.Logger.WithField("module", "sprite").
+		WithField("function", "MarshalMap").
+		Debugf("sprite %s", s.GetName())
+
+	content := map[string]any{
+		"class":    "Sprite",
+		"name":     s.GetName(),
+		"position": []int{0, 0},
+		"sprites":  []map[string]any{},
+	}
+	sprites := []map[string]any{}
+	for _, spriteCell := range s.GetSpriteCells() {
+		pos := spriteCell.position
+		cell := spriteCell.cell
+		ch := cell.Rune
+		fg, bg, attrs := cell.Style.Decompose()
+		sprite := map[string]any{
+			"position": []int{pos.X, pos.Y},
+			"size":     []int{1, 1},
+			"style":    []string{fg.String(), bg.String(), strconv.Itoa(int(attrs))},
+			"ch":       string(ch),
+		}
+		sprites = append(sprites, sprite)
+		content["sprites"] = sprites
+	}
+	return content, nil
+}
+
 func (s *Sprite) RemoveSpriteCellAt(atIndex int) *SpriteCell {
 	if atIndex == AtTheEnd {
 		atIndex = len(s.spriteCells) - 1
@@ -139,6 +175,48 @@ func (s *Sprite) RemoveSpriteCellAt(atIndex int) *SpriteCell {
 
 func (s *Sprite) SetSpriteCells(spriteCells []*SpriteCell) {
 	s.spriteCells = spriteCells
+}
+
+// UnmarshalMap method is the custom method to unmarshal a map[string]any data
+// into an instance.
+func (s *Sprite) UnmarshalMap(content map[string]any, origin *api.Point) error {
+	if name, ok := content["name"].(string); ok {
+		s.SetName(name)
+	}
+	if position, ok := content["position"].([]any); ok {
+		pos := api.NewPoint(int(position[0].(float64)), int(position[1].(float64)))
+		if origin != nil {
+			pos.Add(origin)
+		}
+		s.SetPosition(pos)
+	}
+	for _, spr := range content["sprites"].([]any) {
+		sprite := spr.(map[string]any)
+		spriteCell := NewSpriteCell(nil, nil)
+		cell := engine.NewCell(nil, 0)
+		if position, ok := sprite["position"].([]any); ok {
+			pos := api.NewPoint(int(position[0].(float64)), int(position[1].(float64)))
+			if origin != nil {
+				pos.Add(origin)
+			}
+			spriteCell.SetPosition(pos)
+		}
+		if style, ok := sprite["style"].([]any); ok {
+			tcellStyle := tcell.StyleDefault.
+				Foreground(tcell.GetColor(style[0].(string))).
+				Background(tcell.GetColor(style[1].(string)))
+			cell.Style = &tcellStyle
+		}
+		if ch, ok := sprite["ch"].(string); ok {
+			cell.Rune = rune(ch[0])
+		}
+		spriteCell.SetCell(cell)
+		tools.Logger.WithField("module", "sprite").
+			WithField("function", "Draw").
+			Debugf("spriteccell %s %s %+#v", s.GetName(), spriteCell.GetPosition().ToString(), spriteCell.GetCell())
+		s.AddSpriteCellAt(AtTheEnd, spriteCell)
+	}
+	return nil
 }
 
 var _ engine.IObject = (*Sprite)(nil)

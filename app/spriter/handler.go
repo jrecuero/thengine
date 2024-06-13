@@ -20,13 +20,15 @@ var (
 
 type Handler struct {
 	*engine.Entity
-	entities []engine.IEntity
+	entities      []engine.IEntity
+	spriteHandler *SpriteHandler
 }
 
 func NewHandler() *Handler {
 	if theHandler == nil {
 		theHandler = &Handler{
-			Entity: engine.NewHandler(HandlerName),
+			Entity:        engine.NewHandler(HandlerName),
+			spriteHandler: NewSpriteHandler(),
 		}
 		theHandler.SetFocusType(engine.SingleFocus)
 		theHandler.SetFocusEnable(true)
@@ -35,7 +37,7 @@ func NewHandler() *Handler {
 }
 
 // -----------------------------------------------------------------------------
-// Handler public methods
+// Handler private methods
 // -----------------------------------------------------------------------------
 
 func (h *Handler) updateCursorRune(cursor *Cursor, ch rune) {
@@ -53,7 +55,30 @@ func (h *Handler) entityHandlerResponse(scene engine.IScene) func(engine.IEntity
 	}
 }
 
+func (h *Handler) handleEnter(scene engine.IScene, cursor *Cursor) {
+	if h.spriteHandler.GetSprite() != nil {
+		pos := cursor.GetPosition()
+		cell := cursor.GetCanvas().GetCellAt(api.NewPoint(0, 0))
+		h.spriteHandler.AddPoint(pos, cell)
+	} else {
+		NewEntityHandler(scene, cursor, h.entityHandlerResponse(scene))
+	}
+}
+
+// -----------------------------------------------------------------------------
+// Handler public methods
+// -----------------------------------------------------------------------------
+
+func (h *Handler) CreateSprite(scene engine.IScene) {
+	if sprite := h.spriteHandler.NewSprite(""); sprite != nil {
+		scene.AddEntity(sprite)
+	}
+}
+
 func (h *Handler) SaveEntities() {
+	tools.Logger.WithField("module", "handler").
+		WithField("method", "SaveEntites").
+		Debugf("saving...")
 	for _, ent := range h.entities {
 		tools.Logger.WithField("module", "handler").
 			WithField("method", "SaveEntites").
@@ -63,6 +88,18 @@ func (h *Handler) SaveEntities() {
 		tools.Logger.WithField("module", "handler").
 			WithField("method", "SaveEntites").
 			Errorf("error %s", err.Error())
+	}
+}
+
+func (h *Handler) SaveSprite() {
+	if sprite := h.spriteHandler.GetSprite(); sprite != nil {
+		h.entities = append(h.entities, sprite)
+	}
+	h.spriteHandler.EndSprite()
+	for _, ent := range h.entities {
+		tools.Logger.WithField("module", "handler").
+			WithField("method", "SaveSprite").
+			Debugf("saving %+#v", ent)
 	}
 }
 
@@ -92,7 +129,8 @@ func (h *Handler) Update(event tcell.Event, scene engine.IScene) {
 		case tcell.KeyRight:
 			cursorNewPosition = api.NewPoint(cursorX+1, cursorY)
 		case tcell.KeyEnter:
-			NewEntityHandler(scene, cursor, h.entityHandlerResponse(scene))
+			h.handleEnter(scene, cursor)
+			//NewEntityHandler(scene, cursor, h.entityHandlerResponse(scene))
 		case tcell.KeyRune:
 			h.updateCursorRune(cursor, ev.Rune())
 		}

@@ -176,7 +176,7 @@ func (g *TimerGauge) Update(event tcell.Event, scene engine.IScene) {
 		g.time = time.Now()
 		return
 	}
-	g.RunCallback()
+	g.RunCallback(g)
 	g.CancelTimer()
 }
 

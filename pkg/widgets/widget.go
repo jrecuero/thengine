@@ -5,6 +5,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
+	"github.com/jrecuero/thengine/pkg/tools"
 )
 
 // -----------------------------------------------------------------------------
@@ -134,14 +135,20 @@ func (w *Widget) HandleKeyboardInputForString(event tcell.Event, str string) (st
 
 // RunCallback method executes the widget callback. If not any arguments are
 // provided, it used those in the widget arguments attributes.
-func (w *Widget) RunCallback(args ...any) bool {
+func (w *Widget) RunCallback(entity engine.IEntity, args ...any) bool {
 	if w.callback == nil {
 		return true
 	}
-	if len(args) == 0 {
+	tools.Logger.WithField("module", "widget").
+		WithField("method", "RunCallback").
+		Debugf("callbackArgs: %+#v args: %+#v", w.callbackArgs, args)
+	if args == nil || len(args) == 0 {
 		args = w.callbackArgs
 	}
-	return w.callback(w, args...)
+	if args != nil {
+		return w.callback(entity, args...)
+	}
+	return w.callback(entity, nil)
 }
 
 // SetWidgetCallback method sets a new widget callback and arguments to be

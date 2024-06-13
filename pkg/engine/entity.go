@@ -22,6 +22,7 @@ type IEntity interface {
 	IFocus
 	Consume()
 	Draw(IScene)
+	EndTick(IScene)
 	GetCanvas() *Canvas
 	GetCollider() *Collider
 	GetPLevel() int
@@ -46,6 +47,7 @@ type IEntity interface {
 	SetStyle(*tcell.Style)
 	SetZLevel(int)
 	Start()
+	StartTick(IScene)
 	Stop()
 	Update(tcell.Event, IScene)
 	UnmarshalMap(map[string]any, *api.Point) error
@@ -164,6 +166,9 @@ func (e *Entity) Draw(scene IScene) {
 	if e.IsVisible() && e.GetCanvas() != nil {
 		e.canvas.RenderAt(scene.GetCamera(), e.position)
 	}
+}
+
+func (e *Entity) EndTick(IScene) {
 }
 
 // GetCollider method returns the Collider instance for the entity.
@@ -339,6 +344,9 @@ func (e *Entity) Start() {
 	if e.customStart != nil {
 		e.customStart()
 	}
+}
+
+func (e *Entity) StartTick(IScene) {
 }
 
 // Stop method stops the entity instance.

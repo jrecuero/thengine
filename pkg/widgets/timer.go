@@ -105,7 +105,7 @@ func (t *Timer) Update(event tcell.Event, scene engine.IScene) {
 		return
 	}
 	//tools.Logger.WithField("module", "timer").WithField("function", "Update").Debugf("%s callback", t.GetName())
-	t.RunCallback()
+	t.RunCallback(t)
 	if t.count == ForeverTimer {
 		t.time = time.Now()
 		return

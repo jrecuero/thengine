@@ -190,7 +190,11 @@ func (m *Menu) execute(args ...any) {
 	case "run":
 		menuItem := m.menuItems[m.menuItemIndex]
 		if callback, args := menuItem.GetCallback(); callback != nil {
-			callback(m, args...)
+			if args != nil {
+				callback(m, args...)
+			} else {
+				callback(m, nil)
+			}
 		}
 	}
 }

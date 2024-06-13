@@ -140,6 +140,11 @@ func (e *Engine) End() {
 	e.isRunning = false
 }
 
+// EndTick methods calls any functionality required at the bottom of the tick.
+func (e *Engine) EndTick() {
+	e.sceneManager.EndTick()
+}
+
 // GetScreen method returns the tcell.Screen used by the engine.
 func (e *Engine) GetScreen() tcell.Screen {
 	return e.screen
@@ -214,6 +219,10 @@ func (e *Engine) Run(fps float64) {
 
 	for e.isRunning {
 		nowTime := time.Now()
+		// proceed with any action at the very start of the tick before event
+		// is polled.
+		e.StartTick()
+
 		event = nil
 		select {
 		case event = <-e.eventCh:
@@ -257,6 +266,10 @@ func (e *Engine) Run(fps float64) {
 		// draw all engine resources.
 		e.Draw()
 
+		// proceed with any action at the very end of the tick after everything
+		// has been processed.
+		e.EndTick()
+
 		timeToSleep := (time.Until(nowTime).Seconds() * 1000.0) + 1000.0/fps
 		time.Sleep(time.Duration(timeToSleep) * time.Millisecond)
 	}
@@ -275,6 +288,11 @@ func (e *Engine) SetDryRun(dryRun bool) {
 // Start method starts any required functionality for running the engine.
 func (e *Engine) Start() {
 	e.sceneManager.Start()
+}
+
+// StartTick method calls any functionality required at the top of the tick.
+func (e *Engine) StartTick() {
+	e.sceneManager.StartTick()
 }
 
 // Stop method stops any engine resources.

@@ -64,6 +64,36 @@ var (
 )
 
 // -----------------------------------------------------------------------------
+// main private structs
+// -----------------------------------------------------------------------------
+
+type topmenu struct {
+	*widgets.Menu
+	LoseFocus bool
+}
+
+func (t *topmenu) EndTick(engine.IScene) {
+	if t.LoseFocus {
+		tools.Logger.WithField("module", "spriter").
+			WithField("struct", "topmenu").
+			WithField("function", "EndTick").
+			Tracef("%s %t", t.GetName(), t.LoseFocus)
+		engine.GetEngine().GetSceneManager().UpdateFocus()
+		t.LoseFocus = false
+	}
+}
+
+type builtin struct {
+}
+
+func (b *builtin) GetClassFromString(class string) engine.IEntity {
+	if class == "Sprite" {
+		return widgets.NewSprite("", nil, nil)
+	}
+	return engine.NewEmptyEntity()
+}
+
+// -----------------------------------------------------------------------------
 // main private methods
 // -----------------------------------------------------------------------------
 
@@ -86,12 +116,14 @@ func createDrawingBox(scene engine.IScene) {
 }
 
 func newSpriter(ent engine.IEntity, args ...any) bool {
-	tools.Logger.WithField("module", "spriter").WithField("function", "newSpriter").Tracef("%s %+v", ent.GetName(), args)
+	tools.Logger.WithField("module", "spriter").
+		WithField("function", "newSpriter").
+		Tracef("%s %+v", ent.GetName(), args)
 	if menu, ok := ent.(*widgets.Menu); ok {
 		menu.DisableMenuItemForIndex(0)
 		menu.EnableMenuItemForIndex(3)
 		menu.EnableMenuItemsForLabel("Save")
-		menu.SetSelectionToIndex(3)
+		menu.SetSelectionToIndex(5)
 		menu.Refresh()
 	}
 	if scene, ok := args[0].(engine.IScene); ok {
@@ -107,8 +139,11 @@ func load(entity engine.IEntity, args ...any) bool {
 	if theHandler == nil {
 		newSpriter(entity, args...)
 	}
-	entities := engine.ImportEntitiesFromJSON(filename, TheDrawingBoxOrigin, nil)
+	entities := engine.ImportEntitiesFromJSON(filename, TheDrawingBoxOrigin, &builtin{})
 	for _, entity := range entities {
+		tools.Logger.WithField("module", "import").
+			WithField("function", "ImportEntitiesToJSON").
+			Debugf("importing entity %+#v", entity.GetPosition())
 		theHandler.entities = append(theHandler.entities, entity)
 		scene.AddEntity(entity)
 	}
@@ -122,6 +157,63 @@ func save(ent engine.IEntity, args ...any) bool {
 	return true
 }
 
+func createSprite(ent engine.IEntity, args ...any) bool {
+	var scene engine.IScene
+	var menu *topmenu
+	var menuItem *widgets.MenuItem
+	var ok bool
+
+	if scene, ok = args[0].(engine.IScene); !ok {
+		return false
+	}
+	if menu, ok = args[1].(*topmenu); !ok {
+		return false
+	}
+	if menuItem, ok = args[2].(*widgets.MenuItem); !ok {
+		return false
+	}
+	tools.Logger.WithField("module", "spriter").
+		WithField("function", "createSprite").
+		Tracef("%s %+v %+#v %+#v", ent.GetName(), scene, menu, menuItem)
+
+	menu.DisableMenuItemForIndex(3)
+	menu.EnableMenuItemForIndex(4)
+	menu.SetSelectionToIndex(4)
+	menu.LoseFocus = true
+	menu.Refresh()
+	theHandler.CreateSprite(scene)
+
+	return true
+}
+
+func saveSprite(ent engine.IEntity, args ...any) bool {
+	var scene engine.IScene
+	var menu *topmenu
+	var menuItem *widgets.MenuItem
+	var ok bool
+
+	if scene, ok = args[0].(engine.IScene); !ok {
+		return false
+	}
+	if menu, ok = args[1].(*topmenu); !ok {
+		return false
+	}
+	if menuItem, ok = args[2].(*widgets.MenuItem); !ok {
+		return false
+	}
+	tools.Logger.WithField("module", "spriter").
+		WithField("function", "saveSprite").
+		Tracef("%s %+v %+#v %+#v", ent.GetName(), scene, menu, menuItem)
+
+	menu.DisableMenuItemForIndex(4)
+	menu.EnableMenuItemForIndex(3)
+	menu.SetSelectionToIndex(3)
+	menu.Refresh()
+	theHandler.SaveSprite()
+
+	return true
+}
+
 func exit(ent engine.IEntity, args ...any) bool {
 	engine.GetEngine().End()
 	return true
@@ -131,14 +223,21 @@ func main() {
 	tools.Logger.WithField("module", "spriter").WithField("function", "main").Infof("Spriter App")
 	drawingScene := engine.NewScene(DrawingSceneName, theCamera)
 
+	createSpriteMenuItem := widgets.NewExtendedMenuItem("Create Sprite", false, nil, nil, nil)
+	saveSpriteMenuItem := widgets.NewExtendedMenuItem("Save Sprite", false, nil, nil, nil)
 	topMenuItems := []*widgets.MenuItem{
 		widgets.NewExtendedMenuItem("New", true, nil, newSpriter, []any{drawingScene}),
 		widgets.NewExtendedMenuItem("Save", false, nil, save, nil),
 		widgets.NewExtendedMenuItem("Load", true, nil, load, []any{drawingScene, "output_0_3.json"}),
+		createSpriteMenuItem,
+		saveSpriteMenuItem,
 		widgets.NewExtendedMenuItem("Exit", true, nil, exit, nil),
 	}
-	topMenu := widgets.NewTopMenu(TopMenuName, api.NewPoint(0, 0), api.NewSize(theMenuBoxWidth, theMenuBoxHeight), &TheStyleBlackOverWhite, topMenuItems, 0)
-	topMenu.GetCanvas().WriteRectangleInCanvasAt(nil, nil, &TheStyleWhiteOverBlack, engine.CanvasRectSingleLine)
+	topMenu := &topmenu{
+		Menu: widgets.NewTopMenu(TopMenuName, api.NewPoint(0, 0), api.NewSize(theMenuBoxWidth, theMenuBoxHeight), &TheStyleWhiteOverBlack, topMenuItems, 0),
+	}
+	createSpriteMenuItem.SetCallback(createSprite, []any{drawingScene, topMenu, createSpriteMenuItem})
+	saveSpriteMenuItem.SetCallback(saveSprite, []any{drawingScene, topMenu, saveSpriteMenuItem})
 	drawingScene.AddEntity(topMenu)
 
 	theEngine.InitResources()

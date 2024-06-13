@@ -57,7 +57,9 @@ func NewListBox(name string, position *api.Point, size *api.Size, style *tcell.S
 // -----------------------------------------------------------------------------
 
 func (l *ListBox) execute(args ...any) {
-	tools.Logger.WithField("module", "list-box").WithField("method", "execute").Debugf("%s %+v", l.GetName(), args)
+	tools.Logger.WithField("module", "list-box").
+		WithField("method", "execute").
+		Debugf("%s %+v", l.GetName(), args)
 	switch args[0].(string) {
 	case "up":
 		if l.selectionIndex > 0 {
@@ -71,11 +73,12 @@ func (l *ListBox) execute(args ...any) {
 		}
 	case "run":
 		if l.callback != nil {
-			if l.callbackArgs != nil {
-				l.callback(l, l.callbackArgs...)
-			} else {
-				l.callback(l)
-			}
+			l.RunCallback(l)
+			//if l.callbackArgs != nil {
+			//    l.callback(l, l.callbackArgs...)
+			//} else {
+			//    l.callback(l)
+			//}
 		}
 	}
 }

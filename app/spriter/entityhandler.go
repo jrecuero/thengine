@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	EntityHandlerName = "entity/entity-handler/1"
+	EntityHandlerName = "handler/entity-handler/1"
 )
 
 type EntityHandler struct {

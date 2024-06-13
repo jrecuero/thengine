@@ -40,6 +40,9 @@ func ImportEntitiesFromJSON(filename string, origin *api.Point, builtin IBuiltIn
 	if err := json.Unmarshal(jsonContent, &content); err != nil {
 		panic(fmt.Sprintf("Error unmarshaling %s:%s", filename, err.Error()))
 	}
+	tools.Logger.WithField("module", "import").
+		WithField("function", "ImportEntitiesToJSON").
+		Debugf("importing content %+#v", content)
 	for _, mapEntity := range content {
 		var entity IEntity
 		if builtin == nil {
@@ -50,15 +53,17 @@ func ImportEntitiesFromJSON(filename string, origin *api.Point, builtin IBuiltIn
 		if err := entity.UnmarshalMap(mapEntity, origin); err != nil {
 			panic(fmt.Sprintf("Error unmarshaling entitys %s:%s", filename, err.Error()))
 		}
-		canvas := NewCanvas(entity.GetSize())
-		ch := mapEntity["ch"].(string)
-		if len(ch) != 1 {
-			canvas.WriteStringInCanvas(mapEntity["ch"].(string), entity.GetStyle())
-		} else {
-			cell := NewCell(entity.GetStyle(), rune(ch[0]))
-			canvas.FillWithCell(cell)
+		if entity.GetSize() != nil {
+			canvas := NewCanvas(entity.GetSize())
+			ch := mapEntity["ch"].(string)
+			if len(ch) != 1 {
+				canvas.WriteStringInCanvas(mapEntity["ch"].(string), entity.GetStyle())
+			} else {
+				cell := NewCell(entity.GetStyle(), rune(ch[0]))
+				canvas.FillWithCell(cell)
+			}
+			entity.SetCanvas(canvas)
 		}
-		entity.SetCanvas(canvas)
 		result = append(result, entity)
 	}
 
@@ -68,6 +73,9 @@ func ImportEntitiesFromJSON(filename string, origin *api.Point, builtin IBuiltIn
 // ExportEntitiesToJSON function exports given entites to the given JSON file
 // in JSON format.
 func ExportEntitiesToJSON(filename string, entities []IEntity, origin *api.Point, builtin IBuiltIn) error {
+	tools.Logger.WithField("module", "import").
+		WithField("function", "ExportEntitiesToJSON").
+		Debugf("exporting %+v", entities)
 	var result []map[string]any
 	for _, entity := range entities {
 		if entity == nil {

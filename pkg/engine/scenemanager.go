@@ -117,6 +117,12 @@ func (m *SceneManager) Draw(screen tcell.Screen) {
 	GetEngine().GetScreen().Show()
 }
 
+func (m *SceneManager) EndTick() {
+	for _, scene := range m.activeScenes {
+		scene.EndTick()
+	}
+}
+
 // GetSceneByIndex method finds a scene with the given index. If the index is
 // -1 it retreive the last scene.
 func (m *SceneManager) GetSceneByIndex(index int) IScene {
@@ -329,6 +335,12 @@ func (m *SceneManager) Start() {
 		scene.Start()
 	}
 	m.started = true
+}
+
+func (m *SceneManager) StartTick() {
+	for _, scene := range m.activeScenes {
+		scene.StartTick()
+	}
 }
 
 // Stop method is called by the engine to stop all scene manager resources.

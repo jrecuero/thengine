@@ -45,7 +45,7 @@ func TestWidgetCallback(t *testing.T) {
 	}
 	widgetCbCounter = 0
 	widgetCbArgs = []any{}
-	gotOk := widget.RunCallback()
+	gotOk := widget.RunCallback(widget)
 	if !gotOk {
 		t.Errorf("[1] RunCallback Error exp:true got:%t", gotOk)
 	}
@@ -63,7 +63,7 @@ func TestWidgetCallback(t *testing.T) {
 		t.Errorf("[1] GetWidgetCallbackArgs Error.Callback.Args exp:%s got:%s", "one", widgetCbArgs[1].(string))
 	}
 
-	gotOk = widget.RunCallback("two")
+	gotOk = widget.RunCallback(widget, "two")
 	if !gotOk {
 		t.Errorf("[2] RunCallback Error exp:true got:%t", gotOk)
 	}
@@ -79,7 +79,7 @@ func TestWidgetCallback(t *testing.T) {
 	}
 
 	widget.SetWidgetCallbackArgs("three", 4, 5)
-	gotOk = widget.RunCallback()
+	gotOk = widget.RunCallback(widget)
 	if !gotOk {
 		t.Errorf("[3] RunCallback Error exp:true got:%t", gotOk)
 	}
@@ -103,7 +103,7 @@ func TestWidgetCallback(t *testing.T) {
 	widget.SetWidgetCallback(nil)
 
 	widget.SetWidgetCallbackArgs("four")
-	gotOk = widget.RunCallback()
+	gotOk = widget.RunCallback(widget)
 	if !gotOk {
 		t.Errorf("[4] RunCallback Error exp:true got:%t", gotOk)
 	}

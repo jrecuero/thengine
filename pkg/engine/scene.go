@@ -30,6 +30,7 @@ type IScene interface {
 	Clean()
 	Consume()
 	Draw()
+	EndTick()
 	GetEntities() []IEntity
 	GetEntityByName(string) IEntity
 	GetCamera() ICamera
@@ -37,6 +38,7 @@ type IScene interface {
 	RemoveEntity(IEntity) error
 	Update(tcell.Event)
 	Start()
+	StartTick()
 	Stop()
 }
 
@@ -170,6 +172,12 @@ func (s *Scene) Draw() {
 	}
 }
 
+func (s *Scene) EndTick() {
+	for _, entity := range s.pLevelEntities {
+		entity.EndTick(s)
+	}
+}
+
 // GetEntities method returns all entities in the scene.
 func (s *Scene) GetEntities() []IEntity {
 	return s.entities
@@ -205,6 +213,12 @@ func (s *Scene) Start() {
 		entity.Start()
 	}
 	s.started = true
+}
+
+func (s *Scene) StartTick() {
+	for _, entity := range s.pLevelEntities {
+		entity.StartTick(s)
+	}
 }
 
 // Stop method proceeds to stop all scene resources.
