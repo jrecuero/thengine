@@ -99,6 +99,7 @@ func (b *Button) ReleaseFocus() (bool, error) {
 // Update method executes all the button functionality every tick time. Button
 // callback function will be called if the button was clicked.
 func (b *Button) Update(event tcell.Event, scene engine.IScene) {
+	defer b.Entity.Update(event, scene)
 	if !b.HasFocus() {
 		return
 	}

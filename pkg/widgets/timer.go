@@ -93,6 +93,7 @@ func (t *Timer) StopTimer() {
 // Udpate method executes timer functionality. It check if timer has expired
 // and command has to be called.
 func (t *Timer) Update(event tcell.Event, scene engine.IScene) {
+	defer t.Entity.Update(event, scene)
 	if !t.running {
 		return
 	}

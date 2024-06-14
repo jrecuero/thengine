@@ -117,6 +117,7 @@ func (w *AnimWidget) UnShuffle() {
 
 // Update method updates the entity instance.
 func (w *AnimWidget) Update(event tcell.Event, scene engine.IScene) {
+	defer w.Entity.Update(event, scene)
 	if w.IsActive() {
 		frame := w.frames[w.frameTraverse]
 		if w.isfrozen {

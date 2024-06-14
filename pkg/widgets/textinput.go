@@ -93,6 +93,7 @@ func (t *TextInput) SetInputText(str string) {
 
 // Update method runs every cycle to update the text input.
 func (t *TextInput) Update(event tcell.Event, scene engine.IScene) {
+	defer t.Entity.Update(event, scene)
 	if !t.HasFocus() {
 		return
 	}

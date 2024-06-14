@@ -399,6 +399,7 @@ func (m *Menu) SetSelectionToLabel(label string) error {
 // inut is scanned in order to move the selection index and proceed to select
 // any option.
 func (m *Menu) Update(event tcell.Event, scene engine.IScene) {
+	defer m.Entity.Update(event, scene)
 	if !m.HasFocus() {
 		return
 	}

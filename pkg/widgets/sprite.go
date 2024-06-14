@@ -108,6 +108,7 @@ func (s *Sprite) AddSpriteCellAt(atIndex int, spriteCell *SpriteCell) {
 }
 
 func (s *Sprite) Draw(scene engine.IScene) {
+	defer s.Entity.Draw(scene)
 	if s.IsVisible() {
 		for _, spriteCell := range s.spriteCells {
 			position := api.ClonePoint(s.GetPosition())

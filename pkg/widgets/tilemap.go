@@ -141,6 +141,7 @@ func (t *TileMap) IsTileMapPosInside(tileMapPos *api.Point) bool {
 
 // Draw method renders the tile map in the screen.
 func (t *TileMap) Draw(scene engine.IScene) {
+	defer t.Entity.Draw(scene)
 	t.GetCanvas().RenderRectAt(scene.GetCamera(), t.cameraOffset, t.cameraSize, t.GetPosition())
 }
 

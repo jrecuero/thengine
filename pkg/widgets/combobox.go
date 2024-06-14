@@ -155,6 +155,7 @@ func (c *ComboBox) GetSelection() string {
 // inut is scanned in order to move the selection index and proceed to select
 // any option.
 func (c *ComboBox) Update(event tcell.Event, scene engine.IScene) {
+	defer c.Entity.Update(event, scene)
 	if !c.HasFocus() {
 		return
 	}

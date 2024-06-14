@@ -148,6 +148,7 @@ func (g *TimerGauge) updateCanvas() {
 
 // Draw method draws nothing.
 func (g *TimerGauge) Draw(scene engine.IScene) {
+	defer g.Entity.Draw(scene)
 	g.Timer.Widget.Draw(scene)
 }
 
@@ -160,6 +161,7 @@ func (g *TimerGauge) RestartTimer() {
 
 // Udpate method executes timer gauge functionality.
 func (g *TimerGauge) Update(event tcell.Event, scene engine.IScene) {
+	defer g.Entity.Update(event, scene)
 	if !g.running {
 		return
 	}

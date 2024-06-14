@@ -181,6 +181,9 @@ func (e *Entity) CanHaveFocus() bool {
 
 // Draw method renders the entity in the screen.
 func (e *Entity) Draw(scene IScene) {
+	if e.customDraw != nil {
+		defer e.customDraw(scene)
+	}
 	if e.IsVisible() && e.GetCanvas() != nil {
 		e.canvas.RenderAt(scene.GetCamera(), e.position)
 	}
@@ -255,10 +258,10 @@ func (e *Entity) GetZLevel() int {
 
 // Init methos initialize the entity instance.
 func (e *Entity) Init(screen tcell.Screen) {
-	e.screen = screen
 	if e.customInit != nil {
-		e.customInit()
+		defer e.customInit()
 	}
+	e.screen = screen
 }
 
 // IsSolid method returns if the entity is solid or not.
@@ -395,7 +398,7 @@ func (e *Entity) SetZLevel(level int) {
 // Start method starts the entity instance.
 func (e *Entity) Start() {
 	if e.customStart != nil {
-		e.customStart()
+		defer e.customStart()
 	}
 }
 
@@ -405,7 +408,7 @@ func (e *Entity) StartTick(IScene) {
 // Stop method stops the entity instance.
 func (e *Entity) Stop() {
 	if e.customStop != nil {
-		e.customStop()
+		defer e.customStop()
 	}
 }
 
@@ -444,7 +447,10 @@ func (e *Entity) UnmarshalMap(content map[string]any, origin *api.Point) error {
 }
 
 // Update method updates the entity instance.
-func (e *Entity) Update(tcell.Event, IScene) {
+func (e *Entity) Update(event tcell.Event, scene IScene) {
+	if e.customUpdate != nil {
+		defer e.customUpdate(event, scene)
+	}
 	if e.IsActive() {
 	}
 }

@@ -125,6 +125,7 @@ func (c *CheckBox) SetSelection(indexes ...int) {
 // inut is scanned in order to move the selection index and proceed to select
 // any option.
 func (c *CheckBox) Update(event tcell.Event, scene engine.IScene) {
+	defer c.Entity.Update(event, scene)
 	if !c.HasFocus() {
 		return
 	}

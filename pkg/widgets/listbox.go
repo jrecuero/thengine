@@ -124,6 +124,7 @@ func (l *ListBox) GetSelectionIndex() int {
 // inut is scanned in order to move the selection index and proceed to select
 // any option.
 func (l *ListBox) Update(event tcell.Event, scene engine.IScene) {
+	defer l.Entity.Update(event, scene)
 	if !l.HasFocus() {
 		return
 	}
