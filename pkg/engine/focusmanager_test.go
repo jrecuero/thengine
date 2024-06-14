@@ -143,21 +143,25 @@ func TestFocusManagerRemoveEntity(t *testing.T) {
 	_ = got.AddEntity(scene1, entity11)
 	_ = got.AddEntity(scene1, entity12)
 	_ = got.AddEntity(scene1, entity13)
+	gotEntities := got.GetEntities()
+	if len(gotEntities[scene1.GetName()]) != 3 {
+		t.Errorf("[3] RemoveEntity Error.Before.GetEntities exp:3 got:%d", len(gotEntities[scene1.GetName()]))
+	}
 	gotError = got.RemoveEntity(scene1, entity11)
 	if gotError != nil {
 		t.Errorf("[3] RemoveEntity Error exp:nil got:%v", gotError)
 	}
-	gotEntities := got.GetEntities()
-	if len(gotEntities) != 1 {
-		t.Errorf("[3] RemoveEntity Error.GetEntities exp:1 got:%d", len(gotEntities))
+	gotEntities = got.GetEntities()
+	if len(gotEntities[scene1.GetName()]) != 1 {
+		t.Errorf("[3] RemoveEntity Error.After.GetEntities exp:2 got:%d", len(gotEntities[scene1.GetName()]))
 	}
 	if entities, ok := gotEntities[scene1.GetName()]; ok {
-		if len(entities) == 2 {
-			if entities[0] != entity12 {
-				t.Errorf("[3] RemoveEntity Error.Entity exp:%s got:%s", entity12.GetName(), entities[0].GetName())
+		if len(entities) == 1 {
+			if entities[0] != entity13 {
+				t.Errorf("[3] RemoveEntity Error.Entity exp:%s got:%s", entity13.GetName(), entities[0].GetName())
 			}
 		} else {
-			t.Errorf("[3] RemoveEntity Error.Entities exp:1 got:%d", len(entities))
+			t.Errorf("[3] RemoveEntity Error.Entities exp:2 got:%d", len(entities))
 		}
 	} else {
 		t.Errorf("[3] RemoveEntity Error.Scene exp:%s got:nil", scene1.GetName())
@@ -181,19 +185,15 @@ func TestFocusManagerRemoveEntity(t *testing.T) {
 		t.Errorf("[4] RemoveEntity Error.GetEntities exp:1 got:%d", len(gotEntities))
 	}
 	if entities, ok := gotEntities[scene1.GetName()]; ok {
-		if len(entities) == 1 {
-			if entities[0] != entity13 {
-				t.Errorf("[4] RemoveEntity Error.Entity exp:%s got:%s", entity13.GetName(), entities[0].GetName())
-			}
-		} else {
-			t.Errorf("[4] RemoveEntity Error.Entities exp:1 got:%d", len(entities))
+		if len(entities) != 0 {
+			t.Errorf("[4] RemoveEntity Error.Entities exp:0 got:%d", len(entities))
 		}
 	} else {
 		t.Errorf("[4] RemoveEntity Error.Scene exp:%s got:nil", scene1.GetName())
 	}
 	withFocus = got.GetEntitiesWithFocus()[scene1.GetName()]
-	if len(withFocus) != 0 {
-		t.Errorf("[4] RemoveEntity Error.AfterRemove.WithFocus exp:0 got:%d", len(withFocus))
+	if len(withFocus) != 1 {
+		t.Errorf("[4] RemoveEntity Error.AfterRemove.WithFocus exp:1 got:%d", len(withFocus))
 	}
 }
 
@@ -499,25 +499,19 @@ func TestFocusManagerAcquireFocusToEntity(t *testing.T) {
 	}
 	withFocus = got.GetEntitiesWithFocus()
 	if gotWithFocus, ok := withFocus[scene1.GetName()]; ok {
-		if len(gotWithFocus) != 2 {
-			t.Errorf("[2] AcquireFocusToEntity Error.LenWithFocus exp:2 got:%d", len(gotWithFocus))
+		if len(gotWithFocus) != 1 {
+			t.Errorf("[2] AcquireFocusToEntity Error.LenWithFocus exp:1 got:%d", len(gotWithFocus))
 		}
-		if gotWithFocus[0] != entity11 {
-			t.Errorf("[2] AcquireFocusToEntity Error.EntityWitFocus exp:%s got:%s", entity11.GetName(), gotWithFocus[0].GetName())
-		}
-		if gotWithFocus[1] != entity12 {
+		if gotWithFocus[0] != entity12 {
 			t.Errorf("[2] AcquireFocusToEntity Error.EntityWitFocus exp:%s got:%s", entity12.GetName(), gotWithFocus[1].GetName())
 		}
 		entities := got.GetEntities()
-		if len(entities[scene1.GetName()]) != 1 {
-			t.Errorf("[2] AcquireFocusToEntity Error.LenEntities exp:1 got:%d", len(entities))
+		if len(entities[scene1.GetName()]) != 2 {
+			t.Errorf("[2] AcquireFocusToEntity Error.LenEntities exp:2 got:%d", len(entities))
 		}
 		for _, gotEntity := range entities[scene1.GetName()] {
-			if gotEntity.GetName() == entity11.GetName() {
-				t.Errorf("[2] AcquireFocusToEntity Error.Entity exp:nil got:%s", gotEntity.GetName())
-			}
 			if gotEntity.GetName() == entity12.GetName() {
-				t.Errorf("[2] AcquireFocusToEntity Error.Entity exp:nil got:%s", gotEntity.GetName())
+				t.Errorf("[2] AcquireFocusToEntity Error.Entity exp%snil got:%s", entity12.GetName(), gotEntity.GetName())
 			}
 		}
 	} else {

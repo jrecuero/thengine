@@ -24,6 +24,7 @@ type IEntity interface {
 	Consume()
 	Draw(IScene)
 	EndTick(IScene)
+	GetCache() api.ICache
 	GetCanvas() *Canvas
 	GetCollider() *Collider
 	GetPLevel() int
@@ -38,10 +39,13 @@ type IEntity interface {
 	MarshalMap(*api.Point) (map[string]any, error)
 	MarshalCode(*api.Point) (string, error)
 	Refresh()
+	SetCache(api.ICache)
 	SetCanvas(*Canvas)
+	SetCustomDraw(func(IScene))
 	SetCustomInit(func())
 	SetCustomStart(func())
 	SetCustomStop(func())
+	SetCustomUpdate(func(tcell.Event, IScene))
 	SetPLevel(int)
 	SetPosition(*api.Point)
 	SetSize(*api.Size)
@@ -70,35 +74,41 @@ type IEntity interface {
 type Entity struct {
 	*EObject
 	*Focus
-	canvas      *Canvas
-	position    *api.Point
-	size        *api.Size
-	style       *tcell.Style
-	screen      tcell.Screen
-	zLevel      int
-	pLevel      int
-	solid       bool
-	customInit  func()
-	customStart func()
-	customStop  func()
+	canvas       *Canvas
+	position     *api.Point
+	size         *api.Size
+	style        *tcell.Style
+	screen       tcell.Screen
+	zLevel       int
+	pLevel       int
+	solid        bool
+	cache        api.ICache
+	customInit   func()
+	customStart  func()
+	customUpdate func(tcell.Event, IScene)
+	customDraw   func(IScene)
+	customStop   func()
 }
 
 // NewEntity function creates a new Entity instance with all given attributes.
 func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.Style) *Entity {
 	entity := &Entity{
-		EObject:     NewEObject(name),
-		Focus:       NewDisableFocus(),
-		canvas:      NewCanvas(size),
-		position:    position,
-		size:        size,
-		style:       style,
-		screen:      nil,
-		zLevel:      0,
-		pLevel:      0,
-		solid:       false,
-		customInit:  nil,
-		customStart: nil,
-		customStop:  nil,
+		EObject:      NewEObject(name),
+		Focus:        NewDisableFocus(),
+		canvas:       NewCanvas(size),
+		position:     position,
+		size:         size,
+		style:        style,
+		screen:       nil,
+		zLevel:       0,
+		pLevel:       0,
+		solid:        false,
+		cache:        api.NewCache(),
+		customInit:   nil,
+		customStart:  nil,
+		customUpdate: nil,
+		customDraw:   nil,
+		customStop:   nil,
 	}
 	return entity
 }
@@ -107,19 +117,22 @@ func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.St
 // as default values.
 func NewEmptyEntity() *Entity {
 	return &Entity{
-		EObject:     NewEObject(""),
-		Focus:       NewDisableFocus(),
-		canvas:      nil,
-		position:    nil,
-		size:        nil,
-		style:       nil,
-		screen:      nil,
-		zLevel:      0,
-		pLevel:      0,
-		solid:       false,
-		customInit:  nil,
-		customStart: nil,
-		customStop:  nil,
+		EObject:      NewEObject(""),
+		Focus:        NewDisableFocus(),
+		canvas:       nil,
+		position:     nil,
+		size:         nil,
+		style:        nil,
+		screen:       nil,
+		zLevel:       0,
+		pLevel:       0,
+		solid:        false,
+		cache:        api.NewCache(),
+		customInit:   nil,
+		customStart:  nil,
+		customUpdate: nil,
+		customDraw:   nil,
+		customStop:   nil,
 	}
 }
 
@@ -127,19 +140,22 @@ func NewEmptyEntity() *Entity {
 // attributes but the given name.
 func NewNamedEntity(name string) *Entity {
 	return &Entity{
-		EObject:     NewEObject(name),
-		Focus:       NewDisableFocus(),
-		canvas:      nil,
-		position:    nil,
-		size:        nil,
-		style:       nil,
-		screen:      nil,
-		zLevel:      0,
-		pLevel:      0,
-		solid:       false,
-		customInit:  nil,
-		customStart: nil,
-		customStop:  nil,
+		EObject:      NewEObject(name),
+		Focus:        NewDisableFocus(),
+		canvas:       nil,
+		position:     nil,
+		size:         nil,
+		style:        nil,
+		screen:       nil,
+		zLevel:       0,
+		pLevel:       0,
+		solid:        false,
+		cache:        api.NewCache(),
+		customInit:   nil,
+		customStart:  nil,
+		customUpdate: nil,
+		customDraw:   nil,
+		customStop:   nil,
 	}
 }
 
@@ -191,6 +207,9 @@ func (e *Entity) Consume() {
 // GetCanvas method returns the entity canvas instance.
 func (e *Entity) GetCanvas() *Canvas {
 	return e.canvas
+}
+func (e *Entity) GetCache() api.ICache {
+	return e.cache
 }
 
 // GetScreen method returns the entity screen instance.
@@ -301,9 +320,17 @@ func (e *Entity) MarshalCode(origin *api.Point) (string, error) {
 func (e *Entity) Refresh() {
 }
 
+func (e *Entity) SetCache(cache api.ICache) {
+	e.cache = cache
+}
+
 // SetCanvas method sets a new value for the entity canvas.
 func (e *Entity) SetCanvas(canvas *Canvas) {
 	e.canvas = canvas
+}
+
+func (e *Entity) SetCustomDraw(f func(IScene)) {
+	e.customDraw = f
 }
 
 // SetCustomInit method sets a new value for the custom init function.
@@ -319,6 +346,10 @@ func (e *Entity) SetCustomStart(f func()) {
 // SetCustomStop method sets a new value for the custom stop function.
 func (e *Entity) SetCustomStop(f func()) {
 	e.customStop = f
+}
+
+func (e *Entity) SetCustomUpdate(f func(tcell.Event, IScene)) {
+	e.customUpdate = f
 }
 
 // SetPLevel method sets a new value for the entity p-level.
