@@ -86,6 +86,10 @@ func (t *Button) SetLabel(label string) {
 	t.updateCanvas()
 }
 
+func (b *Button) Refresh() {
+	b.updateCanvas()
+}
+
 // ReleaseFocus method release the focus for the entity.
 func (b *Button) ReleaseFocus() (bool, error) {
 	ok, err := b.Entity.ReleaseFocus()

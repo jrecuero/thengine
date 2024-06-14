@@ -631,9 +631,68 @@ func demoFourteen(dryRun bool) {
 	appEngine.Run(60.0)
 }
 
+func demoFifteen(dryRun bool) {
+	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-fifteen")
+	fmt.Println("ThEngine demo-fifteen")
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
+	styleOne := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)
+	styleText := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
+	styleAge := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
+	styleOk := tcell.StyleDefault.Foreground(tcell.ColorGreen).Background(tcell.ColorBlack)
+	styleCancel := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
+	scene := engine.NewScene("scene", camera)
+
+	modalDialog := widgets.NewModalDialog(scene)
+
+	okCallback := func(entity engine.IEntity, args ...any) bool {
+		data := modalDialog.GetDialog().Close()
+		modalDialog.Close()
+		result := fmt.Sprintf("Welcome %s %s [%s]", data[0], data[1], data[2])
+		resultText := widgets.NewText("text/result/ok/1", api.NewPoint(1, 1), api.NewSize(40, 1), &styleText, result)
+		scene.AddEntity(resultText)
+		return true
+	}
+
+	cancelCallback := func(entity engine.IEntity, args ...any) bool {
+		modalDialog.Close()
+		resultText := widgets.NewText("text/result/cancel/1", api.NewPoint(1, 1), api.NewSize(40, 1), &styleCancel, "dialog canceled")
+		scene.AddEntity(resultText)
+		return true
+	}
+
+	text1 := widgets.NewText("text/1", nil, nil, &styleText, "First Name:")
+	text2 := widgets.NewText("text/2", nil, nil, &styleText, "Last Name:")
+	text3 := widgets.NewText("text/3", nil, nil, &styleText, "Age:")
+	input1 := widgets.NewTextInput("text-input/1", nil, nil, nil, "Jose Carlos")
+	input2 := widgets.NewTextInput("text-input/2", nil, nil, nil, "Recuero Arias")
+	input3 := widgets.NewTextInput("text-input/3", nil, nil, &styleAge, "")
+	button1 := widgets.NewButton("button/1", nil, nil, &styleOk, "OK")
+	button1.SetWidgetCallback(okCallback)
+	button2 := widgets.NewButton("button/2", nil, nil, &styleCancel, "CANCEL")
+	button2.SetWidgetCallback(cancelCallback)
+	//dialog := widgets.NewDialog("dialog", api.NewPoint(1, 1), api.NewSize(30, 7), &styleOne, scene,
+	dialog := widgets.NewDialog("dialog", api.NewPoint(1, 1), api.NewSize(30, 7), &styleOne, modalDialog.GetDialogScene(),
+		[]*widgets.Text{text1, text2, text3},
+		[]*widgets.TextInput{input1, input2, input3},
+		[]*widgets.Button{button1, button2})
+
+	appEngine := engine.GetEngine()
+	appEngine.InitResources()
+	appEngine.GetSceneManager().AddScene(scene)
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.Init()
+	appEngine.Start()
+
+	modalDialog.Open(dialog)
+
+	appEngine.Run(60.0)
+}
+
 func main() {
-	demoEleven(false)
+	//demoEleven(false)
 	//demoTwelve(false)
 	//demoFourteen(false)
+	demoFifteen(false)
 	//demoSnake(false)
 }

@@ -55,8 +55,12 @@ func (m *FocusManager) acquireFocusToEntityInScene(sceneName string, entity IEnt
 	}
 
 	m.withFocus[sceneName] = append(m.withFocus[sceneName], entity)
-	tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("withFocus %+v", m.withFocus)
-	tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("acquire focus entity %s", entity.GetName())
+	tools.Logger.WithField("module", "focus-manager").
+		WithField("method", "acquireFocusToEntityInScene").
+		Debugf("withFocus %+v", m.withFocus)
+	tools.Logger.WithField("module", "focus-manager").
+		WithField("method", "acquireFocusToEntityInScene").
+		Debugf("acquire focus entity %s", entity.GetName())
 	entity.AcquireFocus()
 	// Remove the entity from the list of entities so it can not take focus
 	// again.
@@ -149,7 +153,9 @@ func (m *FocusManager) AcquireFocusToEntity(entity IEntity) error {
 		// for the given scene and remove the focus for that entity.
 		for index, entity := range m.withFocus[sceneName] {
 			if entity.GetFocusType() == SingleFocus {
-				tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("release-focus entity %s", entity.GetName())
+				tools.Logger.WithField("module", "focus-manager").
+					WithField("method", "AcquireFocusToEntity").
+					Debugf("release-focus entity %s", entity.GetName())
 				m.releaseFocusFromEntityInScene(sceneName, entity, index)
 				break
 			}
@@ -295,7 +301,9 @@ func (m *FocusManager) UpdateFocusForScene(scene IScene) error {
 		// for the given scene and remove the focus for that entity.
 		for index, entity := range m.withFocus[sceneName] {
 			if entity.GetFocusType() == SingleFocus {
-				tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("release-focus entity %s", entity.GetName())
+				tools.Logger.WithField("module", "focus-manager").
+					WithField("method", "UpdateFocusForScene").
+					Debugf("release-focus entity %s", entity.GetName())
 				m.releaseFocusFromEntityInScene(sceneName, entity, index)
 				break
 			}
@@ -307,7 +315,9 @@ func (m *FocusManager) UpdateFocusForScene(scene IScene) error {
 		}
 	} else {
 		message := fmt.Sprintf("scene %s not found", sceneName)
-		tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Errorf(message)
+		tools.Logger.WithField("module", "focus-manager").
+			WithField("function", "UpdateFocusForScene").
+			Errorf(message)
 		return fmt.Errorf(message)
 	}
 	return nil

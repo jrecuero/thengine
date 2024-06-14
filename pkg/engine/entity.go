@@ -19,7 +19,7 @@ import (
 
 // IEntity interface defines all methods any Entity structure should implement.
 type IEntity interface {
-	IObject
+	IObjectUI
 	IFocus
 	Consume()
 	Draw(IScene)
@@ -28,10 +28,6 @@ type IEntity interface {
 	GetCanvas() *Canvas
 	GetCollider() *Collider
 	GetPLevel() int
-	GetPosition() *api.Point
-	GetRect() *api.Rect
-	GetSize() *api.Size
-	GetStyle() *tcell.Style
 	GetZLevel() int
 	Init(tcell.Screen)
 	IsSolid() bool
@@ -47,10 +43,7 @@ type IEntity interface {
 	SetCustomStop(func())
 	SetCustomUpdate(func(tcell.Event, IScene))
 	SetPLevel(int)
-	SetPosition(*api.Point)
-	SetSize(*api.Size)
 	SetSolid(bool)
-	SetStyle(*tcell.Style)
 	SetZLevel(int)
 	Start()
 	StartTick(IScene)
@@ -72,12 +65,9 @@ type IEntity interface {
 // pLevel represents the update priority of the entity which allows to update
 // entities before.
 type Entity struct {
-	*EObject
+	*ObjectUI
 	*Focus
 	canvas       *Canvas
-	position     *api.Point
-	size         *api.Size
-	style        *tcell.Style
 	screen       tcell.Screen
 	zLevel       int
 	pLevel       int
@@ -93,12 +83,9 @@ type Entity struct {
 // NewEntity function creates a new Entity instance with all given attributes.
 func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.Style) *Entity {
 	entity := &Entity{
-		EObject:      NewEObject(name),
+		ObjectUI:     NewObjectUI(name, position, size, style),
 		Focus:        NewDisableFocus(),
 		canvas:       NewCanvas(size),
-		position:     position,
-		size:         size,
-		style:        style,
 		screen:       nil,
 		zLevel:       0,
 		pLevel:       0,
@@ -117,12 +104,9 @@ func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.St
 // as default values.
 func NewEmptyEntity() *Entity {
 	return &Entity{
-		EObject:      NewEObject(""),
+		ObjectUI:     NewObjectUI("", nil, nil, nil),
 		Focus:        NewDisableFocus(),
 		canvas:       nil,
-		position:     nil,
-		size:         nil,
-		style:        nil,
 		screen:       nil,
 		zLevel:       0,
 		pLevel:       0,
@@ -140,12 +124,9 @@ func NewEmptyEntity() *Entity {
 // attributes but the given name.
 func NewNamedEntity(name string) *Entity {
 	return &Entity{
-		EObject:      NewEObject(name),
+		ObjectUI:     NewObjectUI(name, nil, nil, nil),
 		Focus:        NewDisableFocus(),
 		canvas:       nil,
-		position:     nil,
-		size:         nil,
-		style:        nil,
 		screen:       nil,
 		zLevel:       0,
 		pLevel:       0,
@@ -225,31 +206,16 @@ func (e *Entity) GetPLevel() int {
 	return e.pLevel
 }
 
-// GetPosition method returns the entity origin position.
-func (e *Entity) GetPosition() *api.Point {
-	return e.position
-}
-
 // GetRect method returns the entity rectangle instance.
-func (e *Entity) GetRect() *api.Rect {
-	var rect *api.Rect
-	if e.GetCanvas() != nil {
-		rect = e.GetCanvas().GetRect()
-		rect.Origin.X += e.GetPosition().X
-		rect.Origin.Y += e.GetPosition().Y
-	}
-	return rect
-}
-
-// GetSize method returns the entity size instance.
-func (e *Entity) GetSize() *api.Size {
-	return e.size
-}
-
-// GetStyle method returns the entity style instance.
-func (e *Entity) GetStyle() *tcell.Style {
-	return e.style
-}
+//func (e *Entity) GetRect() *api.Rect {
+//    var rect *api.Rect
+//    if e.GetCanvas() != nil {
+//        rect = e.GetCanvas().GetRect()
+//        rect.Origin.X += e.GetPosition().X
+//        rect.Origin.Y += e.GetPosition().Y
+//    }
+//    return rect
+//}
 
 // GetZLevel method returns the entity z-level value.
 func (e *Entity) GetZLevel() int {
@@ -360,16 +326,6 @@ func (e *Entity) SetPLevel(level int) {
 	e.pLevel = level
 }
 
-// SetPosition method sets a new value for the entity position.
-func (e *Entity) SetPosition(position *api.Point) {
-	e.position = position
-}
-
-// SetSize method sets a new value for the entity size.
-func (e *Entity) SetSize(size *api.Size) {
-	e.size = size
-}
-
 // SetSolid method sets a new value for the entity solid attribute.
 func (e *Entity) SetSolid(solid bool) {
 	e.solid = solid
@@ -377,10 +333,10 @@ func (e *Entity) SetSolid(solid bool) {
 
 // SetStyle method sets a new value for the entity style.
 func (e *Entity) SetStyle(style *tcell.Style) {
+	e.ObjectUI.SetStyle(style)
 	if e.GetCanvas() == nil {
 		return
 	}
-	e.style = style
 	for _, rows := range e.GetCanvas().Rows {
 		for _, cell := range rows.Cols {
 			if cell != nil {
@@ -456,5 +412,6 @@ func (e *Entity) Update(event tcell.Event, scene IScene) {
 }
 
 var _ IObject = (*Entity)(nil)
+var _ IObjectUI = (*Entity)(nil)
 var _ IFocus = (*Entity)(nil)
 var _ IEntity = (*Entity)(nil)

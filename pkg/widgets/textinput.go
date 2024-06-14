@@ -76,6 +76,10 @@ func (t *TextInput) GetInputText() string {
 	return t.inputStr
 }
 
+func (t *TextInput) Refresh() {
+	t.updateCanvas()
+}
+
 // ReleaseFocus method release the focus for the entity.
 func (t *TextInput) ReleaseFocus() (bool, error) {
 	ok, err := t.Entity.ReleaseFocus()
