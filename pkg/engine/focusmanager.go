@@ -53,6 +53,7 @@ func (m *FocusManager) acquireFocusToEntityInScene(sceneName string, entity IEnt
 	if _, ok := m.withFocus[sceneName]; !ok {
 		m.withFocus[sceneName] = []IEntity{}
 	}
+
 	m.withFocus[sceneName] = append(m.withFocus[sceneName], entity)
 	tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("withFocus %+v", m.withFocus)
 	tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("acquire focus entity %s", entity.GetName())
@@ -136,7 +137,7 @@ func (m *FocusManager) releaseFocusFromEntityInScene(sceneName string, entity IE
 // AcquireFocusToEntity method acquires the focus to the given entity.
 func (m *FocusManager) AcquireFocusToEntity(entity IEntity) error {
 	// if focus manager is locked, return.
-	if m.locked {
+	if m.IsLocked() {
 		return nil
 	}
 	// if the entity already has focus, return.
@@ -144,6 +145,15 @@ func (m *FocusManager) AcquireFocusToEntity(entity IEntity) error {
 		return nil
 	}
 	if sceneName, index := m.indexForEntityInEntities(entity); index != entityNotInScene {
+		// look for any single-focus entity in the list of entities with focus
+		// for the given scene and remove the focus for that entity.
+		for index, entity := range m.withFocus[sceneName] {
+			if entity.GetFocusType() == SingleFocus {
+				tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("release-focus entity %s", entity.GetName())
+				m.releaseFocusFromEntityInScene(sceneName, entity, index)
+				break
+			}
+		}
 		m.acquireFocusToEntityInScene(sceneName, entity, index)
 		return nil
 	}
@@ -191,7 +201,7 @@ func (m *FocusManager) NextEntityWithFocusInScene(scene IScene) (IEntity, int) {
 // ReleaseFocusFromEntity method release the focus from the given entity.
 func (m *FocusManager) ReleaseFocusFromEntity(entity IEntity) error {
 	// if focus manager is locked, return.
-	if m.locked {
+	if m.IsLocked() {
 		return nil
 	}
 	// look for the entity in the list of entities with focus.
@@ -251,12 +261,23 @@ func (m *FocusManager) RemoveScene(scene IScene) {
 	delete(m.withFocus, scene.GetName())
 }
 
+// SetLocked method locks or unlocks focus manager in order to select a new
+// entity to focus.
+func (m *FocusManager) SetLocked(locked bool) {
+	m.locked = locked
+}
+
 // UpdateFocusForScene method proceeds to update entities with focus for the
 // given entity.
 // Searches for all entities with multi-focus which will be given focus.
 // Remove focus for the active single-focus entity, if present in the scene..
 // Acquire focus to the next single-focus entity in the scene.
 func (m *FocusManager) UpdateFocusForScene(scene IScene) error {
+	// if focus manager is locked, return.
+	if m.IsLocked() {
+		return nil
+	}
+
 	sceneName := scene.GetName()
 	if entities, ok := m.entities[sceneName]; ok {
 		// ensure that there is a list for entities with focus for the given
@@ -271,7 +292,7 @@ func (m *FocusManager) UpdateFocusForScene(scene IScene) error {
 			}
 		}
 		// look for any single-focus entity in the list of entities with focus
-		// for the given scene.
+		// for the given scene and remove the focus for that entity.
 		for index, entity := range m.withFocus[sceneName] {
 			if entity.GetFocusType() == SingleFocus {
 				tools.Logger.WithField("module", "focus-manager").WithField("function", "UpdateFocusForScene").Debugf("release-focus entity %s", entity.GetName())

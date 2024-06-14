@@ -75,21 +75,16 @@ func (h *Handler) CreateSprite(scene engine.IScene) {
 	}
 }
 
-func (h *Handler) SaveEntities() {
-	tools.Logger.WithField("module", "handler").
-		WithField("method", "SaveEntites").
-		Debugf("saving...")
-	for _, ent := range h.entities {
-		tools.Logger.WithField("module", "handler").
-			WithField("method", "SaveEntites").
-			Debugf("saving %+#v", ent)
-	}
-	if err := engine.ExportEntitiesToJSON("output", h.entities, TheDrawingBoxOrigin, nil); err != nil {
+func (h *Handler) SaveEntitiesToCode() {
+	if err := engine.ExportEntitiesToCode("output", h.entities, TheDrawingBoxOrigin, nil); err != nil {
 		tools.Logger.WithField("module", "handler").
 			WithField("method", "SaveEntites").
 			Errorf("error %s", err.Error())
 	}
-	if err := engine.ExportEntitiesToCode("output", h.entities, TheDrawingBoxOrigin, nil); err != nil {
+}
+
+func (h *Handler) SaveEntitiesToJSON() {
+	if err := engine.ExportEntitiesToJSON("output", h.entities, TheDrawingBoxOrigin, nil); err != nil {
 		tools.Logger.WithField("module", "handler").
 			WithField("method", "SaveEntites").
 			Errorf("error %s", err.Error())

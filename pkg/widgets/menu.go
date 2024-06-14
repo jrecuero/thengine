@@ -22,6 +22,7 @@ import (
 type MenuItem struct {
 	label        string
 	enabled      bool
+	position     *api.Point
 	menu         *Menu
 	callback     WidgetCallback
 	callbackArgs WidgetArgs
@@ -29,8 +30,12 @@ type MenuItem struct {
 
 func NewMenuItem(label string) *MenuItem {
 	return &MenuItem{
-		label:   label,
-		enabled: true,
+		label:        label,
+		enabled:      true,
+		position:     nil,
+		menu:         nil,
+		callback:     nil,
+		callbackArgs: nil,
 	}
 }
 
@@ -38,6 +43,7 @@ func NewExtendedMenuItem(label string, enabled bool, menu *Menu, callback Widget
 	return &MenuItem{
 		label:        label,
 		enabled:      enabled,
+		position:     nil,
 		menu:         menu,
 		callback:     callback,
 		callbackArgs: args,
@@ -58,6 +64,10 @@ func (m *MenuItem) GetLabel() string {
 
 func (m *MenuItem) GetMenu() *Menu {
 	return m.menu
+}
+
+func (m *MenuItem) GetPosition() *api.Point {
+	return m.position
 }
 
 func (m *MenuItem) IsEnabled() bool {
@@ -82,6 +92,11 @@ func (m *MenuItem) SetLabel(label string) *MenuItem {
 
 func (m *MenuItem) SetMenu(menu *Menu) *MenuItem {
 	m.menu = menu
+	return m
+}
+
+func (m *MenuItem) SetPosition(position *api.Point) *MenuItem {
+	m.position = position
 	return m
 }
 
@@ -117,8 +132,13 @@ func NewTopMenu(name string, position *api.Point, size *api.Size, style *tcell.S
 	}
 	// Add padding for every menu item to fill the whole horizontal length.
 	paddingMenuItems := make([]string, numberOfMenuItems)
-	for i, s := range menuItems {
-		paddingMenuItems[i] = fmt.Sprintf("%-*s", maxItemLength-1, s.GetLabel())
+	paddingLength := maxItemLength - 1
+	menuItemX := position.X + 1
+	menuItemY := position.Y + 1
+	for i, menuItem := range menuItems {
+		menuItem.SetPosition(api.NewPoint(menuItemX, menuItemY))
+		paddingMenuItems[i] = fmt.Sprintf("%-*s", paddingLength, menuItem.GetLabel())
+		menuItemX += paddingLength
 	}
 	// Assign the total number of characters required to contains all menu
 	// items.
@@ -131,6 +151,9 @@ func NewTopMenu(name string, position *api.Point, size *api.Size, style *tcell.S
 		menuItemIndex: menuItemIndex,
 		parent:        nil,
 	}
+	for _, item := range menuItems {
+		item.SetMenu(menu)
+	}
 	menu.scroller = NewScroller(totalSelectionLength, size.W-2, maxItemLength)
 	menu.SetFocusType(engine.SingleFocus)
 	menu.SetFocusEnable(true)
@@ -142,8 +165,12 @@ func NewSubMenu(name string, position *api.Point, size *api.Size, style *tcell.S
 	selectionsLength := len(menuItems)
 	// Add padding for every menu item to fill the whole horizontal length.
 	paddingSelections := make([]string, selectionsLength)
-	for i, s := range menuItems {
-		paddingSelections[i] = fmt.Sprintf("%-*s", size.W-2, s.GetLabel())
+	menuItemX := position.X + 1
+	menuItemY := position.Y + 1
+	for i, menuItem := range menuItems {
+		menuItem.SetPosition(api.NewPoint(menuItemX, menuItemY))
+		paddingSelections[i] = fmt.Sprintf("%-*s", size.W-2, menuItem.GetLabel())
+		menuItemY++
 	}
 	tools.Logger.WithField("module", "menu").WithField("function", "NewSubMenu").Debugf("%s %+v", name, paddingSelections)
 	menu := &Menu{
@@ -191,9 +218,10 @@ func (m *Menu) execute(args ...any) {
 		menuItem := m.menuItems[m.menuItemIndex]
 		if callback, args := menuItem.GetCallback(); callback != nil {
 			if args != nil {
+				args = append([]any{menuItem}, args...)
 				callback(m, args...)
 			} else {
-				callback(m, nil)
+				callback(m, menuItem)
 			}
 		}
 	}
