@@ -105,3 +105,35 @@ func ExportEntitiesToJSON(filename string, entities []IEntity, origin *api.Point
 	}
 	return nil
 }
+
+// ExportEntitiesToCode function exports given entites to the given file
+// in pseudocode format.
+func ExportEntitiesToCode(filename string, entities []IEntity, origin *api.Point, builtin IBuiltIn) error {
+	tools.Logger.WithField("module", "import").
+		WithField("function", "ExportEntitiesToJSON").
+		Debugf("exporting %+v", entities)
+	result := ""
+	for _, entity := range entities {
+		if entity == nil {
+			continue
+		}
+		if resultCode, err := entity.MarshalCode(origin); err == nil {
+			tools.Logger.WithField("module", "import").
+				WithField("function", "ExportEntitiesToJSON").
+				Debug(resultCode)
+			result += resultCode
+		} else {
+			return err
+		}
+	}
+	if origin != nil {
+		x, y := origin.Get()
+		filename = fmt.Sprintf("%s_%d_%d.code", filename, x, y)
+	} else {
+		filename = fmt.Sprintf("%s.json", filename)
+	}
+	if err := os.WriteFile(filename, []byte(result), 0644); err != nil {
+		return err
+	}
+	return nil
+}

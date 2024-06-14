@@ -4,6 +4,7 @@ package engine
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/gdamore/tcell/v2"
@@ -35,6 +36,7 @@ type IEntity interface {
 	IsSolid() bool
 	MarshalJSON() ([]byte, error)
 	MarshalMap(*api.Point) (map[string]any, error)
+	MarshalCode(*api.Point) (string, error)
 	Refresh()
 	SetCanvas(*Canvas)
 	SetCustomInit(func())
@@ -273,6 +275,26 @@ func (e *Entity) MarshalMap(origin *api.Point) (map[string]any, error) {
 		"ch":       string(cell.Rune),
 	}
 	return content, nil
+}
+
+// MarshalCode method is the custom marshal method to generate pseudocode for
+// the the instance.
+func (e *Entity) MarshalCode(origin *api.Point) (string, error) {
+	result := ""
+	position := api.ClonePoint(e.position)
+	if origin != nil {
+		position.Subtract(origin)
+	}
+	fg, bg, attrs := e.style.Decompose()
+	cell := e.GetCanvas().GetCellAt(nil)
+	result += fmt.Sprintf("// entity: %s:%s\n", e.GetClassName(), e.GetName())
+	result += fmt.Sprintf("style := tcell.StyleDefault.Foreground(tcell.GetColor(%s)).Background(tcell.GetColor(%s)).Attributes(tcell.AttrMask(%d))\n", fg, bg, attrs)
+	result += fmt.Sprintf("entity := New%s(%s, api.Point(%d, %d), api.NewSize(%d, %d), &style)\n",
+		e.GetClassName(), e.GetName(), position.X, position.Y, e.GetSize().W, e.GetSize().H)
+	result += fmt.Sprintf("cell := engine.NewCell(&style, %d)\n", cell.Rune)
+	result += fmt.Sprintf("entity.GetCanvas().FillWithCell(cell)\n")
+	result += fmt.Sprintf("\n")
+	return result, nil
 }
 
 // Refresh method refreshes the entity instance.

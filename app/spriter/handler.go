@@ -89,6 +89,11 @@ func (h *Handler) SaveEntities() {
 			WithField("method", "SaveEntites").
 			Errorf("error %s", err.Error())
 	}
+	if err := engine.ExportEntitiesToCode("output", h.entities, TheDrawingBoxOrigin, nil); err != nil {
+		tools.Logger.WithField("module", "handler").
+			WithField("method", "SaveEntites").
+			Errorf("error %s", err.Error())
+	}
 }
 
 func (h *Handler) SaveSprite() {

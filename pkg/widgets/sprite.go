@@ -4,6 +4,7 @@
 package widgets
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/gdamore/tcell/v2"
@@ -165,6 +166,29 @@ func (s *Sprite) MarshalMap(origin *api.Point) (map[string]any, error) {
 			Debugf("sprite %+#v", sprite)
 	}
 	return content, nil
+}
+
+// MarshalCode method is the custom marshal method to generate pseudocode for
+// the the instance.
+func (s *Sprite) MarshalCode(origin *api.Point) (string, error) {
+	result := ""
+	result += fmt.Sprintf("// sprite: Sprite:%s\n", s.GetName())
+	result += fmt.Sprintf("sprite := NewSprite(%s, api.Point(0, 0), nil, nil)\n", s.GetName())
+	for _, spriteCell := range s.GetSpriteCells() {
+		pos := api.ClonePoint(spriteCell.position)
+		if origin != nil {
+			pos.Subtract(origin)
+		}
+		fg, bg, attrs := spriteCell.GetCell().Style.Decompose()
+		result += fmt.Sprintf("style := tcell.StyleDefault.Foreground(tcell.GetColor(%s)).Background(tcell.GetColor(%s)).Attributes(tcell.AttrMask(%d))\n", fg, bg, attrs)
+		result += fmt.Sprintf("cell := engine.NewCell(&style, %d)\n", spriteCell.GetCell().Rune)
+		result += fmt.Sprintf("spriteCell := widgets.NewSpriteCell(pos, cell)\n")
+		result += fmt.Sprintf("sprite.AddSpriteCellAt(AtTheEnd, spriteCell)\n")
+		result += fmt.Sprintf("--\n")
+	}
+	result += fmt.Sprintf("\n")
+
+	return result, nil
 }
 
 func (s *Sprite) RemoveSpriteCellAt(atIndex int) *SpriteCell {
