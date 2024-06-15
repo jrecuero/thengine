@@ -643,6 +643,10 @@ func demoFourteen(dryRun bool) {
 	diceAnimSprite.Shuffle()
 	scene.AddEntity(diceAnimSprite)
 
+	sprite := widgets.NewSprite("sprite/demo/1", api.NewPoint(20, 1), nil)
+	sprite.StringToSprite("xx \n x \n---", &constants.OliveOverBlack)
+	scene.AddEntity(sprite)
+
 	appEngine := engine.GetEngine()
 	appEngine.InitResources()
 	appEngine.GetSceneManager().AddScene(scene)

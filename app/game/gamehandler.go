@@ -221,6 +221,15 @@ func (h *GameHandler) PlayerMove(scene engine.IScene, playerNewPosition *api.Poi
 			h.player.SetPosition(api.NewPoint(playerX, playerY))
 		case *Enemy:
 			h.player.SetPosition(api.NewPoint(playerX, playerY))
+		case *widgets.Sprite:
+			h.player.SetPosition(api.NewPoint(playerX, playerY))
+		}
+	}
+	if tmp := scene.GetEntityByName(PlayerPosTextName); tmp != nil {
+		if cursorPosText, ok := tmp.(*widgets.Text); ok {
+			pos := api.ClonePoint(h.player.GetPosition())
+			pos.Subtract(TheGameBoxOrigin)
+			cursorPosText.SetText(fmt.Sprintf("[%d,%d]", pos.X, pos.Y))
 		}
 	}
 }
@@ -266,6 +275,7 @@ func (h *GameHandler) RunStartTurn(scene engine.IScene, input *inputAction) {
 			options := widgets.NewListBox("list-box/player-options/1",
 				api.NewPoint(x, y), api.NewSize(10, 5), &theStyleBlueOverBlack,
 				[]string{"weapon", "power", "magical"}, 0)
+			options.SetZLevel(1)
 			options.SetWidgetCallback(h.playerSelection, scene)
 			scene.AddEntity(options)
 			theEngine.GetSceneManager().UpdateFocus()

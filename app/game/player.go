@@ -38,12 +38,15 @@ type Player struct {
 }
 
 func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
-	cell := engine.NewCell(style, 'o')
+	cell := engine.NewCell(style, 'H')
+	//cell := engine.NewCell(style, '🧝')
+	//cell := engine.NewCell(style, '🐱')
 	player := &Player{
 		Widget: widgets.NewWidget(name, position, nil, style),
 		Unit:   rules.NewUnit("player"),
 	}
 	player.GetCanvas().SetCellAt(nil, cell)
+	player.SetZLevel(1)
 	player.GetHitPoints().SetMaxScore(100)
 	player.GetHitPoints().SetScore(100)
 	player.GetAbilities().GetStrength().SetScore(14)

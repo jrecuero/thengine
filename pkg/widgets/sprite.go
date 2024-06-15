@@ -6,6 +6,7 @@ package widgets
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
@@ -136,7 +137,7 @@ func (s *Sprite) GetSpriteCells() []*SpriteCell {
 // from an instance.
 func (s *Sprite) MarshalMap(origin *api.Point) (map[string]any, error) {
 	tools.Logger.WithField("module", "sprite").
-		WithField("function", "MarshalMap").
+		WithField("method", "MarshalMap").
 		Debugf("sprite %s origin: %s", s.GetName(), origin.ToString())
 
 	content := map[string]any{
@@ -183,6 +184,7 @@ func (s *Sprite) MarshalCode(origin *api.Point) (string, error) {
 		fg, bg, attrs := spriteCell.GetCell().Style.Decompose()
 		result += fmt.Sprintf("style := tcell.StyleDefault.Foreground(tcell.GetColor(%s)).Background(tcell.GetColor(%s)).Attributes(tcell.AttrMask(%d))\n", fg, bg, attrs)
 		result += fmt.Sprintf("cell := engine.NewCell(&style, %d)\n", spriteCell.GetCell().Rune)
+		result += fmt.Sprintf("pos := engine.NewPoint(%d, %d)\n", pos.X, pos.Y)
 		result += fmt.Sprintf("spriteCell := widgets.NewSpriteCell(pos, cell)\n")
 		result += fmt.Sprintf("sprite.AddSpriteCellAt(AtTheEnd, spriteCell)\n")
 		result += fmt.Sprintf("--\n")
@@ -206,6 +208,47 @@ func (s *Sprite) RemoveSpriteCellAt(atIndex int) *SpriteCell {
 
 func (s *Sprite) SetSpriteCells(spriteCells []*SpriteCell) {
 	s.spriteCells = spriteCells
+}
+
+func (s *Sprite) StringToSprite(str string, style *tcell.Style, opts ...any) {
+	s.StringToSpriteAt(str, nil, style, opts...)
+}
+
+// StringToSpriteAt method writes the given string in the sprite character by
+// character.
+// opts:
+//
+//	[0] skip-spaces: true will skill any space. false will write any spaces.
+func (s *Sprite) StringToSpriteAt(str string, pos *api.Point, style *tcell.Style, opts ...any) {
+	skipSpaces := true
+	if len(opts) != 0 {
+		skipSpaces = opts[0].(bool)
+	}
+	posX, posY := 0, 0
+	if pos != nil {
+		posX, posY = pos.Get()
+	}
+	lines := strings.Split(str, "\n")
+	for y, line := range lines {
+		for x, ch := range line {
+			if skipSpaces && ch == ' ' {
+				continue
+			}
+			cell := engine.NewCell(style, ch)
+			pos := api.NewPoint(x+posX, y+posY)
+			spriteCell := NewSpriteCell(pos, cell)
+			s.AddSpriteCellAt(AtTheEnd, spriteCell)
+		}
+	}
+}
+
+func (s *Sprite) StringToSpriteAtEnd(str string, style *tcell.Style, opts ...any) {
+	var pos *api.Point
+	if lenSpriteCells := len(s.spriteCells); lenSpriteCells != 0 {
+		lastSpriteCell := s.spriteCells[lenSpriteCells-1]
+		pos = lastSpriteCell.position
+	}
+	s.StringToSpriteAt(str, pos, style, opts...)
 }
 
 // UnmarshalMap method is the custom method to unmarshal a map[string]any data
@@ -243,7 +286,7 @@ func (s *Sprite) UnmarshalMap(content map[string]any, origin *api.Point) error {
 		}
 		spriteCell.SetCell(cell)
 		tools.Logger.WithField("module", "sprite").
-			WithField("function", "Draw").
+			WithField("method", "UnmarshalMap").
 			Debugf("spriteccell %s %s %+#v", s.GetName(), spriteCell.GetPosition().ToString(), spriteCell.GetCell())
 		s.AddSpriteCellAt(AtTheEnd, spriteCell)
 	}

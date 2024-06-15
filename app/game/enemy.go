@@ -28,7 +28,8 @@ func NewEnemy(name string, position *api.Point, style *tcell.Style) *Enemy {
 		Widget: widgets.NewWidget(name, position, nil, style),
 		Unit:   rules.NewUnit("enemy"),
 	}
-	cell := engine.NewCell(enemy.GetStyle(), 'X')
+	cell := engine.NewCell(enemy.GetStyle(), 'E')
+	//cell := engine.NewCell(enemy.GetStyle(), '👺')
 	enemy.GetCanvas().SetCellAt(nil, cell)
 	enemy.populate(nil)
 	return enemy
