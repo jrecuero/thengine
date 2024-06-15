@@ -75,10 +75,10 @@ func (d *Dialog) populateButtons() {
 		if button.GetStyle() == nil {
 			button.SetStyle(d.GetStyle())
 		}
-		tools.Logger.WithField("module", "dialog").
-			WithField("function", "NewDialog").
-			Debugf("x:%d len(label):%d spacePerLabel:%d padding:%d nextW:%d",
-				x, w, spacePerLabel, padding, nextW)
+		//tools.Logger.WithField("module", "dialog").
+		//    WithField("method", "NewDialog").
+		//    Debugf("x:%d len(label):%d spacePerLabel:%d padding:%d nextW:%d",
+		//        x, w, spacePerLabel, padding, nextW)
 		nextW += spacePerLabel
 		button.Refresh()
 		d.GetScene().AddEntity(button)
@@ -112,19 +112,13 @@ func (d *Dialog) populateTextInputs(maxW int) {
 		w := d.GetSize().W - maxW - 2
 		input.SetSize(api.NewSize(w, 1))
 		input.SetCanvas(engine.NewCanvas(input.GetSize()))
-		var reverseStyle *tcell.Style
-		if input.GetStyle() != nil {
-			reverseStyle = tools.ReverseStyle(input.GetStyle())
-		} else {
-			reverseStyle = tools.ReverseStyle(d.GetStyle())
+		if style := input.GetStyle(); style == nil {
+			style = tools.ReverseStyle(d.GetStyle())
+			input.SetStyle(style)
 		}
-		input.SetStyle(reverseStyle)
 		input.Refresh()
 		d.GetScene().AddEntity(input)
 	}
-}
-
-func (d *Dialog) updateCanvas() {
 }
 
 // -----------------------------------------------------------------------------

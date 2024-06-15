@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/pkg/api"
+	"github.com/jrecuero/thengine/pkg/constants"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/tools"
 	"github.com/jrecuero/thengine/pkg/widgets"
@@ -621,6 +623,26 @@ func demoFourteen(dryRun bool) {
 	comboBox := widgets.NewComboBox("combo-box/1", api.NewPoint(2, 5), api.NewSize(20, 6), &styleOne, selections, 0)
 	scene.AddEntity(comboBox)
 
+	diceCells := []*engine.Cell{
+		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace1),
+		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace2),
+		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace3),
+		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace4),
+		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace5),
+		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace6),
+	}
+	diceSpriteCells := []*widgets.SpriteCell{}
+	for _, d := range diceCells {
+		diceSpriteCells = append(diceSpriteCells, widgets.NewSpriteCell(api.NewPoint(0, 0), d))
+	}
+	diceFrames := []*widgets.SpriteFrame{}
+	for _, d := range diceSpriteCells {
+		diceFrames = append(diceFrames, widgets.NewSpriteFrame([]*widgets.SpriteCell{d}, 5))
+	}
+	diceAnimSprite := widgets.NewAnimSprite("anim-sprite/dice", api.NewPoint(10, 1), diceFrames, 0)
+	diceAnimSprite.Shuffle()
+	scene.AddEntity(diceAnimSprite)
+
 	appEngine := engine.GetEngine()
 	appEngine.InitResources()
 	appEngine.GetSceneManager().AddScene(scene)
@@ -637,7 +659,7 @@ func demoFifteen(dryRun bool) {
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)
 	styleText := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
-	styleAge := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
+	//styleAge := tcell.StyleDefault.Foreground(tcell.ColorBlue).Background(tcell.ColorBlack)
 	styleOk := tcell.StyleDefault.Foreground(tcell.ColorGreen).Background(tcell.ColorBlack)
 	styleCancel := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
 	scene := engine.NewScene("scene", camera)
@@ -647,15 +669,21 @@ func demoFifteen(dryRun bool) {
 	okCallback := func(entity engine.IEntity, args ...any) bool {
 		data := modalDialog.GetDialog().Close()
 		modalDialog.Close()
-		result := fmt.Sprintf("Welcome %s %s [%s]", data[0], data[1], data[2])
-		resultText := widgets.NewText("text/result/ok/1", api.NewPoint(1, 1), api.NewSize(40, 1), &styleText, result)
+		result := fmt.Sprintf("☠ Welcome %s %s 🚗 [%s] ❂", data[0], data[1], data[2])
+		tmp := constants.YellowOverBlack
+		style := tmp.Attributes(6)
+		_ = style
+		resultText := widgets.NewText("text/result/ok/1",
+			//api.NewPoint(1, 1), api.NewSize(40, 1), &style, result)
+			api.NewPoint(1, 1), api.NewSize(40, 1), &constants.YellowOverBlack, result)
 		scene.AddEntity(resultText)
 		return true
 	}
 
 	cancelCallback := func(entity engine.IEntity, args ...any) bool {
 		modalDialog.Close()
-		resultText := widgets.NewText("text/result/cancel/1", api.NewPoint(1, 1), api.NewSize(40, 1), &styleCancel, "dialog canceled")
+		result := "dialog canceled " + string(constants.Taxi)
+		resultText := widgets.NewText("text/result/cancel/1", api.NewPoint(1, 1), api.NewSize(40, 1), &styleCancel, result)
 		scene.AddEntity(resultText)
 		return true
 	}
@@ -665,7 +693,19 @@ func demoFifteen(dryRun bool) {
 	text3 := widgets.NewText("text/3", nil, nil, &styleText, "Age:")
 	input1 := widgets.NewTextInput("text-input/1", nil, nil, nil, "Jose Carlos")
 	input2 := widgets.NewTextInput("text-input/2", nil, nil, nil, "Recuero Arias")
-	input3 := widgets.NewTextInput("text-input/3", nil, nil, &styleAge, "")
+	input3 := widgets.NewTextInput("text-input/3", nil, nil, &constants.BlackOverWhite, "57")
+	validator := engine.NewValidator("validator/text-input/3",
+		func(data any, args ...any) error {
+			if str, ok := data.(string); ok {
+				if age, err := strconv.Atoi(str); err == nil {
+					if (age > 0) && (age < 100) {
+						return nil
+					}
+				}
+			}
+			return fmt.Errorf("validation error")
+		}, &constants.WhiteOverRed)
+	input3.SetValidator(validator)
 	button1 := widgets.NewButton("button/1", nil, nil, &styleOk, "OK")
 	button1.SetWidgetCallback(okCallback)
 	button2 := widgets.NewButton("button/2", nil, nil, &styleCancel, "CANCEL")
@@ -692,7 +732,7 @@ func demoFifteen(dryRun bool) {
 func main() {
 	//demoEleven(false)
 	//demoTwelve(false)
-	//demoFourteen(false)
-	demoFifteen(false)
+	demoFourteen(false)
+	//demoFifteen(false)
 	//demoSnake(false)
 }

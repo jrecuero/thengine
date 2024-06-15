@@ -19,14 +19,16 @@ import (
 // generic text input widget.
 type TextInput struct {
 	*Widget
-	inputStr string
+	inputStr    string
+	backupStyle *tcell.Style
 }
 
 // NewTextInput function creates a new TextInput instance widget.
 func NewTextInput(name string, position *api.Point, size *api.Size, style *tcell.Style, defaultStr string) *TextInput {
 	textInput := &TextInput{
-		Widget:   NewWidget(name, position, size, style),
-		inputStr: defaultStr,
+		Widget:      NewWidget(name, position, size, style),
+		inputStr:    defaultStr,
+		backupStyle: style,
 	}
 	textInput.updateCanvas()
 	textInput.SetFocusType(engine.SingleFocus)
@@ -108,6 +110,11 @@ func (t *TextInput) Update(event tcell.Event, scene engine.IScene) {
 				Debugf("execute command")
 		}
 		t.inputStr = str
+		if t.Validate(str) != nil && t.GetValidator().GetErrorStyle() != nil {
+			t.SetStyle(t.GetValidator().GetErrorStyle())
+		} else {
+			t.SetStyle(t.backupStyle)
+		}
 		t.updateCanvas()
 		t.updateCursor()
 	}

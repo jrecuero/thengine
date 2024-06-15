@@ -1,0 +1,38 @@
+package constants
+
+const (
+	Automobile          = '🚗'
+	Taxi                = '🚕'
+	RecreationalVehicle = '🚙'
+	Bus                 = '🚌'
+	Trolleybus          = '🚎'
+	Ambulance           = '🚑'
+	FireEngine          = '🚒'
+	PoliceCar           = '🚓'
+	DeliveryTruck       = '🚚'
+	ArticulatedLorry    = '🚛'
+	Tractor             = '🚜'
+	RacingCar           = '🏎'
+	Motorcycle          = '🏍'
+	Bicycle             = '🚲'
+
+	DieFace1 = '⚀'
+	DieFace2 = '⚁'
+	DieFace3 = '⚂'
+	DieFace4 = '⚃'
+	DieFace5 = '⚄'
+	DieFace6 = '⚅'
+
+	WhiteChessKing   = '♔'
+	WhiteChessQueen  = '♕'
+	WhiteChessRook   = '♖'
+	WhiteChessBishop = '♗'
+	WhiteChessKnight = '♘'
+	WhiteChessPawn   = '♙'
+	BlackChessKing   = '♚'
+	BlackChessQueen  = '♛'
+	BlackChessRook   = '♜'
+	BlackChessBishop = '♝'
+	BlackChessKnight = '♞'
+	BlackChessPawn   = '♟'
+)

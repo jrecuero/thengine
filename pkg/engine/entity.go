@@ -28,6 +28,7 @@ type IEntity interface {
 	GetCanvas() *Canvas
 	GetCollider() *Collider
 	GetPLevel() int
+	GetValidator() IValidator
 	GetZLevel() int
 	Init(tcell.Screen)
 	IsSolid() bool
@@ -44,12 +45,14 @@ type IEntity interface {
 	SetCustomUpdate(func(tcell.Event, IScene))
 	SetPLevel(int)
 	SetSolid(bool)
+	SetValidator(IValidator)
 	SetZLevel(int)
 	Start()
 	StartTick(IScene)
 	Stop()
 	Update(tcell.Event, IScene)
 	UnmarshalMap(map[string]any, *api.Point) error
+	Validate(any, ...any) error
 }
 
 // -----------------------------------------------------------------------------
@@ -78,6 +81,7 @@ type Entity struct {
 	customUpdate func(tcell.Event, IScene)
 	customDraw   func(IScene)
 	customStop   func()
+	validator    IValidator
 }
 
 // NewEntity function creates a new Entity instance with all given attributes.
@@ -96,6 +100,7 @@ func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.St
 		customUpdate: nil,
 		customDraw:   nil,
 		customStop:   nil,
+		validator:    nil,
 	}
 	return entity
 }
@@ -117,6 +122,7 @@ func NewEmptyEntity() *Entity {
 		customUpdate: nil,
 		customDraw:   nil,
 		customStop:   nil,
+		validator:    nil,
 	}
 }
 
@@ -137,6 +143,7 @@ func NewNamedEntity(name string) *Entity {
 		customUpdate: nil,
 		customDraw:   nil,
 		customStop:   nil,
+		validator:    nil,
 	}
 }
 
@@ -216,6 +223,10 @@ func (e *Entity) GetPLevel() int {
 //    }
 //    return rect
 //}
+
+func (e *Entity) GetValidator() IValidator {
+	return e.validator
+}
 
 // GetZLevel method returns the entity z-level value.
 func (e *Entity) GetZLevel() int {
@@ -346,6 +357,10 @@ func (e *Entity) SetStyle(style *tcell.Style) {
 	}
 }
 
+func (e *Entity) SetValidator(validator IValidator) {
+	e.validator = validator
+}
+
 // SetZLevel method sets a new value for the entity z-level.
 func (e *Entity) SetZLevel(level int) {
 	e.zLevel = level
@@ -409,6 +424,13 @@ func (e *Entity) Update(event tcell.Event, scene IScene) {
 	}
 	if e.IsActive() {
 	}
+}
+
+func (e *Entity) Validate(data any, args ...any) error {
+	if e.validator != nil {
+		return e.validator.Validate(data, args...)
+	}
+	return nil
 }
 
 var _ IObject = (*Entity)(nil)
