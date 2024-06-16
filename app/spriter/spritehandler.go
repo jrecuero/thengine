@@ -35,7 +35,7 @@ func (h *SpriteHandler) AddPoint(point *api.Point, cell *engine.Cell) {
 	}
 	spriteCell := widgets.NewSpriteCell(point, cell)
 	h.sprite.AddSpriteCellAt(widgets.AtTheEnd, spriteCell)
-	tools.Logger.WithField("module", "SpriteHandler").
+	tools.Logger.WithField("module", "Spritehandler").
 		WithField("method", "AddPoint").
 		Debugf("%s %+#v", h.sprite.GetName(), spriteCell)
 }
@@ -54,7 +54,7 @@ func (h *SpriteHandler) NewSprite(name string) *widgets.Sprite {
 		name = fmt.Sprintf("sprite_%02d", h.counter)
 	}
 	h.sprite = widgets.NewSprite(name, api.NewPoint(0, 0), nil)
-	tools.Logger.WithField("module", "SpriteHandler").
+	tools.Logger.WithField("module", "Spritehandler").
 		WithField("method", "NewSprite").
 		Debugf("%s %+#v", h.sprite.GetName(), h.sprite)
 	return h.sprite

@@ -137,8 +137,9 @@ func NewTimerGauge(name string, position *api.Point, size *api.Size, style *tcel
 // value.
 func (g *TimerGauge) updateCanvas() {
 	updateCanvas(g, g.total, g.completed)
-	//tools.Logger.WithField("module", "TimerGauge").
-	//    WithField("function", "updateCanvas").
+	//tools.Logger.WithField("module", "gauge").
+	//    WithField("struct", "TimerGauge").
+	//    WithField("method", "updateCanvas").
 	//    Debugf("completed %d/%d %d '%s'", g.completed, g.total, completedSteps, pattern)
 }
 

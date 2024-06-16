@@ -5,6 +5,8 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/app/game/assets"
+	dad_constants "github.com/jrecuero/thengine/app/game/dad/constants"
+	"github.com/jrecuero/thengine/app/game/dad/rules"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/builder"
 	"github.com/jrecuero/thengine/pkg/constants"
@@ -89,7 +91,7 @@ func (b *BuiltIn) GetClassFromString(className string) engine.IEntity {
 	case "Wall":
 		return NewEmptyWall()
 	case "Enemy":
-		tools.Logger.WithField("module", "game/main").
+		tools.Logger.WithField("module", "main").
 			WithField("struct", "BuiltIn").
 			WithField("method", "GetClassFromString").
 			Infof("Created a new empty enemy")
@@ -231,8 +233,21 @@ func buildUI(scene engine.IScene, player *Player, enemy *Enemy) {
 	scene.AddEntity(playerPosText)
 }
 
+func newTrap(name string, pos *api.Point, style *tcell.Style) *assets.Trap {
+	trap := assets.NewTrap(name, pos, api.NewSize(1, 1), style)
+	trapDC := 8
+	trapDamage := &rules.SavingThrowDamage{
+		SavingThrow: rules.NewSavingThrow(dad_constants.Perception, trapDC),
+		Damage:      rules.NewDamage(rules.DiceThrow1d3, dad_constants.Poison),
+	}
+	trap.Damage = rules.NewNoDamage()
+	trap.Damage.SetSavingThrows([]*rules.SavingThrowDamage{trapDamage})
+	trap.GetCanvas().SetCellAt(nil, engine.NewCell(&constants.RedOverBlack, '*'))
+	return trap
+}
+
 func main() {
-	tools.Logger.WithField("module", "game/main").Infof("The Game")
+	tools.Logger.WithField("module", "main").Infof("The Game")
 	mainScene := engine.NewScene("scene/main/1", theCamera)
 
 	buildBoxesAndWalls(mainScene)
@@ -285,6 +300,18 @@ func main() {
 	mainScene.AddEntity(diceTwoAnimWidget)
 
 	buildDungeon(mainScene)
+
+	//trap := assets.NewTrap("widget/trap/1", api.NewPoint(14, 4), api.NewSize(1, 1), &constants.RedOverBlack)
+	//trapDC := 8
+	//trapDamage := &rules.SavingThrowDamage{
+	//    SavingThrow: rules.NewSavingThrow(dad_constants.Wisdom, trapDC),
+	//    Damage:      rules.NewDamage(rules.DiceThrow1d3, dad_constants.Poison),
+	//}
+	//trap.Damage = rules.NewNoDamage()
+	//trap.Damage.SetSavingThrows([]*rules.SavingThrowDamage{trapDamage})
+	//trap.GetCanvas().SetCellAt(nil, engine.NewCell(&constants.RedOverBlack, '*'))
+	trap := newTrap("widget/trap/1", api.NewPoint(14, 4), &constants.RedOverBlack)
+	mainScene.AddEntity(trap)
 
 	gameHandler := NewGameHandler()
 	mainScene.AddEntity(gameHandler)

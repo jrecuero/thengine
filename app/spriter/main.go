@@ -74,7 +74,7 @@ type topmenu struct {
 
 func (t *topmenu) EndTick(engine.IScene) {
 	if t.LoseFocus {
-		tools.Logger.WithField("module", "spriter").
+		tools.Logger.WithField("module", "main").
 			WithField("struct", "topmenu").
 			WithField("function", "EndTick").
 			Tracef("%s %t", t.GetName(), t.LoseFocus)
@@ -123,7 +123,9 @@ func createDrawingBox(scene engine.IScene) {
 }
 
 func main() {
-	tools.Logger.WithField("module", "spriter").WithField("function", "main").Infof("Spriter App")
+	tools.Logger.WithField("module", "main").
+		WithField("function", "main").
+		Infof("Spriter App")
 	drawingScene := engine.NewScene(DrawingSceneName, theCamera)
 
 	createSpriteMenuItem := widgets.NewExtendedMenuItem("New SPR", false, nil, nil, nil)
@@ -171,7 +173,7 @@ func menuLoad(entity engine.IEntity, args ...any) bool {
 	}
 	entities := engine.ImportEntitiesFromJSON(filename, TheDrawingBoxOrigin, &builtin{})
 	for _, entity := range entities {
-		tools.Logger.WithField("module", "import").
+		tools.Logger.WithField("module", "main").
 			WithField("function", "ImportEntitiesToJSON").
 			Debugf("importing entity %+#v", entity.GetPosition())
 		theHandler.entities = append(theHandler.entities, entity)
@@ -181,7 +183,7 @@ func menuLoad(entity engine.IEntity, args ...any) bool {
 }
 
 func menuNewDrawingBox(ent engine.IEntity, args ...any) bool {
-	tools.Logger.WithField("module", "spriter").
+	tools.Logger.WithField("module", "main").
 		WithField("function", "menuNewDrawingBox").
 		Tracef("%s %+v", ent.GetName(), args)
 	if menu, ok := ent.(*widgets.Menu); ok {
@@ -213,7 +215,7 @@ func menuNewSprite(entity engine.IEntity, args ...any) bool {
 	if menu, ok = args[2].(*topmenu); !ok {
 		return false
 	}
-	tools.Logger.WithField("module", "spriter").
+	tools.Logger.WithField("module", "main").
 		WithField("function", "menuNewSprite").
 		Tracef("%s %+v %+#v %+#v", entity.GetName(), scene, menu, menuItem)
 
@@ -246,7 +248,7 @@ func menuSaveSprite(entity engine.IEntity, args ...any) bool {
 	if menu, ok = args[2].(*topmenu); !ok {
 		return false
 	}
-	tools.Logger.WithField("module", "spriter").
+	tools.Logger.WithField("module", "main").
 		WithField("function", "menuSaveSprite").
 		Tracef("%s %+v %+#v %+#v", entity.GetName(), scene, menu, menuItem)
 

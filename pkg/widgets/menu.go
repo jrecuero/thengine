@@ -143,7 +143,9 @@ func NewTopMenu(name string, position *api.Point, size *api.Size, style *tcell.S
 	// Assign the total number of characters required to contains all menu
 	// items.
 	totalSelectionLength := numberOfMenuItems * maxItemLength
-	tools.Logger.WithField("module", "menu").WithField("function", "NewMenu").Debugf("%s", name)
+	tools.Logger.WithField("module", "menu").
+		WithField("function", "NewMenu").
+		Debugf("%s", name)
 	menu := &Menu{
 		Widget:        NewWidget(name, position, size, style),
 		menuItems:     menuItems,
@@ -172,7 +174,9 @@ func NewSubMenu(name string, position *api.Point, size *api.Size, style *tcell.S
 		paddingSelections[i] = fmt.Sprintf("%-*s", size.W-2, menuItem.GetLabel())
 		menuItemY++
 	}
-	tools.Logger.WithField("module", "menu").WithField("function", "NewSubMenu").Debugf("%s %+v", name, paddingSelections)
+	tools.Logger.WithField("module", "menu").
+		WithField("function", "NewSubMenu").
+		Debugf("%s %+v", name, paddingSelections)
 	menu := &Menu{
 		Widget:        NewWidget(name, position, size, style),
 		menuItems:     menuItems,
@@ -196,7 +200,9 @@ func (m *Menu) getMenuItemLabel(index int) string {
 }
 
 func (m *Menu) execute(args ...any) {
-	tools.Logger.WithField("module", "menu").WithField("function", "execute").Debugf("%s %+v", m.GetName(), args)
+	tools.Logger.WithField("module", "menu").
+		WithField("method", "execute").
+		Debugf("%s %+v", m.GetName(), args)
 	switch args[0].(string) {
 	case "up":
 		if m.parent != nil {

@@ -73,7 +73,7 @@ func (m *SceneManager) ActivateScene(scene IScene) bool {
 
 // AddScene method adds a new Scene to be handled by the manager.
 func (m *SceneManager) AddScene(scene IScene) bool {
-	tools.Logger.WithField("module", "scene-manager").
+	tools.Logger.WithField("module", "scenemanager").
 		WithField("method", "AddScene").
 		Debugf("add scene %s", scene.GetName())
 
@@ -254,7 +254,7 @@ func (m *SceneManager) PushVisibleSceneAsLast(scene IScene) bool {
 
 // RemoveScene method removes the given scene from all scene slices.
 func (m *SceneManager) RemoveScene(scene IScene) bool {
-	tools.Logger.WithField("module", "scene-manager").
+	tools.Logger.WithField("module", "scenemanager").
 		WithField("method", "RemoveScene").
 		Debugf("remove scene %s", scene.GetName())
 
@@ -353,7 +353,7 @@ func (m *SceneManager) Stop() {
 // Update method is called by the engine to update all scene manager scenes.
 func (m *SceneManager) Update(event tcell.Event) {
 	for _, scene := range m.activeScenes {
-		//tools.Logger.WithField("module", "scene-manager").
+		//tools.Logger.WithField("module", "scenemanager").
 		//    WithField("method", "Update").
 		//    Debugf("scene %s", scene.GetName())
 		scene.Update(event)
@@ -364,7 +364,7 @@ func (m *SceneManager) Update(event tcell.Event) {
 func (m *SceneManager) UpdateFocus() {
 	if lenActiveScenes := len(m.activeScenes); lenActiveScenes != 0 {
 		lastActiveScene := m.activeScenes[lenActiveScenes-1]
-		tools.Logger.WithField("module", "scene-manager").
+		tools.Logger.WithField("module", "scenemanager").
 			WithField("method", "UpdateFocus").
 			Debugf("scene %s", lastActiveScene.GetName())
 		focusManager := GetEngine().GetFocusManager()

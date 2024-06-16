@@ -102,10 +102,14 @@ func (t *Timer) Update(event tcell.Event, scene engine.IScene) {
 	}
 	now := time.Now()
 	if elapsed := now.Sub(t.time) + t.elapsed; elapsed < t.interval {
-		//tools.Logger.WithField("module", "timer").WithField("function", "Update").Debugf("%d < %d", elapsed, t.interval)
+		//tools.Logger.WithField("module", "timer").
+		//    WithField("method", "Update").
+		//    Debugf("%d < %d", elapsed, t.interval)
 		return
 	}
-	//tools.Logger.WithField("module", "timer").WithField("function", "Update").Debugf("%s callback", t.GetName())
+	//tools.Logger.WithField("module", "timer").
+	//    WithField("method", "Update").
+	//    Debugf("%s callback", t.GetName())
 	t.RunCallback(t)
 	if t.count == ForeverTimer {
 		t.time = time.Now()

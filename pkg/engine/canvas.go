@@ -133,7 +133,9 @@ func NewCanvasFromString(str string, style *tcell.Style) *Canvas {
 func NewCanvasFromFile(filename string, style *tcell.Style) *Canvas {
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		tools.Logger.WithField("module", "canvas").Errorf("Error opening %s Err=%+v", filename, err)
+		tools.Logger.WithField("module", "canvas").
+			WithField("method", "NewCanvasFromFile").
+			Errorf("Error opening %s Err=%+v", filename, err)
 		return nil
 	}
 	return NewCanvasFromString(string(content), style)

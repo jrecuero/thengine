@@ -88,7 +88,7 @@ func updateColor(ent engine.IEntity, args ...any) bool {
 }
 
 func acceptColor(entity engine.IEntity, args ...any) bool {
-	tools.Logger.WithField("module", "spriter").
+	tools.Logger.WithField("module", "colorhandler").
 		WithField("function", "acceptColor").
 		Tracef("%s args: %+#v", entity.GetName(), args)
 
@@ -124,7 +124,7 @@ func acceptColor(entity engine.IEntity, args ...any) bool {
 }
 
 func cancelColor(entity engine.IEntity, args ...any) bool {
-	tools.Logger.WithField("module", "spriter").
+	tools.Logger.WithField("module", "colorhandler").
 		WithField("function", "cancelColor").
 		Tracef("%s args: %+#v", entity.GetName(), args)
 

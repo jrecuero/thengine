@@ -202,8 +202,12 @@ func (e *Engine) Run(fps float64) {
 			recoverStack := false
 			err := recover()
 			if err != nil {
-				tools.Logger.WithField("module", "engine").WithField("function", "Run").Errorf("panic %+v", err)
-				tools.Logger.WithField("module", "engine").WithField("function", "Run").Errorf("%s", string(debug.Stack()))
+				tools.Logger.WithField("module", "engine").
+					WithField("method", "Run").
+					Errorf("panic %+v", err)
+				tools.Logger.WithField("module", "engine").
+					WithField("method", "Run").
+					Errorf("%s", string(debug.Stack()))
 				recoverStack = true
 			}
 			if !e.dryRun {
@@ -231,7 +235,7 @@ func (e *Engine) Run(fps float64) {
 				e.screen.Sync()
 			case *tcell.EventMouse:
 				tools.Logger.WithField("module", "engine").
-					WithField("function", "Run").
+					WithField("method", "Run").
 					Debugf("mouse %+v", event)
 			case *tcell.EventKey:
 				switch ev.Key() {
@@ -241,16 +245,16 @@ func (e *Engine) Run(fps float64) {
 					e.isRunning = false
 				case tcell.KeyTab:
 					tools.Logger.WithField("module", "engine").
-						WithField("function", "Run").
+						WithField("fmethod", "Run").
 						Debugf("tab update focus")
 					e.sceneManager.UpdateFocus()
 				case tcell.KeyRune:
 					tools.Logger.WithField("module", "engine").
-						WithField("function", "Run").
+						WithField("method", "Run").
 						Debugf("rune %s", string(ev.Rune()))
 				default:
 					tools.Logger.WithField("module", "engine").
-						WithField("function", "Run").
+						WithField("method", "Run").
 						Debugf("key %+v", ev.Key())
 				}
 			}

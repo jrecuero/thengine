@@ -28,7 +28,7 @@ type ListBox struct {
 
 // NewListBox function creates a new ListBox instance.
 func NewListBox(name string, position *api.Point, size *api.Size, style *tcell.Style, selections []string, selectionIndex int) *ListBox {
-	tools.Logger.WithField("module", "list-box").
+	tools.Logger.WithField("module", "listbox").
 		WithField("function", "NewListBox").
 		Infof("%s %s %s %+v", name, position.ToString(), size.ToString(), selections)
 	selectionsLength := len(selections)
@@ -37,7 +37,7 @@ func NewListBox(name string, position *api.Point, size *api.Size, style *tcell.S
 	for i, s := range selections {
 		paddingSelections[i] = fmt.Sprintf("%-*s", size.W-2, s)
 	}
-	//tools.Logger.WithField("module", "list-box").
+	//tools.Logger.WithField("module", "listbox").
 	//    WithField("function", "NewListBox").
 	//    Debugf("%s %+v", name, paddingSelections)
 	listBox := &ListBox{
@@ -57,7 +57,7 @@ func NewListBox(name string, position *api.Point, size *api.Size, style *tcell.S
 // -----------------------------------------------------------------------------
 
 func (l *ListBox) execute(args ...any) {
-	tools.Logger.WithField("module", "list-box").
+	tools.Logger.WithField("module", "listbox").
 		WithField("method", "execute").
 		Debugf("%s %+v", l.GetName(), args)
 	switch args[0].(string) {

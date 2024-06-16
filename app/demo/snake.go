@@ -110,13 +110,13 @@ func (b *Bullet) Update(ecent tcell.Event, scene engine.IScene) {
 	collisions := scene.CheckCollisionWith(b)
 	for _, ent := range collisions {
 		if _, ok := ent.(*TimerFoodPiece); ok {
-			tools.Logger.WithField("module", "snake").
+			tools.Logger.WithField("module", "main").
 				WithField("struct", "Bullet").
-				WithField("function", "Update").
+				WithField("method", "Update").
 				Debugf("bullet collider %s", b.GetCollider().GetRect().ToString())
-			tools.Logger.WithField("module", "snake").
+			tools.Logger.WithField("module", "main").
 				WithField("struct", "Bullet").
-				WithField("function", "Update").
+				WithField("method", "Update").
 				Debugf("collision collider %s", ent.GetCollider().GetRect().ToString())
 			scene.RemoveEntity(ent)
 			scene.RemoveEntity(b)
@@ -169,9 +169,9 @@ func (s *snake) Move(args ...any) {
 }
 
 func (s *snake) Shoot(args ...any) {
-	tools.Logger.WithField("module", "snake").
+	tools.Logger.WithField("module", "main").
 		WithField("struct", "snake").
-		WithField("function", "Shoot").
+		WithField("method", "Shoot").
 		Debugf("snake is shooting %s", s.direction)
 	if s.BulletAvailable {
 		scene := args[0].(engine.IScene)
@@ -251,9 +251,9 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 		if (intX != spriteCell.GetPosition().X) || (intY != spriteCell.GetPosition().Y) {
 			if (intX >= 80) || (intX < 0) || (intY >= 20) || (intY < 0) {
 				s.alive = false
-				tools.Logger.WithField("module", "snake").
+				tools.Logger.WithField("module", "main").
 					WithField("struct", "snake").
-					WithField("function", "Update").
+					WithField("method", "Update").
 					Debugf("snake is dead at %d,%d", intX, intY)
 				s.PublishGameOver()
 				return
@@ -263,9 +263,9 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 			lastCell := s.RemoveSpriteCellAt(widgets.AtTheEnd)
 			lastCell.SetPosition(api.NewPoint(intX, intY))
 			s.AddSpriteCellAt(0, lastCell)
-			//tools.Logger.WithField("module", "snake").
+			//tools.Logger.WithField("module", "main").
 			//    WithField("struct", "snake").
-			//    WithField("function", "Update").
+			//    WithField("method", "Update").
 			//    Debugf("rotate %s", lastCell.GetPosition().ToString())
 		}
 		// check collision with itself.
@@ -274,9 +274,9 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 		for i := 1; i < len(s.GetSpriteCells()); i++ {
 			if spriteCell.GetPosition().IsEqual(spriteCells[i].GetPosition()) {
 				s.alive = false
-				tools.Logger.WithField("module", "snake").
+				tools.Logger.WithField("module", "main").
 					WithField("struct", "snake").
-					WithField("function", "Update").
+					WithField("method", "Update").
 					Debugf("snake is dead at %d", i)
 				s.PublishGameOver()
 				return
@@ -295,9 +295,9 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 					s.y = float64(spriteCell.GetPosition().Y + vy)
 					newSpriteCell := widgets.NewSpriteCell(api.NewPoint(int(s.x), int(s.y)), spriteCell.GetCell())
 					s.AddSpriteCellAt(0, newSpriteCell)
-					tools.Logger.WithField("module", "snake").
+					tools.Logger.WithField("module", "main").
 						WithField("struct", "snake").
-						WithField("function", "Update").
+						WithField("method", "Update").
 						Debugf("collision with %s at %s", ent.GetName(), newSpriteCell.GetPosition().ToString())
 					s.PublishCollision(ent.(*TimerFoodPiece).Points)
 				}
@@ -323,9 +323,9 @@ type TextGameOver struct {
 }
 
 func (t *TextGameOver) Exit(args ...any) {
-	tools.Logger.WithField("module", "snake").
+	tools.Logger.WithField("module", "main").
 		WithField("struct", "TextGameOver").
-		WithField("function", "Exit").
+		WithField("method", "Exit").
 		Debugf("key pressed")
 	message := &engine.Message{
 		Topic:   GameOverTopic,
@@ -381,9 +381,9 @@ type AppHandler struct {
 
 func (h *AppHandler) Consume() {
 	if message, _ := engine.GetMailbox().Consume(GameOverTopic, h.GetName()); message != nil {
-		tools.Logger.WithField("module", "snake").
+		tools.Logger.WithField("module", "main").
 			WithField("struct", "AppHandler").
-			WithField("function", "Consume").
+			WithField("method", "Consume").
 			Debugf("cosume message")
 
 		content, ok := message.Content.(string)
@@ -438,9 +438,9 @@ func (h *AppHandler) SetUpMainScene(mainScene engine.IScene) {
 		textBulletAvailable.SetStyle(&styleSix)
 		textBulletAvailable.Refresh()
 		snake.BulletAvailable = true
-		tools.Logger.WithField("module", "snake").
+		tools.Logger.WithField("module", "main").
 			WithField("struct", "AppHandler").
-			WithField("function", "SetUpMainScene").
+			WithField("method", "SetUpMainScene").
 			Debugf("gauge callback")
 		return true
 	})
@@ -474,9 +474,9 @@ func (h *AppHandler) SetUpMainScene(mainScene engine.IScene) {
 		food.GetCanvas().WriteStringInCanvas("*", &style)
 		food.SetSolid(true)
 		mainScene.AddEntity(food)
-		tools.Logger.WithField("module", "snake").
+		tools.Logger.WithField("module", "main").
 			WithField("struct", "AppHandler").
-			WithField("function", "SetUpMainScene").
+			WithField("method", "SetUpMainScene").
 			Debugf("foodTimer generates new food %d %d", duration, points)
 		return true
 	})

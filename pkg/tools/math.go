@@ -55,3 +55,13 @@ func Min(values ...int) int {
 	}
 	return min
 }
+
+// SumSlice function returns the total sum for every entry in a slice or
+// integer numbers.
+func SumSlice(values ...int) int {
+	result := 0
+	for _, v := range values {
+		result += v
+	}
+	return result
+}

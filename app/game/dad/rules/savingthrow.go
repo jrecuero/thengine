@@ -14,12 +14,12 @@ import (
 
 // ISavingThrow interfaces defines all abilities methods to be implemented.
 type ISavingThrow interface {
-	GetAS() AbilityScore
 	GetDC() int
+	GetScore() string
 	Pass(IUnit) bool
 	Roll() int
-	SetAS(AbilityScore)
 	SetDC(int)
+	SetScore(string)
 	ToString() string
 }
 
@@ -57,15 +57,15 @@ type ISavingThrow interface {
 // Wisdom (WIS), or Charisma (CHA) scores. The rules for each effect specify
 // which type of saving throw is required.
 type SavingThrow struct {
-	as        AbilityScore // ability score
-	dc        int          // dificulty class
-	diceThrow IDiceThrow   // dice throw: 1d20
+	score     string     // ability score
+	dc        int        // dificulty class
+	diceThrow IDiceThrow // dice throw: 1d20
 }
 
 // NewSavingThrow function creates a new SavingThrow instance.
-func NewSavingThrow(as AbilityScore, dc int) *SavingThrow {
+func NewSavingThrow(score string, dc int) *SavingThrow {
 	return &SavingThrow{
-		as:        as,
+		score:     score,
 		dc:        dc,
 		diceThrow: DiceThrow1d20,
 	}
@@ -75,39 +75,52 @@ func NewSavingThrow(as AbilityScore, dc int) *SavingThrow {
 // SavingThrow public methods
 // -----------------------------------------------------------------------------
 
-func (s *SavingThrow) GetAS() AbilityScore {
-	return s.as
-}
-
 func (s *SavingThrow) GetDC() int {
 	return s.dc
+}
+
+func (s *SavingThrow) GetScore() string {
+	return s.score
 }
 
 // Pass method checks if the given unit is able to pass the saving throw for
 // the required difficulty class.
 func (s *SavingThrow) Pass(unit IUnit) bool {
-	score := unit.GetAbilities().GetAbilityByName(s.GetAS()).GetScorePoint()
+	var score []int
+	if ability := unit.GetAbilities().GetAbilityByName(AbilityScore(s.GetScore())); ability != nil {
+		// saving throws based on abilities only make use of the ability score
+		// bonus value
+		score = append(score, ability.GetScorePoint())
+	} else if skill := GetSkillByName(unit.GetSkills(), SkillName(s.GetScore())); skill != nil {
+		// saving throws based in skill make used fo the related ability score
+		// bonus and the ability proficiency value.
+		ability := skill.GetAbility()
+		score = append(score, unit.GetAbilities().GetAbilityByName(ability).GetScore())
+		score = append(score, skill.GetProficienty())
+	} else {
+		return true
+	}
 	roll := s.Roll()
-	tools.Logger.WithField("module", "savingThrow").
+	tools.Logger.WithField("module", "savingthrow").
 		WithField("method", "Pass").
-		Debugf("saving throw roll:%d score:%d dc:%d", roll, score, s.dc)
-	return (roll + score) > s.GetDC()
+		Debugf("saving throw roll:%d score:%+v dc:%d", roll, score, s.dc)
+	return (roll + tools.SumSlice(score...)) > s.GetDC()
 }
 
 func (s *SavingThrow) Roll() int {
 	return s.diceThrow.Roll()
 }
 
-func (s *SavingThrow) SetAS(as AbilityScore) {
-	s.as = as
-}
-
 func (s *SavingThrow) SetDC(dc int) {
 	s.dc = dc
 }
 
+func (s *SavingThrow) SetScore(score string) {
+	s.score = score
+}
+
 func (s *SavingThrow) ToString() string {
-	return fmt.Sprintf("saving-throw %s:%d %s", s.as, s.dc, s.diceThrow.ToString())
+	return fmt.Sprintf("saving-throw %s:%d %s", s.score, s.dc, s.diceThrow.ToString())
 }
 
 var _ ISavingThrow = (*SavingThrow)(nil)

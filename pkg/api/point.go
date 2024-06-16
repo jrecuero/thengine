@@ -69,6 +69,16 @@ func (p *Point) Get() (int, int) {
 	return p.X, p.Y
 }
 
+func (p *Point) GetAdjacentPoints() []*Point {
+	result := []*Point{
+		NewPoint(p.X, p.Y-1),
+		NewPoint(p.X, p.Y+1),
+		NewPoint(p.X-1, p.Y),
+		NewPoint(p.X+1, p.Y),
+	}
+	return result
+}
+
 // IsAdjacent method returns if the given Point is adjacent to the instance, it
 // means if it is just on top, bottom, left or right.
 func (p *Point) IsAdjacent(point *Point) bool {

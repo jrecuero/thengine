@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/jrecuero/thengine/app/game/assets"
 	"github.com/jrecuero/thengine/app/game/dad/gear/body"
 	"github.com/jrecuero/thengine/app/game/dad/gear/shields"
 	"github.com/jrecuero/thengine/app/game/dad/gear/weapons"
@@ -76,12 +77,25 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 	player.GetAttacks().AddAttack(magicalAttack)
 
 	strengthModifier := player.GetAbilities().GetStrength().GetModifier()
-	tools.Logger.WithField("module", "player").WithField("function", "NewPlayer").Debugf("strength modifier %d", strengthModifier)
+	tools.Logger.WithField("module", "player").
+		WithField("function", "NewPlayer").
+		Debugf("strength modifier %d", strengthModifier)
 	return player
 }
 
 func (p *Player) Update(event tcell.Event, scene engine.IScene) {
-	if !p.HasFocus() {
+	if !p.IsActive() {
 		return
+	}
+	traps := getTrapsInScene(scene)
+	if t := isAnyTrapAdjacent(p, traps); t != nil {
+		t.SetVisible(true)
+		if trap, ok := t.(*assets.Trap); ok {
+			if trap.GetSavingThrows() != nil && len(trap.GetSavingThrows()) != 0 {
+				trapScore := trap.GetSavingThrows()[0].GetScore()
+				trapDC := trap.GetSavingThrows()[0].GetDC()
+				_, _ = trapScore, trapDC
+			}
+		}
 	}
 }

@@ -93,7 +93,7 @@ func (d *Die) GetFaces() int {
 	return d.faces
 }
 
-// Roll method returns a roll die.
+// Roll method returns a roll die [0-faces]
 func (d *Die) Roll() int {
 	if d.isLoaded {
 		return d.loaded
@@ -101,7 +101,7 @@ func (d *Die) Roll() int {
 	return tools.RandomRing.Intn(d.GetFaces() + 1)
 }
 
-// SureRoll method returns a roll die without a zero.
+// SureRoll method returns a roll die without a zero [1-faces]
 func (d *Die) SureRoll() int {
 	if d.isLoaded {
 		return d.loaded
@@ -109,6 +109,7 @@ func (d *Die) SureRoll() int {
 	return tools.RandomRing.Intn(d.GetFaces()) + 1
 }
 
+// ToString method returns the dice struct as a string.
 func (d *Die) ToString() string {
 	return fmt.Sprintf("die %s %d/%d", d.name, d.faces, d.loaded)
 }

@@ -65,7 +65,9 @@ func (t *TextInput) updateCursor() {
 
 // AcquireFocus method acquires focus for the entity.
 func (t *TextInput) AcquireFocus() (bool, error) {
-	tools.Logger.WithField("module", "text-input").WithField("function", "AcquireFocus").Debugf("%s", t.GetName())
+	tools.Logger.WithField("module", "textinput").
+		WithField("method", "AcquireFocus").
+		Debugf("%s", t.GetName())
 	ok, err := t.Entity.AcquireFocus()
 	if err == nil {
 		t.updateCursor()
@@ -105,8 +107,8 @@ func (t *TextInput) Update(event tcell.Event, scene engine.IScene) {
 	}
 	if str, ok, run := t.HandleKeyboardInputForString(event, t.inputStr); ok {
 		if run {
-			tools.Logger.WithField("module", "text-input").
-				WithField("function", "AcquireFocus").
+			tools.Logger.WithField("module", "textinput").
+				WithField("method", "AcquireFocus").
 				Debugf("execute command")
 		}
 		t.inputStr = str

@@ -108,6 +108,15 @@ func CreateSkills() []ISkill {
 	return skills
 }
 
+func GetSkillByName(skills []ISkill, name SkillName) ISkill {
+	for _, skill := range skills {
+		if skill.GetName() == name {
+			return skill
+		}
+	}
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 //
 // ISkill

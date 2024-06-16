@@ -34,7 +34,9 @@ func NewCheckBox(name string, position *api.Point, size *api.Size, style *tcell.
 	for i, s := range selections {
 		paddingSelections[i] = fmt.Sprintf("%-*s", size.W-4, s)
 	}
-	tools.Logger.WithField("module", "check-box").WithField("function", "NewCheckBox").Debugf("%s %+v", name, paddingSelections)
+	tools.Logger.WithField("module", "checkbox").
+		WithField("function", "NewCheckBox").
+		Debugf("%s %+v", name, paddingSelections)
 	checkBox := &CheckBox{
 		Widget:         NewWidget(name, position, size, style),
 		selections:     paddingSelections,
@@ -53,7 +55,9 @@ func NewCheckBox(name string, position *api.Point, size *api.Size, style *tcell.
 // -----------------------------------------------------------------------------
 
 func (c *CheckBox) execute(args ...any) {
-	tools.Logger.WithField("module", "check-box").WithField("function", "execute").Debugf("%s %+v", c.GetName(), args)
+	tools.Logger.WithField("module", "checkbox").
+		WithField("method", "execute").
+		Debugf("%s %+v", c.GetName(), args)
 	switch args[0].(string) {
 	case "up":
 		if c.selectionIndex > 0 {

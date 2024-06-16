@@ -36,7 +36,7 @@ type IUnit interface {
 	GetInitiative() int // unit initiative 1d20 + mod(dex)
 	GetLanguages() any
 	GetProficiencyBonus() int // unit proficiency bonus.
-	GetSkills() any
+	GetSkills() []ISkill
 	GetSpeed() int // unit speed
 	GetSpells() any
 	GetTraits() any
@@ -51,7 +51,7 @@ type IUnit interface {
 	SetGear(IGear)
 	SetHitPoints(IHitPoints)
 	SetLanguages(any)
-	SetSkills(any)
+	SetSkills([]ISkill)
 	SetSpells(any)
 	SetTraits(any)
 	SetUName(string)
@@ -92,7 +92,7 @@ type Unit struct {
 	hitPoints            IHitPoints        // unit hit points.
 	level                ILevel            // unit level.
 	abilities            IAbilities        // unit abilities.
-	skills               any               // unit skills
+	skills               []ISkill          // unit skills
 	gear                 IGear             // unit gear
 	attacks              IAttacks          // unit type of attacks
 	spells               any               // unit spells
@@ -115,6 +115,7 @@ func NewUnit(name string) *Unit {
 		gear:                 NewGear(),
 		conditions:           nil,
 		conditionResistances: make(map[string]string),
+		skills:               CreateSkills(),
 	}
 }
 
@@ -296,7 +297,7 @@ func (u *Unit) GetProficiencyBonus() int {
 	return 1
 }
 
-func (u *Unit) GetSkills() any {
+func (u *Unit) GetSkills() []ISkill {
 	return u.skills
 }
 
@@ -365,18 +366,31 @@ func (u *Unit) Populate(defaults map[string]any, content map[string]any) {
 func (u *Unit) RollAttack(index int, other IUnit) (bool, int) {
 	dieRoll := u.GetDieRoll()
 	ac := other.GetArmorClass()
-	tools.Logger.WithField("module", "unit").WithField("method", "Attack").Debug(dieRoll, ac)
+	tools.Logger.WithField("module", "unit").
+		WithField("method", "RollAttack").
+		Debug(dieRoll, ac)
 	// if die-roll is greater than the other unit armor class, it is a hit.
 	if dieRoll < ac {
-		battlelog.BLog.PushInfo(fmt.Sprintf("[%s] miss! roll:%dvs%d", u.GetUName(), dieRoll, ac))
+		//battlelog.BLog.PushInfo(fmt.Sprintf("[%s] miss!\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
+		battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\t❌\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
 		return false, 0
 	}
 	// TODO: fix to used the first attack, usually attack/weapon
 	attack := u.GetAttacks().GetAttacks()[index]
+	attackIcon := ""
+	switch index {
+	case 0:
+		attackIcon = "🗡"
+	case 1:
+		attackIcon = "⚒"
+	case 2:
+		attackIcon = "⚡"
+	}
 	damage := attack.Roll()
 	stDamage := attack.RollSavingThrows(other)
 	otherHp := other.GetHitPoints().GetScore()
-	battlelog.BLog.PushInfo(fmt.Sprintf("[%s] %s roll:%dvs%d ^%d :%d", u.GetUName(), attack.GetName(), dieRoll, ac, damage, stDamage))
+	//battlelog.BLog.PushInfo(fmt.Sprintf("[%s] %s roll:%dvs%d🛡️%d⚔%d⚁", u.GetUName(), attack.GetName(), dieRoll, ac, damage, stDamage))
+	battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\t%s\troll:%dvs%d🛡️%d⚔%d⚁", u.GetUName(), attackIcon, dieRoll, ac, damage, stDamage))
 	damage += stDamage
 	otherHp -= damage
 	other.GetHitPoints().SetScore(otherHp)
@@ -415,7 +429,7 @@ func (u *Unit) SetLanguages(langs any) {
 	u.languages = langs
 }
 
-func (u *Unit) SetSkills(skills any) {
+func (u *Unit) SetSkills(skills []ISkill) {
 	u.skills = skills
 }
 

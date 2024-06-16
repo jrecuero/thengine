@@ -55,10 +55,10 @@ func (m *FocusManager) acquireFocusToEntityInScene(sceneName string, entity IEnt
 	}
 
 	m.withFocus[sceneName] = append(m.withFocus[sceneName], entity)
-	tools.Logger.WithField("module", "focus-manager").
+	tools.Logger.WithField("module", "focusmanager").
 		WithField("method", "acquireFocusToEntityInScene").
 		Debugf("withFocus %+v", m.withFocus)
-	tools.Logger.WithField("module", "focus-manager").
+	tools.Logger.WithField("module", "focusmanager").
 		WithField("method", "acquireFocusToEntityInScene").
 		Debugf("acquire focus entity %s", entity.GetName())
 	entity.AcquireFocus()
@@ -153,7 +153,7 @@ func (m *FocusManager) AcquireFocusToEntity(entity IEntity) error {
 		// for the given scene and remove the focus for that entity.
 		for index, entity := range m.withFocus[sceneName] {
 			if entity.GetFocusType() == SingleFocus {
-				tools.Logger.WithField("module", "focus-manager").
+				tools.Logger.WithField("module", "focusmanager").
 					WithField("method", "AcquireFocusToEntity").
 					Debugf("release-focus entity %s", entity.GetName())
 				m.releaseFocusFromEntityInScene(sceneName, entity, index)
@@ -301,7 +301,7 @@ func (m *FocusManager) UpdateFocusForScene(scene IScene) error {
 		// for the given scene and remove the focus for that entity.
 		for index, entity := range m.withFocus[sceneName] {
 			if entity.GetFocusType() == SingleFocus {
-				tools.Logger.WithField("module", "focus-manager").
+				tools.Logger.WithField("module", "focusmanager").
 					WithField("method", "UpdateFocusForScene").
 					Debugf("release-focus entity %s", entity.GetName())
 				m.releaseFocusFromEntityInScene(sceneName, entity, index)
@@ -315,8 +315,8 @@ func (m *FocusManager) UpdateFocusForScene(scene IScene) error {
 		}
 	} else {
 		message := fmt.Sprintf("scene %s not found", sceneName)
-		tools.Logger.WithField("module", "focus-manager").
-			WithField("function", "UpdateFocusForScene").
+		tools.Logger.WithField("module", "focusmanager").
+			WithField("method", "UpdateFocusForScene").
 			Errorf(message)
 		return fmt.Errorf(message)
 	}

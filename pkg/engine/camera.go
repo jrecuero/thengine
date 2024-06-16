@@ -89,7 +89,9 @@ func (s *Camera) GetSize() *api.Size {
 
 // Init method initializes the camera instance.
 func (s *Camera) Init(screen tcell.Screen) {
-	tools.Logger.WithField("module", "camera").WithField("function", "Init").Debugf("set screen to %v", screen)
+	tools.Logger.WithField("module", "camera").
+		WithField("method", "Init").
+		Debugf("set screen to %v", screen)
 	s.screen = screen
 }
 

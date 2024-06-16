@@ -96,13 +96,9 @@ func (h *EntityHandler) processEntityTextInput(entityTextInput *EntityTextInput)
 
 func (h *EntityHandler) acceptCallback(entity engine.IEntity, args ...any) bool {
 	textInput := args[0].(*EntityTextInput)
-	tools.Logger.WithField("module", "entityhandler").WithField("method", "acceptCallback").Debugf("create new entity")
-	//tools.Logger.WithField("module", "entityhandler").WithField("method", "acceptCallback").Debugf("class-name %s", textInput.ClassName.GetInputText())
-	//tools.Logger.WithField("module", "entityhandler").WithField("method", "acceptCallback").Debugf("name %s", textInput.Name.GetInputText())
-	//tools.Logger.WithField("module", "entityhandler").WithField("method", "acceptCallback").Debugf("position %s", textInput.Position.GetInputText())
-	//tools.Logger.WithField("module", "entityhandler").WithField("method", "acceptCallback").Debugf("size %s", textInput.Size.GetInputText())
-	//tools.Logger.WithField("module", "entityhandler").WithField("method", "acceptCallback").Debugf("style %s", textInput.Style.GetInputText())
-	//tools.Logger.WithField("module", "entityhandler").WithField("method", "acceptCallback").Debugf("rune %s", textInput.Rune.GetInputText())
+	tools.Logger.WithField("module", "entityhandler").
+		WithField("method", "acceptCallback").
+		Debugf("create new entity")
 	result := h.processEntityTextInput(textInput)
 
 	theEngine := engine.GetEngine()

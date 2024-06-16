@@ -81,7 +81,9 @@ func NewDisableFocus() *Focus {
 
 // AcquireFocus method acquires focus for the entity.
 func (f *Focus) AcquireFocus() (bool, error) {
-	tools.Logger.WithField("module", "focus").WithField("function", "AcquireFocus").Debug("focus")
+	tools.Logger.WithField("module", "focus").
+		WithField("method", "AcquireFocus").
+		Debug("focus")
 	if f.enable {
 		f.focus = true
 		return true, nil

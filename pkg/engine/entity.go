@@ -162,7 +162,7 @@ func NewHandler(name string) *Entity {
 // CanHaveFocus method checks if the entity can receive and have focus.
 func (e *Entity) CanHaveFocus() bool {
 	//tools.Logger.WithField("module", "entity").
-	//    WithField("function", "CanHaveFocus").
+	//    WithField("method", "CanHaveFocus").
 	//    Debugf("entity %s %d %t %t", e.GetName(), int(e.GetFocusType()), e.IsFocusEnable(), e.IsActive())
 	return e.IsFocusEnable() && e.IsActive()
 }

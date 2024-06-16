@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/jrecuero/thengine/app/game/assets"
 	"github.com/jrecuero/thengine/app/game/dad/battlelog"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/engine"
@@ -77,9 +78,19 @@ func displayEnemyHealthBar(scene engine.IScene, ent engine.IEntity) {
 
 func getEnemiesInScene(scene engine.IScene) []engine.IEntity {
 	var result []engine.IEntity
-	for _, ent := range scene.GetEntities() {
-		if _, ok := ent.(*Enemy); ok {
-			result = append(result, ent)
+	for _, entity := range scene.GetEntities() {
+		if _, ok := entity.(*Enemy); ok {
+			result = append(result, entity)
+		}
+	}
+	return result
+}
+
+func getTrapsInScene(scene engine.IScene) []assets.ITrap {
+	var result []assets.ITrap
+	for _, entity := range scene.GetEntities() {
+		if trap, ok := entity.(*assets.Trap); ok {
+			result = append(result, trap)
 		}
 	}
 	return result
@@ -98,6 +109,15 @@ func isAnyEnemyAdjacent(player engine.IEntity, enemies []engine.IEntity) engine.
 	for _, enemy := range enemies {
 		if player.GetPosition().IsAdjacent(enemy.GetPosition()) {
 			return enemy
+		}
+	}
+	return nil
+}
+
+func isAnyTrapAdjacent(player engine.IEntity, traps []assets.ITrap) assets.ITrap {
+	for _, trap := range traps {
+		if player.GetPosition().IsAdjacent(trap.GetPosition()) {
+			return trap
 		}
 	}
 	return nil
@@ -150,7 +170,9 @@ type GameHandler struct {
 
 func NewGameHandler() *GameHandler {
 	if theGameHandler == nil {
-		tools.Logger.WithField("module", "gameHandler").WithField("function", "NewGameHandler").Debugf("handler/game/1")
+		tools.Logger.WithField("module", "gamehandler").
+			WithField("function", "NewGameHandler").
+			Debugf("handler/game/1")
 		theGameHandler = &GameHandler{
 			Entity:             engine.NewHandler("handler/game/1"),
 			player:             nil,
@@ -170,7 +192,7 @@ func NewGameHandler() *GameHandler {
 func (h *GameHandler) playerSelection(entity engine.IEntity, args ...any) bool {
 	scene := args[0].(engine.IScene)
 	tools.Logger.WithField("module", "gamehandler").
-		WithField("module", "playerSelection").
+		WithField("method", "playerSelection").
 		Debugf("selection %d", entity.(*widgets.ListBox).GetSelectionIndex())
 	lb := entity.(*widgets.ListBox)
 	scene.RemoveEntity(entity)
@@ -187,7 +209,7 @@ func (h *GameHandler) EnemyAttack(scene engine.IScene) {
 	if h.enemy != nil {
 		h.enemy.RollAttack(0, h.player)
 		updateDataBox(scene, h.player)
-		tools.Logger.WithField("module", "gameHandler").
+		tools.Logger.WithField("module", "gamehandler").
 			WithField("method", "Update").
 			Debugf("Enemy %s to %s", h.enemy.GetName(), h.player.GetName())
 		readFromBattleLog(scene)
@@ -201,7 +223,7 @@ func (h *GameHandler) PlayerAttack(scene engine.IScene, attack *attackInfo) {
 			h.enemy = e
 			h.player.RollAttack(attack.index, e)
 			updateDataBox(scene, h.player)
-			tools.Logger.WithField("module", "gameHandler").
+			tools.Logger.WithField("module", "gamehandler").
 				WithField("method", "Update").
 				Debugf("player %s to %s", attack.name, enemy.GetName())
 			readFromBattleLog(scene)
@@ -215,11 +237,13 @@ func (h *GameHandler) PlayerMove(scene engine.IScene, playerNewPosition *api.Poi
 	playerX, playerY := h.player.GetPosition().Get()
 	h.player.SetPosition(playerNewPosition)
 	collisions := scene.CheckCollisionWith(h.player)
-	for _, ent := range collisions {
-		switch ent.(type) {
+	for _, entity := range collisions {
+		switch entity.(type) {
 		case *Wall:
 			h.player.SetPosition(api.NewPoint(playerX, playerY))
 		case *Enemy:
+			h.player.SetPosition(api.NewPoint(playerX, playerY))
+		case assets.ITrap:
 			h.player.SetPosition(api.NewPoint(playerX, playerY))
 		case *widgets.Sprite:
 			h.player.SetPosition(api.NewPoint(playerX, playerY))
@@ -232,10 +256,14 @@ func (h *GameHandler) PlayerMove(scene engine.IScene, playerNewPosition *api.Poi
 			cursorPosText.SetText(fmt.Sprintf("[%d,%d]", pos.X, pos.Y))
 		}
 	}
+	//traps := getTrapsInScene(scene)
+	//if trap := isAnyTrapAdjacent(h.player, traps); trap != nil {
+	//    trap.SetVisible(true)
+	//}
 }
 
 func (h *GameHandler) RunEndTurn(scene engine.IScene, input *inputAction) {
-	tools.Logger.WithField("module", "gameHandler").
+	tools.Logger.WithField("module", "gamehandler").
 		WithField("method", "RunEndTurn").
 		Debugf("END TURN %+v", input)
 	h.player = nil
@@ -244,7 +272,7 @@ func (h *GameHandler) RunEndTurn(scene engine.IScene, input *inputAction) {
 }
 
 func (h *GameHandler) RunEnemyTurn(scene engine.IScene, input *inputAction) {
-	tools.Logger.WithField("module", "gameHandler").
+	tools.Logger.WithField("module", "gamehandler").
 		WithField("method", "EnemyTurn").
 		Debugf("ENEMY TURN %+v", input)
 	h.EnemyAttack(scene)
@@ -252,7 +280,7 @@ func (h *GameHandler) RunEnemyTurn(scene engine.IScene, input *inputAction) {
 }
 
 func (h *GameHandler) RunPlayerTurn(scene engine.IScene, input *inputAction) {
-	tools.Logger.WithField("module", "gameHandler").
+	tools.Logger.WithField("module", "gamehandler").
 		WithField("method", "PlayerTurn").
 		Debugf("PLAYER TURN %+v", input)
 	if input != nil && input.attack != nil {
@@ -265,7 +293,7 @@ func (h *GameHandler) RunPlayerTurn(scene engine.IScene, input *inputAction) {
 }
 
 func (h *GameHandler) RunStartTurn(scene engine.IScene, input *inputAction) {
-	tools.Logger.WithField("module", "gameHandler").
+	tools.Logger.WithField("module", "gamehandler").
 		WithField("method", "StartTurn").
 		Debugf("START TURN %+v", input)
 	enemies := getEnemiesInScene(scene)
@@ -311,7 +339,7 @@ func (h *GameHandler) RunStateMachineTurn(scene engine.IScene, input *inputActio
 }
 
 func (h *GameHandler) RunWaitingTurn(scene engine.IScene, input *inputAction) {
-	tools.Logger.WithField("module", "gameHandler").
+	tools.Logger.WithField("module", "gamehandler").
 		WithField("method", "WaitingTurn").
 		Debugf("WAITING TURN %+v", input)
 }
@@ -367,7 +395,7 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 		//    }
 		//TheStateMachine.Next()
 		tools.Logger.WithField("module", "gamehandler").
-			WithField("methomethod", "Update").
+			WithField("method", "Update").
 			Debugf("CALL RunStateMachineTurn %+v", input)
 		h.RunStateMachineTurn(scene, input)
 	}

@@ -39,7 +39,7 @@ func (p *Player) Move(args ...any) {
 	direction := args[1].(string)
 	tools.Logger.WithField("module", "main").
 		WithField("struct", "Player").
-		WithField("function", "Move").
+		WithField("method", "Move").
 		Debugf("steps %d direction %s", steps, direction)
 	x, y := p.GetPosition().Get()
 	if direction == "up" {
@@ -132,7 +132,7 @@ func (p *ninePlayer) Move(args ...any) {
 	direction := args[1].(string)
 	tools.Logger.WithField("module", "main").
 		WithField("struct", "ninePlayer").
-		WithField("function", "Move").
+		WithField("method", "Move").
 		Debugf("steps %d direction %s", steps, direction)
 	x, y := p.GetPosition().Get()
 	if direction == "up" {
@@ -153,7 +153,7 @@ func (p *ninePlayer) Consume() {
 	if message, _ := p.mailbox.Consume(DemoNineMoveTopic, p.GetName()); message != nil {
 		tools.Logger.WithField("module", "main").
 			WithField("struct", "ninePlayer").
-			WithField("function", "Consume").
+			WithField("method", "Consume").
 			Debugf("message %+v", message)
 		content := message.Content.([]any)
 		p.Move(content...)
@@ -179,7 +179,7 @@ func newNineHandler() *nineHandler {
 func (h *nineHandler) Move(args ...any) {
 	tools.Logger.WithField("module", "main").
 		WithField("struct", "nineHandler").
-		WithField("function", "Update").
+		WithField("method", "Update").
 		Debugf("args %+v", args)
 	message := &engine.Message{
 		Topic:   DemoNineMoveTopic,
@@ -261,7 +261,8 @@ func demoTwo() {
 }
 
 func demoThree() {
-	tools.Logger.WithField("module", "main").Infof("ThEngine demo-three")
+	tools.Logger.WithField("module", "main").
+		Infof("ThEngine demo-three")
 	fmt.Println("ThEngine demo-three")
 	camera := engine.NewCamera(nil, api.NewSize(40, 80))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
@@ -283,7 +284,9 @@ func demoThree() {
 }
 
 func demoFour(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-four")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-four")
 	fmt.Println("ThEngine demo-four")
 	camera := engine.NewCamera(nil, api.NewSize(40, 80))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
@@ -303,7 +306,9 @@ func demoFour(dryRun bool) {
 }
 
 func demoFive(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-five")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-five")
 	fmt.Println("ThEngine demo-five")
 	camera := engine.NewCamera(nil, api.NewSize(40, 80))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
@@ -333,7 +338,9 @@ func demoFive(dryRun bool) {
 }
 
 func demoSix(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-six")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-six")
 	fmt.Println("ThEngine demo-six")
 	camera := engine.NewCamera(nil, api.NewSize(40, 80))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorBlack)
@@ -366,7 +373,9 @@ func demoSix(dryRun bool) {
 }
 
 func demoSeven(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-seven")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-seven")
 	fmt.Println("ThEngine demo-seven")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(40, 80))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
@@ -387,7 +396,9 @@ func demoSeven(dryRun bool) {
 }
 
 func demoEight(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-eight")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-eight")
 	fmt.Println("ThEngine demo-eight")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(10, 5))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
@@ -418,7 +429,9 @@ func demoEight(dryRun bool) {
 }
 
 func demoNine(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-nine")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-nine")
 	fmt.Println("ThEngine demo-nine")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(20, 10))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
@@ -439,7 +452,9 @@ func demoNine(dryRun bool) {
 }
 
 func demoTen(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-ten")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-ten")
 	fmt.Println("ThEngine demo-ten")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(20, 10))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
@@ -461,7 +476,9 @@ func demoTen(dryRun bool) {
 }
 
 func demoEleven(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-eleven")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-eleven")
 	fmt.Println("ThEngine demo-eleven")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(20, 10))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)
@@ -493,7 +510,9 @@ func demoEleven(dryRun bool) {
 }
 
 func demoTwelve(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-twelve")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-twelve")
 	fmt.Println("ThEngine demo-twelve")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
@@ -566,7 +585,9 @@ func demoTwelve(dryRun bool) {
 }
 
 func demoThirteen(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-thirteen")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-thirteen")
 	fmt.Println("ThEngine demo-thirteen")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorRed).Background(tcell.ColorWhite)
@@ -596,7 +617,9 @@ func demoThirteen(dryRun bool) {
 }
 
 func demoFourteen(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-fourteen")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-fourteen")
 	fmt.Println("ThEngine demo-fourteen")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)
@@ -658,7 +681,9 @@ func demoFourteen(dryRun bool) {
 }
 
 func demoFifteen(dryRun bool) {
-	tools.Logger.WithField("module", "main").WithField("dry-mode", dryRun).Infof("ThEngine demo-fifteen")
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-fifteen")
 	fmt.Println("ThEngine demo-fifteen")
 	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
 	styleOne := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)

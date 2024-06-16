@@ -18,7 +18,7 @@ func NewHealthBar(name string, position *api.Point, size *api.Size, total int) *
 func (g *HealthBar) UpdateStyle(completed int) {
 	if completed < g.GetTotal()/2 {
 		g.SetStyle(&theStyleRedOverBlack)
-		//tools.Logger.WithField("module", "healthBar").
+		//tools.Logger.WithField("module", "healthbar").
 		//    WithField("method", "UpdateCanvas").
 		//    Debugf("%s", tools.StyleToString(g.GetStyle()))
 	} else {

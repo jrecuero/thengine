@@ -30,7 +30,7 @@ type ComboBox struct {
 
 // NewComboBox function creates a new ComboBox instance.
 func NewComboBox(name string, position *api.Point, size *api.Size, style *tcell.Style, selections []string, selectionIndex int) *ComboBox {
-	tools.Logger.WithField("module", "combo-box").
+	tools.Logger.WithField("module", "combobox").
 		WithField("function", "NewComboBox").
 		Infof("%s %s %s %+v", name, position.ToString(), size.ToString(), selections)
 	selectionsLength := len(selections)
@@ -39,7 +39,7 @@ func NewComboBox(name string, position *api.Point, size *api.Size, style *tcell.
 	for i, s := range selections {
 		paddingSelections[i] = fmt.Sprintf("%-*s", size.W-2, s)
 	}
-	//tools.Logger.WithField("module", "combo-box").
+	//tools.Logger.WithField("module", "combobox").
 	//    WithField("function", "NewComboBox").
 	//    Debugf("%s %+v", name, paddingSelections)
 	comboBox := &ComboBox{
@@ -51,7 +51,7 @@ func NewComboBox(name string, position *api.Point, size *api.Size, style *tcell.
 		inputStr:       "",
 	}
 	comboBox.scroller = NewVerticalScroller(selectionsLength, size.H-3)
-	//tools.Logger.WithField("module", "combo-box").
+	//tools.Logger.WithField("module", "combobox").
 	//    WithField("function", "NewComboBox").
 	//    Debugf("scroller %s", comboBox.scroller.ToString())
 	comboBox.SetFocusType(engine.SingleFocus)
@@ -67,7 +67,9 @@ func NewComboBox(name string, position *api.Point, size *api.Size, style *tcell.
 // execute method runs functionality based on the input from the keyboard, like
 // moving selection or entering chracters in the input string.
 func (c *ComboBox) execute(args ...any) {
-	tools.Logger.WithField("module", "combo-box").WithField("method", "execute").Debugf("%s %+v", c.GetName(), args)
+	tools.Logger.WithField("module", "combobox").
+		WithField("method", "execute").
+		Debugf("%s %+v", c.GetName(), args)
 	switch args[0].(string) {
 	case "up":
 		if c.selectionIndex > 0 {
@@ -101,8 +103,8 @@ func (c *ComboBox) updateCanvas() {
 		} else {
 			selection = strings.Repeat(" ", c.GetSize().W-2)
 		}
-		//tools.Logger.WithField("module", "combo-box").
-		//    WithField("function", "updateCanvas").
+		//tools.Logger.WithField("module", "combobox").
+		//    WithField("method", "updateCanvas").
 		//    Debugf("%d:%d '%s'", index, i, selection)
 		if !isEmptyFilter && index == c.selectionIndex {
 			reverseStyle := tools.ReverseStyle(c.GetStyle())
@@ -119,8 +121,8 @@ func (c *ComboBox) updateInputStr() {
 	if c.updateFilterOptions() {
 		c.selectionIndex = 0
 		c.scroller = NewVerticalScroller(len(c.filtered), c.GetSize().H-3)
-		//tools.Logger.WithField("module", "combo-box").
-		//    WithField("function", "NewComboBox").
+		//tools.Logger.WithField("module", "combobox").
+		//    WithField("method", "NewComboBox").
 		//    Debugf("scroller %s", c.scroller.ToString())
 	}
 }
