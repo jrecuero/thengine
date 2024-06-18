@@ -38,6 +38,12 @@ var (
 // IDie interface defines all possible methods any die struct should
 // implement.
 type IDie interface {
+	AdvantageRoll() int        // returns an advantage roll
+	AdvantageSureRoll() int    // returns an advantage roll without zero.
+	DisadvantageRoll() int     // return a disadvantage roll
+	DisadvantageSureRoll() int // return a disadvantage roll without zero.
+	DoubleRoll() (int, int)
+	DoubleSureRoll() (int, int)
 	GetName() string // returns the name of the die.
 	GetFaces() int   // returns the number of faces for the die.
 	Roll() int       // returns a roll die.
@@ -82,6 +88,48 @@ func NewLoadedDie(name string, loaded int) *Die {
 // -----------------------------------------------------------------------------
 // Die public methods
 // -----------------------------------------------------------------------------
+
+// AdvantageRoll method rolls two dice and returns the highest value between
+// [0-faces].
+func (d *Die) AdvantageRoll() int {
+	rollOne, rollTwo := d.DoubleRoll()
+	return tools.Max(rollOne, rollTwo)
+}
+
+// AdvantageSureRoll method rolls two dice and returns the highest value
+// between [1-faces].
+func (d *Die) AdvantageSureRoll() int {
+	rollOne, rollTwo := d.DoubleSureRoll()
+	return tools.Max(rollOne, rollTwo)
+}
+
+// DisadvantageRoll method rolls two dice and returns the lowest value between
+// [0-faces].
+func (d *Die) DisadvantageRoll() int {
+	rollOne, rollTwo := d.DoubleRoll()
+	return tools.Min(rollOne, rollTwo)
+}
+
+// DisadvantageSureRoll method rolls two dice and returns the lowest value
+// between [1-faces].
+func (d *Die) DisadvantageSureRoll() int {
+	rollOne, rollTwo := d.DoubleSureRoll()
+	return tools.Min(rollOne, rollTwo)
+}
+
+// DoubleRoll method rolls two dice between [0-faces].
+func (d *Die) DoubleRoll() (int, int) {
+	rollOne := d.Roll()
+	rollTwo := d.Roll()
+	return rollOne, rollTwo
+}
+
+// DoubleSureRoll method rolls two dice without zero [1-faces].
+func (d *Die) DoubleSureRoll() (int, int) {
+	rollOne := d.SureRoll()
+	rollTwo := d.SureRoll()
+	return rollOne, rollTwo
+}
 
 // GetName method returns the name of the die.
 func (d *Die) GetName() string {

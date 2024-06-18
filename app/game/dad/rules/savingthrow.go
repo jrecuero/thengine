@@ -90,12 +90,12 @@ func (s *SavingThrow) Pass(unit IUnit) bool {
 	if ability := unit.GetAbilities().GetAbilityByName(AbilityScore(s.GetScore())); ability != nil {
 		// saving throws based on abilities only make use of the ability score
 		// bonus value
-		score = append(score, ability.GetScorePoint())
+		score = append(score, ability.GetModifier())
 	} else if skill := GetSkillByName(unit.GetSkills(), SkillName(s.GetScore())); skill != nil {
 		// saving throws based in skill make used fo the related ability score
 		// bonus and the ability proficiency value.
 		ability := skill.GetAbility()
-		score = append(score, unit.GetAbilities().GetAbilityByName(ability).GetScore())
+		score = append(score, unit.GetAbilities().GetAbilityByName(ability).GetModifier())
 		score = append(score, skill.GetProficienty())
 	} else {
 		return true

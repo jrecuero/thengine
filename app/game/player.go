@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/jrecuero/thengine/app/game/assets"
+	"github.com/jrecuero/thengine/app/game/dad/constants"
 	"github.com/jrecuero/thengine/app/game/dad/gear/body"
 	"github.com/jrecuero/thengine/app/game/dad/gear/shields"
 	"github.com/jrecuero/thengine/app/game/dad/gear/weapons"
@@ -56,6 +56,10 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 	player.GetAbilities().GetIntelligence().SetScore(10)
 	player.GetAbilities().GetWisdom().SetScore(10)
 	player.GetAbilities().GetCharisma().SetScore(10)
+	perception := rules.GetSkillByName(player.GetSkills(), constants.Perception)
+	perception.SetProficienty(2)
+	sleight := rules.GetSkillByName(player.GetSkills(), constants.Sleight)
+	sleight.SetProficienty(1)
 
 	weaponEntry := rules.DBase.GetSections()[rules.DbSectionGear].GetSections()[rules.DbSectionWeapon].GetEntries()[weapons.ShortswordName]
 	weaponCreator := weaponEntry.GetCreator().(func() rules.IHandheld)
@@ -81,21 +85,4 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 		WithField("function", "NewPlayer").
 		Debugf("strength modifier %d", strengthModifier)
 	return player
-}
-
-func (p *Player) Update(event tcell.Event, scene engine.IScene) {
-	if !p.IsActive() {
-		return
-	}
-	traps := getTrapsInScene(scene)
-	if t := isAnyTrapAdjacent(p, traps); t != nil {
-		t.SetVisible(true)
-		if trap, ok := t.(*assets.Trap); ok {
-			if trap.GetSavingThrows() != nil && len(trap.GetSavingThrows()) != 0 {
-				trapScore := trap.GetSavingThrows()[0].GetScore()
-				trapDC := trap.GetSavingThrows()[0].GetDC()
-				_, _ = trapScore, trapDC
-			}
-		}
-	}
 }

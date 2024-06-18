@@ -234,14 +234,15 @@ func buildUI(scene engine.IScene, player *Player, enemy *Enemy) {
 }
 
 func newTrap(name string, pos *api.Point, style *tcell.Style) *assets.Trap {
-	trap := assets.NewTrap(name, pos, api.NewSize(1, 1), style)
-	trapDC := 8
-	trapDamage := &rules.SavingThrowDamage{
-		SavingThrow: rules.NewSavingThrow(dad_constants.Perception, trapDC),
-		Damage:      rules.NewDamage(rules.DiceThrow1d3, dad_constants.Poison),
-	}
-	trap.Damage = rules.NewNoDamage()
-	trap.Damage.SetSavingThrows([]*rules.SavingThrowDamage{trapDamage})
+	detectDC, disarmDC := 8, 10
+	trap := assets.NewTrap(name, pos, api.NewSize(1, 1), style,
+		detectDC, disarmDC, rules.DiceThrow1d4, dad_constants.Poison)
+	//trapDamage := &rules.SavingThrowDamage{
+	//    SavingThrow: rules.NewSavingThrow(dad_constants.Perception, trapDC),
+	//    Damage:      rules.NewDamage(rules.DiceThrow1d3, dad_constants.Poison),
+	//}
+	//trap.Damage = rules.NewNoDamage()
+	//trap.Damage.SetSavingThrows([]*rules.SavingThrowDamage{trapDamage})
 	trap.GetCanvas().SetCellAt(nil, engine.NewCell(&constants.RedOverBlack, '*'))
 	return trap
 }

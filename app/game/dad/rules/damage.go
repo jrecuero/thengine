@@ -53,13 +53,13 @@ type IDamage interface {
 	GetApplyStatus() []any
 	GetDiceThrow() IDiceThrow
 	GetDamageType() DamageType
-	GetSavingThrows() []*SavingThrowDamage
+	GetSavingThrowsDamage() []*SavingThrowDamage
 	RollDamageValue() int
 	RollSavingThrowsDamage(IUnit) int
 	SetApplyStatus([]any)
 	SetDiceThrow(IDiceThrow)
 	SetDamageType(DamageType)
-	SetSavingThrows([]*SavingThrowDamage)
+	SetSavingThrowsDamage([]*SavingThrowDamage)
 	ToString() string
 }
 
@@ -71,27 +71,27 @@ type IDamage interface {
 
 // Damage structure represents any object that produces damage.
 type Damage struct {
-	diceThrow    IDiceThrow
-	damageType   DamageType
-	applyStatus  []any
-	savingThrows []*SavingThrowDamage
+	dicethrow          IDiceThrow
+	damageType         DamageType
+	applyStatus        []any
+	savingThrowsDamage []*SavingThrowDamage
 }
 
-func NewDamage(diceThrow IDiceThrow, damageType DamageType) *Damage {
+func NewDamage(dicethrow IDiceThrow, damageType DamageType) *Damage {
 	return &Damage{
-		diceThrow:    diceThrow,
-		damageType:   damageType,
-		applyStatus:  nil,
-		savingThrows: nil,
+		dicethrow:          dicethrow,
+		damageType:         damageType,
+		applyStatus:        nil,
+		savingThrowsDamage: nil,
 	}
 }
 
 func NewNoDamage() *Damage {
 	return &Damage{
-		diceThrow:    nil,
-		damageType:   constants.NullDamage,
-		applyStatus:  nil,
-		savingThrows: nil,
+		dicethrow:          nil,
+		damageType:         constants.NullDamage,
+		applyStatus:        nil,
+		savingThrowsDamage: nil,
 	}
 }
 
@@ -104,30 +104,41 @@ func (d *Damage) GetApplyStatus() []any {
 }
 
 func (d *Damage) GetDiceThrow() IDiceThrow {
-	return d.diceThrow
+	return d.dicethrow
 }
 
 func (d *Damage) GetDamageType() DamageType {
 	return d.damageType
 }
 
-func (d *Damage) GetSavingThrows() []*SavingThrowDamage {
-	return d.savingThrows
+func (d *Damage) GetSavingThrowsDamage() []*SavingThrowDamage {
+	return d.savingThrowsDamage
+}
+
+func (d *Damage) PassSavingThrowsDamage(unit IUnit) bool {
+	if d.savingThrowsDamage != nil {
+		for _, savingThrowDamage := range d.savingThrowsDamage {
+			if pass := savingThrowDamage.Pass(unit); pass {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (d *Damage) RollDamageValue() int {
-	if d.diceThrow != nil {
-		return d.diceThrow.Roll()
+	if d.dicethrow != nil {
+		return d.dicethrow.Roll()
 	}
 	return 0
 }
 
 func (d *Damage) RollSavingThrowsDamage(unit IUnit) int {
 	result := 0
-	if d.savingThrows != nil {
-		for _, stDamage := range d.savingThrows {
-			if pass := stDamage.Pass(unit); pass {
-				damage := stDamage.RollDamageValue()
+	if d.savingThrowsDamage != nil {
+		for _, savingThrowDamage := range d.savingThrowsDamage {
+			if pass := savingThrowDamage.Pass(unit); pass {
+				damage := savingThrowDamage.Damage.RollDamageValue()
 				result += damage
 				tools.Logger.WithField("module", "damage").
 					WithField("method", "RollSavingThrowsDamage").
@@ -142,23 +153,24 @@ func (d *Damage) SetApplyStatus(status []any) {
 	d.applyStatus = status
 }
 
-func (d *Damage) SetDiceThrow(diceThrow IDiceThrow) {
-	d.diceThrow = diceThrow
+func (d *Damage) SetDiceThrow(dicethrow IDiceThrow) {
+	d.dicethrow = dicethrow
 }
 
 func (d *Damage) SetDamageType(damageType DamageType) {
 	d.damageType = damageType
 }
 
-func (d *Damage) SetSavingThrows(savingThrows []*SavingThrowDamage) {
-	d.savingThrows = savingThrows
+func (d *Damage) SetSavingThrowsDamage(savingThrowsDamage []*SavingThrowDamage) {
+	d.savingThrowsDamage = savingThrowsDamage
 }
 
 func (d *Damage) ToString() string {
-	if d.savingThrows != nil {
-		return fmt.Sprintf("damage %s %s %s", d.diceThrow.ToString(), d.damageType, d.savingThrows[0].ToString())
+	if d.savingThrowsDamage != nil {
+		return fmt.Sprintf("\nsaving throw damage %s %s %s",
+			d.dicethrow.ToString(), d.damageType, d.savingThrowsDamage[0].ToString())
 	}
-	return fmt.Sprintf("damage %s %s", d.diceThrow.ToString(), d.damageType)
+	return fmt.Sprintf("damage %s %s\n", d.dicethrow.ToString(), d.damageType)
 }
 
 var _ IDamage = (*Damage)(nil)

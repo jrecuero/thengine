@@ -41,6 +41,6 @@ func NewPoisonDagger() *rules.Weapon {
 		SavingThrow: rules.NewSavingThrow(constants.Dexterity, 12),
 		Damage:      rules.NewDamage(rules.DiceThrow1d3, constants.Poison),
 	}
-	dagger.Damage.SetSavingThrows([]*rules.SavingThrowDamage{poisonDamage})
+	dagger.Damage.SetSavingThrowsDamage([]*rules.SavingThrowDamage{poisonDamage})
 	return dagger
 }

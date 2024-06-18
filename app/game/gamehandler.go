@@ -244,11 +244,39 @@ func (h *GameHandler) PlayerMove(scene engine.IScene, playerNewPosition *api.Poi
 		case *Enemy:
 			h.player.SetPosition(api.NewPoint(playerX, playerY))
 		case assets.ITrap:
-			h.player.SetPosition(api.NewPoint(playerX, playerY))
+			// if the trap is not visible, it was not detected, so damage has
+			// to be applied to the player.
+			// if the trap is visible, it was detected, so try to disarm it, if
+			// it fails, trap is removed and damage is applied to the player
+			// but player does not update the position in that case and trap is
+			// being removed.
+			// if trap is properly disarmed, trap is removed and player update
+			// the position.
+			if trap, ok := entity.(*assets.Trap); ok {
+				if entity.IsVisible() {
+					if disarm := trap.CanDisarm(h.player); disarm {
+						writeToCommandLine(scene, fmt.Sprintf("\n> player %s disarm trap %s",
+							h.player.GetName(), trap.GetName()))
+					} else {
+						h.player.SetPosition(api.NewPoint(playerX, playerY))
+						damage := trap.RollDamageValue()
+						writeToCommandLine(scene, fmt.Sprintf("\n> player %s damaged disarming trap %s for %d",
+							h.player.GetName(), trap.GetName(), damage))
+					}
+				} else {
+					h.player.SetPosition(api.NewPoint(playerX, playerY))
+					damage := trap.RollDamageValue()
+					writeToCommandLine(scene, fmt.Sprintf("\n> player %s damaged by trap %s for %d",
+						h.player.GetName(), trap.GetName(), damage))
+				}
+				scene.RemoveEntity(entity)
+			}
 		case *widgets.Sprite:
 			h.player.SetPosition(api.NewPoint(playerX, playerY))
 		}
 	}
+
+	// check for any enemy that is adjacent to the final player position.
 	if tmp := scene.GetEntityByName(PlayerPosTextName); tmp != nil {
 		if cursorPosText, ok := tmp.(*widgets.Text); ok {
 			pos := api.ClonePoint(h.player.GetPosition())
@@ -256,10 +284,18 @@ func (h *GameHandler) PlayerMove(scene engine.IScene, playerNewPosition *api.Poi
 			cursorPosText.SetText(fmt.Sprintf("[%d,%d]", pos.X, pos.Y))
 		}
 	}
-	//traps := getTrapsInScene(scene)
-	//if trap := isAnyTrapAdjacent(h.player, traps); trap != nil {
-	//    trap.SetVisible(true)
-	//}
+
+	// check for any trap that is adjacent to the final player position.
+	traps := getTrapsInScene(scene)
+	if t := isAnyTrapAdjacent(h.player, traps); t != nil {
+		if trap, ok := t.(*assets.Trap); ok {
+			if pass := trap.CanDetect(h.player); pass {
+				t.SetVisible(true)
+				writeToCommandLine(scene, fmt.Sprintf("\n> player %s detect trap %s",
+					h.player.GetName(), trap.GetName()))
+			}
+		}
+	}
 }
 
 func (h *GameHandler) RunEndTurn(scene engine.IScene, input *inputAction) {
