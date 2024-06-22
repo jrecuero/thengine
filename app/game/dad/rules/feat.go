@@ -35,10 +35,21 @@ type IFeat interface {
 
 // Feat structure represents all attributes and methods for any generic feat.
 type Feat struct {
-	name          string
 	description   string
-	prerequisites []any
 	effects       map[string]any
+	name          string
+	prerequisites []any
+}
+
+// NewFeat function creates a new Feat instance.
+func NewFeat(name string) *Feat {
+	f := &Feat{
+		description:   name,
+		effects:       make(map[string]any),
+		name:          name,
+		prerequisites: nil,
+	}
+	return f
 }
 
 // -----------------------------------------------------------------------------

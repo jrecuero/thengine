@@ -70,18 +70,18 @@ type IEntity interface {
 type Entity struct {
 	*ObjectUI
 	*Focus
-	canvas       *Canvas
-	screen       tcell.Screen
-	zLevel       int
-	pLevel       int
-	solid        bool
 	cache        api.ICache
+	canvas       *Canvas
 	customInit   func()
-	customStart  func()
-	customUpdate func(tcell.Event, IScene)
 	customDraw   func(IScene)
+	customStart  func()
 	customStop   func()
+	customUpdate func(tcell.Event, IScene)
+	pLevel       int
+	screen       tcell.Screen
+	solid        bool
 	validator    IValidator
+	zLevel       int
 }
 
 // NewEntity function creates a new Entity instance with all given attributes.
@@ -89,18 +89,18 @@ func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.St
 	entity := &Entity{
 		ObjectUI:     NewObjectUI(name, position, size, style),
 		Focus:        NewDisableFocus(),
-		canvas:       NewCanvas(size),
-		screen:       nil,
-		zLevel:       0,
-		pLevel:       0,
-		solid:        false,
 		cache:        api.NewCache(),
+		canvas:       NewCanvas(size),
+		customDraw:   nil,
 		customInit:   nil,
 		customStart:  nil,
-		customUpdate: nil,
-		customDraw:   nil,
 		customStop:   nil,
+		customUpdate: nil,
+		pLevel:       0,
+		screen:       nil,
+		solid:        false,
 		validator:    nil,
+		zLevel:       0,
 	}
 	return entity
 }
@@ -111,18 +111,18 @@ func NewEmptyEntity() *Entity {
 	return &Entity{
 		ObjectUI:     NewObjectUI("", nil, nil, nil),
 		Focus:        NewDisableFocus(),
-		canvas:       nil,
-		screen:       nil,
-		zLevel:       0,
-		pLevel:       0,
-		solid:        false,
 		cache:        api.NewCache(),
+		canvas:       nil,
+		customDraw:   nil,
 		customInit:   nil,
 		customStart:  nil,
-		customUpdate: nil,
-		customDraw:   nil,
 		customStop:   nil,
+		customUpdate: nil,
+		pLevel:       0,
+		screen:       nil,
+		solid:        false,
 		validator:    nil,
+		zLevel:       0,
 	}
 }
 
@@ -133,17 +133,17 @@ func NewNamedEntity(name string) *Entity {
 		ObjectUI:     NewObjectUI(name, nil, nil, nil),
 		Focus:        NewDisableFocus(),
 		canvas:       nil,
-		screen:       nil,
-		zLevel:       0,
-		pLevel:       0,
-		solid:        false,
 		cache:        api.NewCache(),
+		customDraw:   nil,
 		customInit:   nil,
 		customStart:  nil,
-		customUpdate: nil,
-		customDraw:   nil,
 		customStop:   nil,
+		customUpdate: nil,
+		pLevel:       0,
+		screen:       nil,
+		solid:        false,
 		validator:    nil,
+		zLevel:       0,
 	}
 }
 

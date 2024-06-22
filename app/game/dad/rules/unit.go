@@ -22,38 +22,47 @@ const (
 
 // IUnit interface  defines all methods required a unit has to implement.
 type IUnit interface {
+	AddCondition(ICondition) error
 	GetAbilities() IAbilities
 	GetArmorClass() int // unit AC 10 + mod(dex) + mod(gear)
 	GetAttacks() IAttacks
+	GetClass() IClass
 	GetConditions() []ICondition
-	GetConditionResistances() map[string]string
+	GetConditionResistances() map[string]int
 	GetDescription() string
 	GetDieRoll() int
+	GetFeats() []IFeat
 	GetGear() IGear
 	GetHitDice() int // unit hit dice.
 	GetHitting(IUnit) bool
 	GetHitPoints() IHitPoints
 	GetInitiative() int // unit initiative 1d20 + mod(dex)
-	GetLanguages() any
+	GetLanguages() []ILanguage
 	GetProficiencyBonus() int // unit proficiency bonus.
 	GetSkills() []ISkill
 	GetSpeed() int // unit speed
-	GetSpells() any
-	GetTraits() any
+	GetSpells() []ISpell
+	GetRace() IRace
+	GetTraits() []ITrait
 	GetUName() string
 	Populate(map[string]any, map[string]any)
+	RemoveCondition(ICondition) error
 	RollAttack(int, IUnit) (bool, int)
+	RollConditions() []int
 	SetAbilities(IAbilities)
 	SetAttacks(IAttacks)
+	SetClass(IClass)
 	SetConditions([]ICondition)
-	SetConditionResistances(map[string]string)
+	SetConditionResistances(map[string]int)
 	SetDescription(string)
+	SetFeats([]IFeat)
 	SetGear(IGear)
 	SetHitPoints(IHitPoints)
-	SetLanguages(any)
+	SetLanguages([]ILanguage)
+	SetRace(IRace)
 	SetSkills([]ISkill)
-	SetSpells(any)
-	SetTraits(any)
+	SetSpells([]ISpell)
+	SetTraits([]ITrait)
 	SetUName(string)
 }
 
@@ -87,46 +96,80 @@ type IUnit interface {
 // representing a unique entity with its own attributes, abilities, and role in
 // the game world.
 type Unit struct {
-	uname                string            // unit name
-	description          string            // unit description.
-	hitPoints            IHitPoints        // unit hit points.
-	level                ILevel            // unit level.
-	abilities            IAbilities        // unit abilities.
-	skills               []ISkill          // unit skills
-	gear                 IGear             // unit gear
-	attacks              IAttacks          // unit type of attacks
-	spells               any               // unit spells
-	languages            any               // unit languages
-	traits               any               // unit personality traits
-	dieRoll              IDiceThrow        // unit die roll
-	conditions           []ICondition      // unit conditions or status effects
-	conditionResistances map[string]string // unit condition resistances
+	abilities            IAbilities // unit abilities.
+	attacks              IAttacks   // unit type of attacks
+	class                IClass
+	conditions           []ICondition   // unit conditions or status effects
+	conditionResistances map[string]int // unit condition resistances
+	description          string         // unit description.
+	dieRoll              IDiceThrow     // unit die roll
+	feats                []IFeat
+	gear                 IGear       // unit gear
+	hitPoints            IHitPoints  // unit hit points.
+	languages            []ILanguage // unit languages
+	level                ILevel      // unit level.
+	race                 IRace
+	skills               []ISkill // unit skills
+	spells               []ISpell // unit spells
+	traits               []ITrait // unit personality traits
+	uname                string   // unit name
 }
 
 func NewUnit(name string) *Unit {
 	die20 := dice.DieTwenty
 	return &Unit{
-		uname:                name,
-		hitPoints:            NewHitPoints(0),
-		level:                NewLevel(0, 0),
 		abilities:            NewAbilities(),
 		attacks:              NewAttacks(nil),
-		dieRoll:              NewDiceThrow("dice-throw/die20", "dieroll", []dice.IDie{die20}),
-		gear:                 NewGear(),
+		class:                nil,
 		conditions:           nil,
-		conditionResistances: make(map[string]string),
+		conditionResistances: make(map[string]int),
+		description:          name,
+		dieRoll:              NewDiceThrow("dice-throw/die20", "dieroll", []dice.IDie{die20}),
+		feats:                nil,
+		gear:                 NewGear(),
+		hitPoints:            NewHitPoints(0),
+		languages:            nil,
+		level:                NewLevel(0, 0),
+		race:                 nil,
 		skills:               CreateSkills(),
+		spells:               nil,
+		traits:               nil,
+		uname:                name,
 	}
+}
+
+// -----------------------------------------------------------------------------
+// Unit private methods
+// -----------------------------------------------------------------------------
+
+func (u *Unit) getConditionResistanceFor(condition ICondition) int {
+	if resistance, ok := u.conditionResistances[condition.GetName()]; ok {
+		return resistance
+	}
+	return 0
 }
 
 // -----------------------------------------------------------------------------
 // Unit public methods
 // -----------------------------------------------------------------------------
 
+// AddCondition method adds given condition to the unit.
+func (u *Unit) AddCondition(condition ICondition) error {
+	if apply := condition.GetApply(); apply != nil {
+		if err := apply(u); err != nil {
+			return err
+		}
+	}
+	u.conditions = append(u.conditions, condition)
+	return nil
+}
+
+// GetAbilities method returns unit abilities.
 func (u *Unit) GetAbilities() IAbilities {
 	return u.abilities
 }
 
+// GetAttacks method returns unit attacks.
 func (u *Unit) GetAttacks() IAttacks {
 	return u.attacks
 }
@@ -164,11 +207,16 @@ func (u *Unit) GetArmorClass() int {
 	return result
 }
 
+// GetClass method returns the unit class.
+func (u *Unit) GetClass() IClass {
+	return u.class
+}
+
 func (u *Unit) GetConditions() []ICondition {
 	return u.conditions
 }
 
-func (u *Unit) GetConditionResistances() map[string]string {
+func (u *Unit) GetConditionResistances() map[string]int {
 	return u.conditionResistances
 }
 
@@ -217,6 +265,18 @@ func (u *Unit) GetDieRoll() int {
 		WithField("method", "GetDieRoll").
 		Debugf(fmt.Sprintf("[%s] die-roll %d+%d+%d", u.GetUName(), die20, strModifier, weaponStrModifier))
 	return result
+}
+
+// GetFeats method returns all unit feats.
+func (u *Unit) GetFeats() []IFeat {
+	feats := u.feats
+	if u.race != nil && u.race.GetFeats() != nil {
+		feats = append(feats, u.race.GetFeats()...)
+	}
+	if u.class != nil && u.class.GetFeats() != nil {
+		feats = append(feats, u.class.GetFeats()...)
+	}
+	return feats
 }
 
 func (u *Unit) GetGear() IGear {
@@ -282,7 +342,7 @@ func (u *Unit) GetInitiative() int {
 	return 1
 }
 
-func (u *Unit) GetLanguages() any {
+func (u *Unit) GetLanguages() []ILanguage {
 	return u.languages
 }
 
@@ -297,6 +357,12 @@ func (u *Unit) GetProficiencyBonus() int {
 	return 1
 }
 
+// GetRace method returns unit race.
+func (u *Unit) GetRace() IRace {
+	return u.race
+}
+
+// GetSkills method returns unit skills.
 func (u *Unit) GetSkills() []ISkill {
 	return u.skills
 }
@@ -312,18 +378,30 @@ func (u *Unit) GetSpeed() int {
 	return 1
 }
 
-func (u *Unit) GetSpells() any {
+// GetSpells method return unit spells.
+func (u *Unit) GetSpells() []ISpell {
 	return u.spells
 }
 
-func (u *Unit) GetTraits() any {
-	return u.traits
+// GetTraits method returns unit treats.
+func (u *Unit) GetTraits() []ITrait {
+	traits := u.traits
+	if u.race != nil && u.race.GetTraits() != nil {
+		traits = append(traits, u.race.GetTraits()...)
+	}
+	if u.class != nil && u.class.GetTraits() != nil {
+		traits = append(traits, u.class.GetTraits()...)
+	}
+	return traits
 }
 
+// GetUName method returns unit name.
 func (u *Unit) GetUName() string {
 	return u.uname
 }
 
+// Populate methods populate the unit with the given default values and content
+// passed as a map[string]any.
 func (u *Unit) Populate(defaults map[string]any, content map[string]any) {
 	var hp int = defaults["hp"].(int)
 	var strength int = defaults["strength"].(int)
@@ -363,6 +441,25 @@ func (u *Unit) Populate(defaults map[string]any, content map[string]any) {
 	u.GetAbilities().GetCharisma().SetScore(charisma)
 }
 
+// RemoveCondition method removes the given condition/status effect from the
+// list of conditions in the unit.
+func (u *Unit) RemoveCondition(condition ICondition) error {
+	for i, unitCondition := range u.conditions {
+		if unitCondition == condition {
+			if remove := condition.GetRemove(); remove != nil {
+				if err := remove(u); err != nil {
+					return err
+				}
+			}
+			u.conditions = append(u.conditions[:i], u.conditions[i+1:]...)
+			break
+		}
+	}
+	return nil
+}
+
+// RollAttack method rolls the attack for the given index against the given
+// unit.
 func (u *Unit) RollAttack(index int, other IUnit) (bool, int) {
 	dieRoll := u.GetDieRoll()
 	ac := other.GetArmorClass()
@@ -397,6 +494,18 @@ func (u *Unit) RollAttack(index int, other IUnit) (bool, int) {
 	return true, damage
 }
 
+// RollConditions method roll damages for every condition applied to the unit.
+func (u *Unit) RollConditions() []int {
+	var result []int
+	for _, condition := range u.conditions {
+		resistance := u.getConditionResistanceFor(condition)
+		conditionRoll := condition.RollDamage()
+		damage := (conditionRoll * resistance) / 100
+		result = append(result, damage)
+	}
+	return result
+}
+
 func (u *Unit) SetAbilities(abilities IAbilities) {
 	u.abilities = abilities
 }
@@ -405,16 +514,26 @@ func (u *Unit) SetAttacks(attacks IAttacks) {
 	u.attacks = attacks
 }
 
+// SetClass method sets a new class to the unit.
+func (u *Unit) SetClass(class IClass) {
+	u.class = class
+}
+
 func (u *Unit) SetConditions(conditions []ICondition) {
 	u.conditions = conditions
 }
 
-func (u *Unit) SetConditionResistances(resitances map[string]string) {
+func (u *Unit) SetConditionResistances(resitances map[string]int) {
 	u.conditionResistances = resitances
 }
 
 func (u *Unit) SetDescription(desc string) {
 	u.description = desc
+}
+
+// SetFeat method sets a new slice of feats for the unit.
+func (u *Unit) SetFeats(feats []IFeat) {
+	u.feats = feats
 }
 
 func (u *Unit) SetGear(gear IGear) {
@@ -425,19 +544,24 @@ func (u *Unit) SetHitPoints(hp IHitPoints) {
 	u.hitPoints = hp
 }
 
-func (u *Unit) SetLanguages(langs any) {
+func (u *Unit) SetLanguages(langs []ILanguage) {
 	u.languages = langs
+}
+
+// SetRace method sets a new race for the unit.
+func (u *Unit) SetRace(race IRace) {
+	u.race = race
 }
 
 func (u *Unit) SetSkills(skills []ISkill) {
 	u.skills = skills
 }
 
-func (u *Unit) SetSpells(spells any) {
+func (u *Unit) SetSpells(spells []ISpell) {
 	u.spells = spells
 }
 
-func (u *Unit) SetTraits(traits any) {
+func (u *Unit) SetTraits(traits []ITrait) {
 	u.traits = traits
 }
 
