@@ -36,8 +36,9 @@ type IUnit interface {
 	GetHitDice() int // unit hit dice.
 	GetHitting(IUnit) bool
 	GetHitPoints() IHitPoints
-	GetInitiative() int // unit initiative 1d20 + mod(dex)
+	GetInitiativeRoll() int // unit initiative 1d20 + mod(dex)
 	GetLanguages() []ILanguage
+	GetProficiencies() []IProficiency
 	GetProficiencyBonus() int // unit proficiency bonus.
 	GetSkills() []ISkill
 	GetSpeed() int // unit speed
@@ -59,6 +60,7 @@ type IUnit interface {
 	SetGear(IGear)
 	SetHitPoints(IHitPoints)
 	SetLanguages([]ILanguage)
+	SetProficiencies([]IProficiency)
 	SetRace(IRace)
 	SetSkills([]ISkill)
 	SetSpells([]ISpell)
@@ -108,6 +110,7 @@ type Unit struct {
 	hitPoints            IHitPoints  // unit hit points.
 	languages            []ILanguage // unit languages
 	level                ILevel      // unit level.
+	proficiencies        []IProficiency
 	race                 IRace
 	skills               []ISkill // unit skills
 	spells               []ISpell // unit spells
@@ -130,6 +133,7 @@ func NewUnit(name string) *Unit {
 		hitPoints:            NewHitPoints(0),
 		languages:            nil,
 		level:                NewLevel(0, 0),
+		proficiencies:        nil,
 		race:                 nil,
 		skills:               CreateSkills(),
 		spells:               nil,
@@ -142,11 +146,70 @@ func NewUnit(name string) *Unit {
 // Unit private methods
 // -----------------------------------------------------------------------------
 
+// checkForAction method checks in unit feats, proficiencies and traits
+// if there is any of them impacting the giving action.
+// TODO: condition/status effects are still missing in this check.
+func (u *Unit) checkForAction(action string) []any {
+	var result []any
+
+	// Check feats.
+	feats := u.featsCheckForAction(action)
+	result = append(result, feats...)
+
+	// Check proficiencies
+	proficiencies := u.proficienciesCheckForAction(action)
+	result = append(result, proficiencies...)
+
+	// Check traits
+	traits := u.traitsCheckForAction(action)
+	result = append(result, traits...)
+
+	return result
+}
+
+// checkProcessingToInt method process al entries in a slice of check where the
+// final result should be an integer.
+func (u *Unit) checkProcessingToInt(checks []any) int {
+	result := 0
+	for _, check := range checks {
+		switch check.(type) {
+		case int:
+			result += check.(int)
+		case func(IUnit) int:
+			result += check.(func(IUnit) int)(u)
+		default:
+		}
+	}
+	return result
+}
+
+func (u *Unit) featsCheckForAction(action string) []any {
+	var result []any
+	for _, feat := range u.feats {
+		for k, v := range feat.GetEffects() {
+			if k == action {
+				result = append(result, v)
+			}
+		}
+	}
+	return result
+}
+
 func (u *Unit) getConditionResistanceFor(condition ICondition) int {
 	if resistance, ok := u.conditionResistances[condition.GetName()]; ok {
 		return resistance
 	}
 	return 0
+}
+
+func (u Unit) proficienciesCheckForAction(action string) []any {
+	var result []any
+	return result
+}
+
+func (u Unit) traitsCheckForAction(action string) []any {
+	var result []any
+	return result
 }
 
 // -----------------------------------------------------------------------------
@@ -321,7 +384,7 @@ func (u *Unit) GetHitPoints() IHitPoints {
 	return u.hitPoints
 }
 
-// GetInitiative method return the unit initiative.
+// GetInitiativeRoll method return the unit initiative.
 //
 // Initiative is calculated based on a character's Dexterity modifier. The
 // formula for calculating initiative is as follows:
@@ -337,13 +400,28 @@ func (u *Unit) GetHitPoints() IHitPoints {
 // modifier would be +3. If they roll a 12 on their d20 initiative roll, their
 // total initiative would be 15 (12 + 3). This would mean that they would act
 // in the combat encounter before creatures with lower initiative scores.
-func (u *Unit) GetInitiative() int {
-	// TODO: to be implemented.
-	return 1
+func (u *Unit) GetInitiativeRoll() int {
+	initiative := u.dieRoll.Roll()
+	initiative += u.GetAbilities().GetDexterity().GetModifier()
+
+	// TODO: any feats, traits or proficiencies related with initiative have to
+	// be applied now.
+	checks := u.checkForAction(constants.InitiativeRoll)
+	tools.Logger.WithField("module", "unit").
+		WithField("method", "GetInitiativeRoll").
+		Tracef("initiative checks %+#v", checks)
+	checksResult := u.checkProcessingToInt(checks)
+	initiative += checksResult
+	return initiative
 }
 
 func (u *Unit) GetLanguages() []ILanguage {
 	return u.languages
+}
+
+// GetProficiencies method returns all unit proficiencies.
+func (u *Unit) GetProficiencies() []IProficiency {
+	return u.proficiencies
 }
 
 // GetProficiencyBonus method returns the unit proficiency bonus.
@@ -546,6 +624,11 @@ func (u *Unit) SetHitPoints(hp IHitPoints) {
 
 func (u *Unit) SetLanguages(langs []ILanguage) {
 	u.languages = langs
+}
+
+// SetProficiencies method sets the given slice of proficiencies.
+func (u *Unit) SetProficiencies(proficiencies []IProficiency) {
+	u.proficiencies = proficiencies
 }
 
 // SetRace method sets a new race for the unit.

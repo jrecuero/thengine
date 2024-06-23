@@ -1,0 +1,45 @@
+// weapon.go package contains all weapon constants.
+package constants
+
+const (
+	// Simple Weapons
+	Club          = "club"
+	Dagger        = "dagger"
+	Greatclub     = "great club"
+	Handaxe       = "handaxe"
+	Javelin       = "javelin"
+	LightHammer   = "light hammer"
+	Mace          = "mace"
+	Quarterstaff  = "quarterstaff"
+	Sickle        = "sickle"
+	Spear         = "spear"
+	LightCrossbow = "light crossbow"
+	Dart          = "dart"
+	Shortbow      = "shortbow"
+	Sling         = "sling"
+
+	// Martial Weapons
+	Battleaxe     = "battleaxe"
+	Flail         = "flail"
+	Glaive        = "glaive"
+	Greataxe      = "greataxe"
+	Greatsword    = "greatsword"
+	Halberd       = "halberd"
+	Lance         = "lance"
+	Longsword     = "longsword"
+	Maul          = "maul"
+	Morningstar   = "morningstart"
+	Pike          = "pike"
+	Rapier        = "rapier"
+	Scimitar      = "scimitar"
+	Shortsword    = "shortsword"
+	Trident       = "trident"
+	WarPick       = "war pick"
+	Warhammer     = "warhammer"
+	Whip          = "whip"
+	Blowgun       = "blowgun"
+	HandCrossbow  = "hand crossbow"
+	HeavyCrossbow = "heavy crossbow"
+	Longbow       = "longbow"
+	Net           = "net"
+)

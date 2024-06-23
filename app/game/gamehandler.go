@@ -333,6 +333,8 @@ func (h *GameHandler) RunStartTurn(scene engine.IScene, input *inputAction) {
 		WithField("method", "StartTurn").
 		Debugf("START TURN %+v", input)
 	enemies := getEnemiesInScene(scene)
+	// TODO: initiative should be checked for player and enemies in order to
+	// define who should be take action first and in which order.
 	if input != nil && input.selAttack {
 		if enemy := isAnyEnemyAdjacent(h.player, enemies); enemy != nil {
 			x, y := h.player.GetPosition().Get()
