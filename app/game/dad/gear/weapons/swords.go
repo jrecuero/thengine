@@ -21,20 +21,30 @@ func init() {
 //
 // -----------------------------------------------------------------------------
 
-type ShortSword struct {
-	*rules.Weapon
-}
+//type ShortSword struct {
+//    *rules.Weapon
+//}
+
+//func NewShortsword() rules.IHandheld {
+//    htype := rules.NewHandheldType(1)
+//    return &ShortSword{
+//        Weapon: rules.NewWeapon(ShortswordName, "shortsword", 10, 2, htype, rules.DiceThrow1d6, constants.Piercing),
+//    }
+//}
+
+//func (w *ShortSword) GetRollBonusForAction(action string) any {
+//    if action == constants.SavingThrowRollStrength {
+//        return 2
+//    }
+//    return 0
+//}
 
 func NewShortsword() rules.IHandheld {
 	htype := rules.NewHandheldType(1)
-	return &ShortSword{
-		Weapon: rules.NewWeapon(ShortswordName, "shortsword", 10, 2, htype, rules.DiceThrow1d6, constants.Piercing),
+	w := rules.NewWeapon(ShortswordName, "shortsword", 10, 2, htype, rules.DiceThrow1d6, constants.Piercing)
+	effects := map[string]any{
+		constants.SavingThrowRollStrength: 2,
 	}
-}
-
-func (w *ShortSword) DieRollBonus(bonus string) int {
-	if bonus == constants.Strength {
-		return 2
-	}
-	return 0
+	w.SetEffects(effects)
+	return w
 }

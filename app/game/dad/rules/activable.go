@@ -19,6 +19,7 @@ type IActivable interface {
 	Clean()
 	Deactivate() error
 	GetEffects() map[string]any
+	GetRollBonusForAction(string) any
 	IsActivated() bool
 	IsPassive() bool
 	IsSustained() bool
@@ -84,6 +85,18 @@ func (a *Activable) Deactivate() error {
 
 func (a *Activable) GetEffects() map[string]any {
 	return a.effects
+}
+
+func (a *Activable) GetRollBonusForAction(action string) any {
+	if !a.IsActivated() {
+		return nil
+	}
+	for k, v := range a.GetEffects() {
+		if k == action {
+			return v
+		}
+	}
+	return nil
 }
 
 func (a *Activable) IsActivated() bool {

@@ -56,6 +56,14 @@ func Min(values ...int) int {
 	return min
 }
 
+// NilToInt functions returns a zero if the value is a nil.
+func NilToInt(value any) int {
+	if value == nil {
+		return 0
+	}
+	return value.(int)
+}
+
 // SumSlice function returns the total sum for every entry in a slice or
 // integer numbers.
 func SumSlice(values ...int) int {

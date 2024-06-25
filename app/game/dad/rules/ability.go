@@ -1,6 +1,10 @@
 package rules
 
-import "github.com/jrecuero/thengine/app/game/dad/constants"
+import (
+	"strings"
+
+	"github.com/jrecuero/thengine/app/game/dad/constants"
+)
 
 //const (
 //    StrengthAS     AbilityScore = constants.Strength
@@ -216,7 +220,7 @@ func (a *Ability) GetScorePoint() int {
 
 // IAbilities interfaces defines all abilities methods to be implemented.
 type IAbilities interface {
-	IDieRollBonus
+	IRollBonus
 	GetAbilityByName(AbilityScore) IAbility
 	GetConstitution() IAbility
 	GetStrength() IAbility
@@ -281,15 +285,20 @@ func NewAbilities() *Abilities {
 }
 
 // -----------------------------------------------------------------------------
-// Abilities public methods
+// Abilities private methods
 // -----------------------------------------------------------------------------
 
-func (a *Abilities) DieRollBonus(bonus string) int {
-	if ability := a.GetAbilityByName(AbilityScore(bonus)); ability != nil {
-		return ability.GetModifier()
+func getAbilityFromAction(action string) AbilityScore {
+	result := ""
+	if strings.HasPrefix(action, constants.SavingThrowRoll) && strings.Contains(action, "/") {
+		result = strings.Split(action, "/")[1]
 	}
-	return 0
+	return AbilityScore(result)
 }
+
+// -----------------------------------------------------------------------------
+// Abilities public methods
+// -----------------------------------------------------------------------------
 
 // GetAbilityByName method return the ability for the given name.
 func (a *Abilities) GetAbilityByName(name AbilityScore) IAbility {
@@ -314,6 +323,14 @@ func (a *Abilities) GetAbilityByName(name AbilityScore) IAbility {
 // GetConstitution method returns constitution ability.
 func (a *Abilities) GetConstitution() IAbility {
 	return a.Constitution
+}
+
+// GetRollBonusForAction method returns the ability modifier for the given ability.
+func (a *Abilities) GetRollBonusForAction(action string) any {
+	if ability := a.GetAbilityByName(getAbilityFromAction(action)); ability != nil {
+		return ability.GetModifier()
+	}
+	return 0
 }
 
 // GetStrength method returns strength ability.

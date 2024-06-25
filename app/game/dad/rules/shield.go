@@ -31,3 +31,8 @@ func NewShield(name string, uname string, cost int, weight int, ac int) *Shield 
 	shield.SetAC(ac)
 	return shield
 }
+
+var _ IDamage = (*Shield)(nil)
+var _ IRollBonus = (*Shield)(nil)
+var _ IHandheld = (*Shield)(nil)
+var _ IShield = (*Shield)(nil)

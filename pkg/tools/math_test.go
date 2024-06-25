@@ -109,3 +109,55 @@ func TestMin(t *testing.T) {
 		}
 	}
 }
+
+func TestNilToInt(t *testing.T) {
+	cases := []struct {
+		input any
+		exp   int
+	}{
+		{
+			input: nil,
+			exp:   0,
+		},
+		{
+			input: 1,
+			exp:   1,
+		},
+		{
+			input: 0,
+			exp:   0,
+		},
+	}
+	for i, c := range cases {
+		got := tools.NilToInt(c.input)
+		if c.exp != got {
+			t.Errorf("[%d] NilToInt exp:%d got:%d", i, c.exp, got)
+		}
+	}
+}
+
+func TestSumSlice(t *testing.T) {
+	cases := []struct {
+		input []int
+		exp   int
+	}{
+		{
+			input: []int{0, 1, 10, 5},
+			exp:   16,
+		},
+		{
+			input: []int{10, 7},
+			exp:   17,
+		},
+		{
+			input: []int{1, 7, -2},
+			exp:   6,
+		},
+	}
+	for i, c := range cases {
+		got := tools.SumSlice(c.input...)
+		if c.exp != got {
+			t.Errorf("[%d] SumSlice exp:%d got:%d", i, c.exp, got)
+		}
+	}
+}

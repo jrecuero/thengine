@@ -36,6 +36,6 @@ func NewWeapon(name string, uname string, cost int, weight int, htype *HandheldT
 // -----------------------------------------------------------------------------
 
 var _ IDamage = (*Weapon)(nil)
-var _ IDieRollBonus = (*Weapon)(nil)
+var _ IRollBonus = (*Weapon)(nil)
 var _ IHandheld = (*Weapon)(nil)
 var _ IWeapon = (*Weapon)(nil)

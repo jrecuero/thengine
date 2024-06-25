@@ -18,18 +18,6 @@ const (
 // Package private functions
 // -----------------------------------------------------------------------------
 
-func checkForAction(entry IActivable, action string) any {
-	if !entry.IsActivated() {
-		return nil
-	}
-	for k, v := range entry.GetEffects() {
-		if k == action {
-			return v
-		}
-	}
-	return nil
-}
-
 // -----------------------------------------------------------------------------
 //
 // IUnit
@@ -167,22 +155,30 @@ func NewUnit(name string) *Unit {
 // Unit private methods
 // -----------------------------------------------------------------------------
 
-// checkForAction method checks in unit feats, proficiencies and traits
+// getRollBonusForAction method checks in unit feats, proficiencies and traits
 // if there is any of them impacting the giving action.
 // TODO: condition/status effects are still missing in this check.
-func (u *Unit) checkForAction(action string) []any {
+func (u *Unit) getRollBonusForAction(action string) []any {
 	var result []any
 
+	// Check weapons (handheld gear)
+
+	// Check armor
+
+	// Check accessories
+
+	// Check any item
+
 	// Check feats.
-	feats := u.featsCheckForAction(action)
+	feats := u.getFeatsRollBonusForAction(action)
 	result = append(result, feats...)
 
 	// Check proficiencies
-	proficiencies := u.proficienciesCheckForAction(action)
+	proficiencies := u.getProficiencyRollBonusForAction(action)
 	result = append(result, proficiencies...)
 
 	// Check traits
-	traits := u.traitsCheckForAction(action)
+	traits := u.getTraitRollBonusForAction(action)
 	result = append(result, traits...)
 
 	return result
@@ -190,7 +186,7 @@ func (u *Unit) checkForAction(action string) []any {
 
 // checkProcessingToInt method process al entries in a slice of check where the
 // final result should be an integer.
-func (u *Unit) checkProcessingToInt(checks []any) int {
+func (u *Unit) checkProcessingToInt(checks ...any) int {
 	result := 0
 	for _, check := range checks {
 		switch check.(type) {
@@ -204,37 +200,45 @@ func (u *Unit) checkProcessingToInt(checks []any) int {
 	return result
 }
 
-func (u *Unit) featsCheckForAction(action string) []any {
+// getFeatsRollBonusForAction method returns any bonus to be applied to any
+// roll for every player character feat.
+func (u *Unit) getFeatsRollBonusForAction(action string) []any {
 	var result []any
 	for _, feat := range u.feats {
-		if r := checkForAction(feat, action); r != nil {
+		if r := feat.GetRollBonusForAction(action); r != nil {
 			result = append(result, r)
 		}
 	}
 	return result
 }
 
-func (u *Unit) getConditionResistanceFor(condition ICondition) int {
+// getConditionsRollBonusForAction method returns any bonus to be applied to
+// any roll for every player character condition.
+func (u *Unit) getConditionsRollBonusForAction(condition ICondition) int {
 	if resistance, ok := u.conditionResistances[condition.GetName()]; ok {
 		return resistance
 	}
 	return 0
 }
 
-func (u Unit) proficienciesCheckForAction(action string) []any {
+// getProficiencyRollBonusForAction method returns any bonus to be applied to any
+// roll for every player character proficiency.
+func (u Unit) getProficiencyRollBonusForAction(action string) []any {
 	var result []any
 	for _, proficiency := range u.proficiencies {
-		if r := checkForAction(proficiency, action); r != nil {
+		if r := proficiency.GetRollBonusForAction(action); r != nil {
 			result = append(result, r)
 		}
 	}
 	return result
 }
 
-func (u Unit) traitsCheckForAction(action string) []any {
+// getTraitRollBonusForAction method returns any bonus to be applied to any roll for
+// every player character trait.
+func (u Unit) getTraitRollBonusForAction(action string) []any {
 	var result []any
 	for _, trait := range u.traits {
-		if r := checkForAction(trait, action); r != nil {
+		if r := trait.GetRollBonusForAction(action); r != nil {
 			result = append(result, r)
 		}
 	}
@@ -357,10 +361,10 @@ func (u *Unit) GetDieRoll() int {
 	die20 := u.dieRoll.Roll()
 	// TODO: Ability modifier FIXED to strength.
 	//strModifier := u.GetAbilities().GetStrength().GetModifier()
-	strModifier := u.GetAbilities().DieRollBonus(constants.Strength)
+	strModifier := tools.NilToInt(u.GetAbilities().GetRollBonusForAction(constants.SavingThrowRollStrength))
 	weaponStrModifier := 0
 	if u.GetGear() != nil {
-		weaponStrModifier = u.GetGear().DieRollBonus(constants.Strength)
+		weaponStrModifier = tools.NilToInt(u.GetGear().GetRollBonusForAction(constants.SavingThrowRollStrength))
 	}
 	result := die20 + strModifier + weaponStrModifier
 	battlelog.BLog.PushDebug(fmt.Sprintf("[%s] die-roll %d+%d+%d", u.GetUName(), die20, strModifier, weaponStrModifier))
@@ -446,11 +450,11 @@ func (u *Unit) GetInitiativeRoll() int {
 
 	// TODO: any feats, traits or proficiencies related with initiative have to
 	// be applied now.
-	checks := u.checkForAction(constants.InitiativeRoll)
+	checks := u.getRollBonusForAction(constants.InitiativeRoll)
 	tools.Logger.WithField("module", "unit").
 		WithField("method", "GetInitiativeRoll").
 		Tracef("initiative checks %+#v", checks)
-	checksResult := u.checkProcessingToInt(checks)
+	checksResult := u.checkProcessingToInt(checks...)
 	initiative += checksResult
 	return initiative
 }
@@ -576,57 +580,11 @@ func (u *Unit) RemoveCondition(condition ICondition) error {
 	return nil
 }
 
-//// RollAttack method rolls the attack for the given index against the given
-//// unit.
-//func (u *Unit) RollAttack(index int, other IUnit) (bool, int) {
-//    dieRoll := u.GetDieRoll()
-//    // TODO: any feats, traits or proficiencies related with die roll have to
-//    // be applied now.
-//    dieRollChecks := u.checkForAction(constants.DieRoll)
-//    dieRollChecksResult := u.checkProcessingToInt(dieRollChecks)
-//    dieRoll += dieRollChecksResult
-//    ac := other.GetArmorClass()
-//    tools.Logger.WithField("module", "unit").
-//        WithField("method", "RollAttack").
-//        Debug(dieRoll, ac)
-//    // if die-roll is greater than the other unit armor class, it is a hit.
-//    if dieRoll < ac {
-//        //battlelog.BLog.PushInfo(fmt.Sprintf("[%s] miss!\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
-//        battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\t❌\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
-//        return false, 0
-//    }
-//    // TODO: fix to used the first attack, usually attack/weapon
-//    attack := u.GetAttacks().GetAttacks()[index]
-//    attackIcon := ""
-//    switch index {
-//    case 0:
-//        attackIcon = "🗡"
-//    case 1:
-//        attackIcon = "⚒"
-//    case 2:
-//        attackIcon = "⚡"
-//    }
-//    damage := attack.Roll()
-//    stDamage := attack.RollSavingThrows(other)
-//    otherHp := other.GetHitPoints().GetScore()
-//    //battlelog.BLog.PushInfo(fmt.Sprintf("[%s] %s roll:%dvs%d🛡️%d⚔%d⚁", u.GetUName(), attack.GetName(), dieRoll, ac, damage, stDamage))
-//    battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\t%s\troll:%dvs%d🛡️%d⚔%d⚁", u.GetUName(), attackIcon, dieRoll, ac, damage, stDamage))
-//    damage += stDamage
-//    // TODO: any feats, traits or proficiencies related with damage have to
-//    // be applied now.
-//    damageChecks := u.checkForAction(constants.DieRoll)
-//    damageChecksResult := u.checkProcessingToInt(damageChecks)
-//    damage += damageChecksResult
-//    otherHp -= damage
-//    other.GetHitPoints().SetScore(otherHp)
-//    return true, damage
-//}
-
 // RollConditions method roll damages for every condition applied to the unit.
 func (u *Unit) RollConditions() []int {
 	var result []int
 	for _, condition := range u.conditions {
-		resistance := u.getConditionResistanceFor(condition)
+		resistance := u.getConditionsRollBonusForAction(condition)
 		conditionRoll := condition.RollDamage()
 		damage := (conditionRoll * resistance) / 100
 		result = append(result, damage)
@@ -651,8 +609,8 @@ func (u *Unit) RollDamage(index int, other IUnit) (bool, int) {
 	damage += stDamage
 	// TODO: any feats, traits or proficiencies related with damage have to
 	// be applied now.
-	damageChecks := u.checkForAction(constants.DamageRoll)
-	damageChecksResult := u.checkProcessingToInt(damageChecks)
+	damageChecks := u.getRollBonusForAction(constants.DamageRoll)
+	damageChecksResult := u.checkProcessingToInt(damageChecks...)
 	damage += damageChecksResult
 	otherHp -= damage
 	other.GetHitPoints().SetScore(otherHp)
@@ -672,8 +630,8 @@ func (u *Unit) RollDieRoll(index int, other IUnit) bool {
 	dieRoll += attack.DieRoll(u)
 	// TODO: any feats, traits or proficiencies related with die roll have to
 	// be applied now.
-	dieRollChecks := u.checkForAction(constants.DieRoll)
-	dieRollChecksResult := u.checkProcessingToInt(dieRollChecks)
+	dieRollChecks := u.getRollBonusForAction(constants.SavingThrowRoll)
+	dieRollChecksResult := u.checkProcessingToInt(dieRollChecks...)
 	dieRoll += dieRollChecksResult
 	ac := other.GetArmorClass()
 	tools.Logger.WithField("module", "unit").

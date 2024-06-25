@@ -2,6 +2,8 @@
 // battle gear like weapons, shield or any piece of armor.
 package rules
 
+import "github.com/jrecuero/thengine/pkg/tools"
+
 // -----------------------------------------------------------------------------
 //
 // IBattleGear
@@ -12,11 +14,12 @@ package rules
 // implementing
 type IBattleGear interface {
 	IDamage
-	IDieRollBonus
+	IRollBonus
 	GetAC() int
 	GetCost() int
 	GetDamage() *Damage
 	GetDescription() string
+	GetEffects() map[string]any
 	GetMaterial() string
 	GetModifiers() []any
 	GetName() string
@@ -28,6 +31,7 @@ type IBattleGear interface {
 	SetAC(int)
 	SetCost(int)
 	SetDamage(*Damage)
+	SetEffects(map[string]any)
 	SetDescription(string)
 	SetMaterial(string)
 	SetModifiers([]any)
@@ -51,6 +55,7 @@ type BattleGear struct {
 	ac          int
 	cost        int
 	description string
+	effects     map[string]any
 	material    string
 	modifiers   []any
 	name        string
@@ -65,6 +70,7 @@ func NewBattleGear(name string, uname string, cost int, weight int) *BattleGear 
 		ac:          0,
 		cost:        cost,
 		description: name,
+		effects:     make(map[string]any),
 		material:    "",
 		modifiers:   nil,
 		name:        name,
@@ -81,10 +87,6 @@ func NewBattleGear(name string, uname string, cost int, weight int) *BattleGear 
 // BattleGear public methods
 // -----------------------------------------------------------------------------
 
-func (h *BattleGear) DieRollBonus(string) int {
-	return 0
-}
-
 func (h *BattleGear) GetAC() int {
 	return h.ac
 }
@@ -99,6 +101,10 @@ func (h *BattleGear) GetDamage() *Damage {
 
 func (h *BattleGear) GetDescription() string {
 	return h.description
+}
+
+func (h *BattleGear) GetEffects() map[string]any {
+	return h.effects
 }
 
 func (h *BattleGear) GetMaterial() string {
@@ -119,6 +125,18 @@ func (h *BattleGear) GetProps() []any {
 
 func (h *BattleGear) GetQuality() string {
 	return h.quality
+}
+
+func (h *BattleGear) GetRollBonusForAction(action string) any {
+	for k, v := range h.GetEffects() {
+		if k == action {
+			tools.Logger.WithField("module", "battlegear").
+				WithField("method", "GetRollBonusForAction").
+				Debugf("battlegear %s bonus %v for %s", h.GetName(), v.(int), action)
+			return v
+		}
+	}
+	return nil
 }
 
 func (h *BattleGear) GetUName() string {
@@ -147,6 +165,10 @@ func (h *BattleGear) SetDamage(damage *Damage) {
 
 func (h *BattleGear) SetDescription(description string) {
 	h.description = description
+}
+
+func (h *BattleGear) SetEffects(effects map[string]any) {
+	h.effects = effects
 }
 
 func (h *BattleGear) SetMaterial(material string) {
@@ -178,5 +200,5 @@ func (h *BattleGear) SetWeight(weight int) {
 }
 
 var _ IDamage = (*BattleGear)(nil)
-var _ IDieRollBonus = (*BattleGear)(nil)
+var _ IRollBonus = (*BattleGear)(nil)
 var _ IBattleGear = (*BattleGear)(nil)

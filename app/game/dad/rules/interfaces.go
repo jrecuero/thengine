@@ -3,12 +3,12 @@ package rules
 
 // -----------------------------------------------------------------------------
 //
-// IDieRollBonus
+// IRollBonus
 //
 // -----------------------------------------------------------------------------
 
-// IDieRollBonus interfaces defines methods required to be implemented for any
-// structure that can apply a bonus to a die-roll.
-type IDieRollBonus interface {
-	DieRollBonus(string) int
+// IRollBonus interface defines methods required to be implemented for any
+// structure that can apply any bonus to any roll.
+type IRollBonus interface {
+	GetRollBonusForAction(string) any
 }

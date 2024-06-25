@@ -47,6 +47,6 @@ func (a *Armor) SetBodyPart(bodypart string) {
 }
 
 var _ IDamage = (*Armor)(nil)
-var _ IDieRollBonus = (*Armor)(nil)
+var _ IRollBonus = (*Armor)(nil)
 var _ IBattleGear = (*Armor)(nil)
 var _ IArmor = (*Armor)(nil)

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/jrecuero/thengine/app/game/dad/battlelog"
+	"github.com/jrecuero/thengine/pkg/tools"
 )
 
 // -----------------------------------------------------------------------------
@@ -18,7 +19,7 @@ import (
 
 // IGear interfaces defines all methods any Geara structure should implement.
 type IGear interface {
-	IDieRollBonus
+	IRollBonus
 	AC() int
 	GetAccessories() []any
 	GetArms() IArmor
@@ -108,35 +109,6 @@ func (g *Gear) AC() int {
 	return result
 }
 
-func (g *Gear) DieRollBonus(bonus string) int {
-	result := 0
-	if g.GetMainHand() != nil {
-		result += g.GetMainHand().DieRollBonus(bonus)
-	}
-	if g.GetOffHand() != nil {
-		result += g.GetOffHand().DieRollBonus(bonus)
-	}
-	if g.GetArms() != nil {
-		result += g.GetArms().DieRollBonus(bonus)
-	}
-	if g.GetBody() != nil {
-		result += g.GetBody().DieRollBonus(bonus)
-	}
-	if g.GetFeet() != nil {
-		result += g.GetFeet().DieRollBonus(bonus)
-	}
-	if g.GetHands() != nil {
-		result += g.GetHands().DieRollBonus(bonus)
-	}
-	if g.GetHead() != nil {
-		result += g.GetHead().DieRollBonus(bonus)
-	}
-	if g.GetLegs() != nil {
-		result += g.GetLegs().DieRollBonus(bonus)
-	}
-	return result
-}
-
 func (g *Gear) GetAccessories() []any {
 	return g.accessories
 }
@@ -171,6 +143,35 @@ func (g *Gear) GetMainHand() IHandheld {
 
 func (g *Gear) GetOffHand() IHandheld {
 	return g.offhand
+}
+
+func (g *Gear) GetRollBonusForAction(action string) any {
+	result := 0
+	if g.GetMainHand() != nil {
+		result += tools.NilToInt(g.GetMainHand().GetRollBonusForAction(action))
+	}
+	if g.GetOffHand() != nil {
+		result += tools.NilToInt(g.GetOffHand().GetRollBonusForAction(action))
+	}
+	if g.GetArms() != nil {
+		result += tools.NilToInt(g.GetArms().GetRollBonusForAction(action))
+	}
+	if g.GetBody() != nil {
+		result += tools.NilToInt(g.GetBody().GetRollBonusForAction(action))
+	}
+	if g.GetFeet() != nil {
+		result += tools.NilToInt(g.GetFeet().GetRollBonusForAction(action))
+	}
+	if g.GetHands() != nil {
+		result += tools.NilToInt(g.GetHands().GetRollBonusForAction(action))
+	}
+	if g.GetHead() != nil {
+		result += tools.NilToInt(g.GetHead().GetRollBonusForAction(action))
+	}
+	if g.GetLegs() != nil {
+		result += tools.NilToInt(g.GetLegs().GetRollBonusForAction(action))
+	}
+	return result
 }
 
 func (g *Gear) RollDamage() int {
@@ -254,5 +255,5 @@ func (g *Gear) UnmarshalMap(content map[string]any) {
 	}
 }
 
-var _ IDieRollBonus = (*Gear)(nil)
+var _ IRollBonus = (*Gear)(nil)
 var _ IGear = (*Gear)(nil)

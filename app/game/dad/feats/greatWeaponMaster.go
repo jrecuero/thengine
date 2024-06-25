@@ -21,8 +21,8 @@ weapon attack as a bonus action. Before you make a melee attack with a heavy
 weapon that you are proficient with, you can choose to take a -5 penalty to the
 attack roll. If the attack hits, you add +10 to the attack’s damage.`)
 	effects := map[string]any{
-		constants.DieRoll:    -5,
-		constants.DamageRoll: 10,
+		constants.SavingThrowRoll: -5,
+		constants.DamageRoll:      10,
 	}
 	f.SetEffects(effects)
 	return f
