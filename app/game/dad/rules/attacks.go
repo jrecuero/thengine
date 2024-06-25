@@ -28,7 +28,8 @@ const (
 // IAttackRolls interface defines all required methods for any custom attack
 // roll to be used as an Attack.
 type IAttackRoll interface {
-	Roll() int
+	DieRoll(IUnit) int
+	Roll(IUnit) int
 	RollSavingThrows(IUnit) int
 }
 
@@ -119,6 +120,17 @@ func NewSpecialAttack(name string, special IAttackRoll) *Attack {
 // Attack private methods
 // -----------------------------------------------------------------------------
 
+// dieRoll method returns any additional value to add to the die roll related
+// with an specific weapon attack.
+func (a *Attack) dieRoll(IUnit) int {
+	result := 0
+	if a.gear.GetMainHand() != nil {
+	}
+	if a.gear.GetOffHand() != nil {
+	}
+	return result
+}
+
 func (a *Attack) mainHandWeaponRoll() int {
 	if a.gear.GetMainHand() != nil {
 		return a.gear.GetMainHand().GetDamage().RollDamageValue()
@@ -133,7 +145,8 @@ func (a *Attack) offHandWeaponRoll() int {
 	return 0
 }
 
-func (a *Attack) weaponRoll() int {
+// weaponRoll method returns the weapon damage for the specific weapon attack.
+func (a *Attack) weaponRoll(IUnit) int {
 	result := 0
 	if a.gear.GetMainHand() != nil {
 		result += a.gear.GetMainHand().GetDamage().RollDamageValue()
@@ -158,6 +171,8 @@ func (a *Attack) offHandWeaponRollSavingThrows(unit IUnit) int {
 	return 0
 }
 
+// weaponRollSavingThrows method returns the weapon saving throws damage for
+// the specific weapon attack.
 func (a *Attack) weaponRollSavingThrows(unit IUnit) int {
 	result := 0
 	if a.gear.GetMainHand() != nil {
@@ -173,18 +188,14 @@ func (a *Attack) weaponRollSavingThrows(unit IUnit) int {
 // Attack public methods
 // -----------------------------------------------------------------------------
 
-func (a *Attack) GetName() string {
-	return a.name
-}
-
-func (a *Attack) Roll() int {
+func (a *Attack) DieRoll(unit IUnit) int {
 	result := 0
 	switch a.atype {
 	case WeaponMeleeAttackType:
 		fallthrough
 	case WeaponRangedAttackType:
 		if a.gear != nil {
-			result += a.weaponRoll()
+			result += a.dieRoll(unit)
 		}
 	case SpellMeleeAttackType:
 		fallthrough
@@ -192,11 +203,40 @@ func (a *Attack) Roll() int {
 		fallthrough
 	case SpellAreaOfEffectAttackType:
 		if a.spell != nil {
-			result += a.spell.RollCast()
+			result += a.spell.DieRoll(unit)
 		}
 	case SpecialAttackType:
 		if a.special != nil {
-			result += a.special.Roll()
+			result += a.special.DieRoll(unit)
+		}
+	}
+	return result
+}
+
+func (a *Attack) GetName() string {
+	return a.name
+}
+
+func (a *Attack) Roll(unit IUnit) int {
+	result := 0
+	switch a.atype {
+	case WeaponMeleeAttackType:
+		fallthrough
+	case WeaponRangedAttackType:
+		if a.gear != nil {
+			result += a.weaponRoll(unit)
+		}
+	case SpellMeleeAttackType:
+		fallthrough
+	case SpellRangedAttackType:
+		fallthrough
+	case SpellAreaOfEffectAttackType:
+		if a.spell != nil {
+			result += a.spell.RollCast(unit)
+		}
+	case SpecialAttackType:
+		if a.special != nil {
+			result += a.special.Roll(unit)
 		}
 	}
 	return result

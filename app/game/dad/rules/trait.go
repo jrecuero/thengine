@@ -8,10 +8,9 @@ package rules
 // -----------------------------------------------------------------------------
 
 type ITrait interface {
-	GetBenefits() []any
+	IActivable
 	GetDescription() string
 	GetName() string
-	SetBenefits([]any)
 	SetDescription(string)
 	SetName(string)
 }
@@ -23,17 +22,16 @@ type ITrait interface {
 // -----------------------------------------------------------------------------
 
 type Trait struct {
-	benefits    []any
+	*Activable
 	description string
 	name        string
 }
 
 // NewTrait function creates a new Trait instance.
-func NewTrait(name string) *Trait {
+func NewTrait(name string, ispassive bool, issustained bool, isactivated bool) *Trait {
 	t := &Trait{
-		benefits:    nil,
-		description: name,
-		name:        name,
+		Activable: NewActivable(ispassive, issustained, isactivated),
+		name:      name,
 	}
 	return t
 }
@@ -42,20 +40,12 @@ func NewTrait(name string) *Trait {
 // Trait public methods
 // -----------------------------------------------------------------------------
 
-func (t *Trait) GetBenefits() []any {
-	return t.benefits
-}
-
 func (t *Trait) GetDescription() string {
 	return t.description
 }
 
 func (t *Trait) GetName() string {
 	return t.name
-}
-
-func (t *Trait) SetBenefits(benefits []any) {
-	t.benefits = benefits
 }
 
 func (t *Trait) SetDescription(description string) {
@@ -66,4 +56,5 @@ func (t *Trait) SetName(name string) {
 	t.name = name
 }
 
+var _ IActivable = (*Trait)(nil)
 var _ ITrait = (*Trait)(nil)

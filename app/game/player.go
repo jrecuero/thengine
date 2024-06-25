@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/jrecuero/thengine/app/game/dad/constants"
+	"github.com/jrecuero/thengine/app/game/dad/feats"
 	"github.com/jrecuero/thengine/app/game/dad/gear/body"
 	"github.com/jrecuero/thengine/app/game/dad/gear/shields"
 	"github.com/jrecuero/thengine/app/game/dad/gear/weapons"
@@ -25,8 +26,30 @@ func NewPowerAttack(gear rules.IGear) *PowerAttack {
 	}
 }
 
-func (a *PowerAttack) Roll() int {
-	return 2 * a.gear.GetMainHand().RollDamage()
+func (a *PowerAttack) DieRoll(unit rules.IUnit) int {
+	tools.Logger.WithField("module", "player").
+		WithField("struct", "PowerAttack").
+		WithField("method", "DieRoll").
+		Debugf("power attack")
+	for _, p := range unit.GetFeats() {
+		if p.GetName() == "great weapon master" {
+			tools.Logger.WithField("module", "player").
+				WithField("struct", "PowerAttack").
+				WithField("method", "DieRoll").
+				Debugf("activate feat %s", p.GetName())
+			p.Activate()
+			unit.AddActivable(p)
+		}
+	}
+	return 0
+}
+
+func (a *PowerAttack) Roll(rules.IUnit) int {
+	tools.Logger.WithField("module", "player").
+		WithField("struct", "PowerAttack").
+		WithField("method", "Roll").
+		Debugf("power attack")
+	return a.gear.GetMainHand().RollDamage()
 }
 
 func (a *PowerAttack) RollSavingThrows(rules.IUnit) int {
@@ -60,6 +83,8 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 	perception.SetProficienty(2)
 	sleight := rules.GetSkillByName(player.GetSkills(), constants.Sleight)
 	sleight.SetProficienty(1)
+	feats := []rules.IFeat{feats.NewGreatWeaponMaster()}
+	player.SetFeats(feats)
 
 	weaponEntry := rules.DBase.GetSections()[rules.DbSectionGear].GetSections()[rules.DbSectionWeapon].GetEntries()[weapons.ShortswordName]
 	weaponCreator := weaponEntry.GetCreator().(func() rules.IHandheld)
@@ -85,4 +110,8 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 		WithField("function", "NewPlayer").
 		Debugf("strength modifier %d", strengthModifier)
 	return player
+}
+
+func (p *Player) EndTick(engine.IScene) {
+	p.EndTurn()
 }

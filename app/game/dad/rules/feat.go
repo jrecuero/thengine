@@ -15,14 +15,13 @@ package rules
 
 // IFeat interface provides all meethods any feat have to implement.
 type IFeat interface {
+	IActivable
 	GetDescription() string
-	GetEffects() map[string]any
 	GetName() string
 	GetPrerequisites() []any
 	MeetPrerequisites(IUnit) bool
 	RollEffects(IUnit)
 	SetDescription(string)
-	SetEffects(map[string]any)
 	SetName(string)
 	SetPrerequisites([]any)
 }
@@ -35,17 +34,17 @@ type IFeat interface {
 
 // Feat structure represents all attributes and methods for any generic feat.
 type Feat struct {
+	*Activable
 	description   string
-	effects       map[string]any
 	name          string
 	prerequisites []any
 }
 
 // NewFeat function creates a new Feat instance.
-func NewFeat(name string) *Feat {
+func NewFeat(name string, ispassive bool, issustained bool, isactivated bool) *Feat {
 	f := &Feat{
+		Activable:     NewActivable(ispassive, issustained, isactivated),
 		description:   name,
-		effects:       make(map[string]any),
 		name:          name,
 		prerequisites: nil,
 	}
@@ -58,10 +57,6 @@ func NewFeat(name string) *Feat {
 
 func (f *Feat) GetDescription() string {
 	return f.description
-}
-
-func (f *Feat) GetEffects() map[string]any {
-	return f.effects
 }
 
 func (f *Feat) GetName() string {
@@ -83,10 +78,6 @@ func (f *Feat) SetDescription(description string) {
 	f.description = description
 }
 
-func (f *Feat) SetEffects(effects map[string]any) {
-	f.effects = effects
-}
-
 func (f *Feat) SetName(name string) {
 	f.name = name
 }
@@ -95,4 +86,5 @@ func (f *Feat) SetPrerequisites(prerequisites []any) {
 	f.prerequisites = prerequisites
 }
 
+var _ IActivable = (*Feat)(nil)
 var _ IFeat = (*Feat)(nil)

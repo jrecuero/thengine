@@ -207,7 +207,10 @@ func (h *GameHandler) playerSelection(entity engine.IEntity, args ...any) bool {
 
 func (h *GameHandler) EnemyAttack(scene engine.IScene) {
 	if h.enemy != nil {
-		h.enemy.RollAttack(0, h.player)
+		// Roll Damage only if enemy gets a hit from the die roll.
+		if hit := h.enemy.RollDieRoll(0, h.player); hit {
+			h.enemy.RollDamage(0, h.player)
+		}
 		updateDataBox(scene, h.player)
 		tools.Logger.WithField("module", "gamehandler").
 			WithField("method", "Update").
@@ -221,7 +224,10 @@ func (h *GameHandler) PlayerAttack(scene engine.IScene, attack *attackInfo) {
 	if enemy := isAnyEnemyAdjacent(h.player, enemies); enemy != nil {
 		if e, ok := enemy.(*Enemy); ok {
 			h.enemy = e
-			h.player.RollAttack(attack.index, e)
+			// Roll Damage only if player gets a hit from the die roll.
+			if hit := h.player.RollDieRoll(attack.index, e); hit {
+				h.player.RollDamage(attack.index, e)
+			}
 			updateDataBox(scene, h.player)
 			tools.Logger.WithField("module", "gamehandler").
 				WithField("method", "Update").

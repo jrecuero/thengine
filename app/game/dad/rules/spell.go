@@ -43,6 +43,7 @@ type MagicComponent string
 
 // ISpell interface provides all methods any spell have to be implementing.
 type ISpell interface {
+	DieRoll(IUnit) int
 	GetCastingTime() int
 	GetComponents() []MagicComponent
 	GetDamage() IDamage
@@ -54,7 +55,7 @@ type ISpell interface {
 	GetRange() int
 	GetUName() string
 	GetLevel() int
-	RollCast() int
+	RollCast(IUnit) int
 	SetCastingTime(int)
 	SetComponents([]MagicComponent)
 	SetDamage(IDamage)
@@ -128,6 +129,12 @@ func NewSpell(name string, uname string, school MagicSchool, level int, damage I
 // Spell public methods
 // -----------------------------------------------------------------------------
 
+// DieRoll method returns any additional value to add to the die roll related
+// with the specific spell.
+func (s *Spell) DieRoll(IUnit) int {
+	return 0
+}
+
 func (s *Spell) GetCastingTime() int {
 	return s.castingTime
 }
@@ -172,7 +179,7 @@ func (s *Spell) GetLevel() int {
 	return s.level
 }
 
-func (s *Spell) RollCast() int {
+func (s *Spell) RollCast(IUnit) int {
 	if s.damage != nil {
 		s.damage.RollDamageValue()
 	}

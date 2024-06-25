@@ -13,7 +13,7 @@ import (
 // -----------------------------------------------------------------------------
 
 func NewAlert() *rules.Feat {
-	f := rules.NewFeat("alert")
+	f := rules.NewFeat("alert", true, true, true)
 	f.SetDescription(`Always on the lookout for danger, you gain the following
 benefits:
 - You gain a +5 bonus to initiative.

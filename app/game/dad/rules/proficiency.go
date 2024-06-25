@@ -18,6 +18,7 @@ const (
 // -----------------------------------------------------------------------------
 
 type IProficiency interface {
+	IActivable
 	GetDescription() string
 	GetName() string
 	GetType() ProficiencyType
@@ -33,14 +34,16 @@ type IProficiency interface {
 // -----------------------------------------------------------------------------
 
 type Proficiency struct {
+	*Activable
 	description string
 	name        string
 	ptype       ProficiencyType
 }
 
 // NewProficiency function creates a new Proficiency instance.
-func NewProficiency(name string, ptype ProficiencyType) *Proficiency {
+func NewProficiency(name string, ptype ProficiencyType, ispassive bool, issustained bool, isactivated bool) *Proficiency {
 	p := &Proficiency{
+		Activable:   NewActivable(ispassive, issustained, isactivated),
 		description: name,
 		name:        name,
 		ptype:       ptype,
@@ -76,4 +79,5 @@ func (p *Proficiency) SetType(ptype ProficiencyType) {
 	p.ptype = ptype
 }
 
+var _ IActivable = (*Proficiency)(nil)
 var _ IProficiency = (*Proficiency)(nil)

@@ -15,6 +15,22 @@ const (
 )
 
 // -----------------------------------------------------------------------------
+// Package private functions
+// -----------------------------------------------------------------------------
+
+func checkForAction(entry IActivable, action string) any {
+	if !entry.IsActivated() {
+		return nil
+	}
+	for k, v := range entry.GetEffects() {
+		if k == action {
+			return v
+		}
+	}
+	return nil
+}
+
+// -----------------------------------------------------------------------------
 //
 // IUnit
 //
@@ -22,7 +38,9 @@ const (
 
 // IUnit interface  defines all methods required a unit has to implement.
 type IUnit interface {
+	AddActivable(IActivable)
 	AddCondition(ICondition) error
+	EndTurn()
 	GetAbilities() IAbilities
 	GetArmorClass() int // unit AC 10 + mod(dex) + mod(gear)
 	GetAttacks() IAttacks
@@ -48,7 +66,9 @@ type IUnit interface {
 	GetUName() string
 	Populate(map[string]any, map[string]any)
 	RemoveCondition(ICondition) error
-	RollAttack(int, IUnit) (bool, int)
+	//RollAttack(int, IUnit) (bool, int)
+	RollDamage(int, IUnit) (bool, int)
+	RollDieRoll(int, IUnit) bool
 	RollConditions() []int
 	SetAbilities(IAbilities)
 	SetAttacks(IAttacks)
@@ -98,8 +118,9 @@ type IUnit interface {
 // representing a unique entity with its own attributes, abilities, and role in
 // the game world.
 type Unit struct {
-	abilities            IAbilities // unit abilities.
-	attacks              IAttacks   // unit type of attacks
+	abilities            IAbilities   // unit abilities.
+	activables           []IActivable // unit activables in a turn.
+	attacks              IAttacks     // unit type of attacks
 	class                IClass
 	conditions           []ICondition   // unit conditions or status effects
 	conditionResistances map[string]int // unit condition resistances
@@ -186,10 +207,8 @@ func (u *Unit) checkProcessingToInt(checks []any) int {
 func (u *Unit) featsCheckForAction(action string) []any {
 	var result []any
 	for _, feat := range u.feats {
-		for k, v := range feat.GetEffects() {
-			if k == action {
-				result = append(result, v)
-			}
+		if r := checkForAction(feat, action); r != nil {
+			result = append(result, r)
 		}
 	}
 	return result
@@ -204,17 +223,31 @@ func (u *Unit) getConditionResistanceFor(condition ICondition) int {
 
 func (u Unit) proficienciesCheckForAction(action string) []any {
 	var result []any
+	for _, proficiency := range u.proficiencies {
+		if r := checkForAction(proficiency, action); r != nil {
+			result = append(result, r)
+		}
+	}
 	return result
 }
 
 func (u Unit) traitsCheckForAction(action string) []any {
 	var result []any
+	for _, trait := range u.traits {
+		if r := checkForAction(trait, action); r != nil {
+			result = append(result, r)
+		}
+	}
 	return result
 }
 
 // -----------------------------------------------------------------------------
 // Unit public methods
 // -----------------------------------------------------------------------------
+
+func (u *Unit) AddActivable(act IActivable) {
+	u.activables = append(u.activables, act)
+}
 
 // AddCondition method adds given condition to the unit.
 func (u *Unit) AddCondition(condition ICondition) error {
@@ -225,6 +258,13 @@ func (u *Unit) AddCondition(condition ICondition) error {
 	}
 	u.conditions = append(u.conditions, condition)
 	return nil
+}
+
+func (u *Unit) EndTurn() {
+	for _, act := range u.activables {
+		act.Clean()
+	}
+	u.activables = nil
 }
 
 // GetAbilities method returns unit abilities.
@@ -326,7 +366,7 @@ func (u *Unit) GetDieRoll() int {
 	battlelog.BLog.PushDebug(fmt.Sprintf("[%s] die-roll %d+%d+%d", u.GetUName(), die20, strModifier, weaponStrModifier))
 	tools.Logger.WithField("module", "unit").
 		WithField("method", "GetDieRoll").
-		Debugf(fmt.Sprintf("[%s] die-roll %d+%d+%d", u.GetUName(), die20, strModifier, weaponStrModifier))
+		Debugf("[%s] die-roll %d+%d+%d", u.GetUName(), die20, strModifier, weaponStrModifier)
 	return result
 }
 
@@ -536,41 +576,51 @@ func (u *Unit) RemoveCondition(condition ICondition) error {
 	return nil
 }
 
-// RollAttack method rolls the attack for the given index against the given
-// unit.
-func (u *Unit) RollAttack(index int, other IUnit) (bool, int) {
-	dieRoll := u.GetDieRoll()
-	ac := other.GetArmorClass()
-	tools.Logger.WithField("module", "unit").
-		WithField("method", "RollAttack").
-		Debug(dieRoll, ac)
-	// if die-roll is greater than the other unit armor class, it is a hit.
-	if dieRoll < ac {
-		//battlelog.BLog.PushInfo(fmt.Sprintf("[%s] miss!\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
-		battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\t❌\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
-		return false, 0
-	}
-	// TODO: fix to used the first attack, usually attack/weapon
-	attack := u.GetAttacks().GetAttacks()[index]
-	attackIcon := ""
-	switch index {
-	case 0:
-		attackIcon = "🗡"
-	case 1:
-		attackIcon = "⚒"
-	case 2:
-		attackIcon = "⚡"
-	}
-	damage := attack.Roll()
-	stDamage := attack.RollSavingThrows(other)
-	otherHp := other.GetHitPoints().GetScore()
-	//battlelog.BLog.PushInfo(fmt.Sprintf("[%s] %s roll:%dvs%d🛡️%d⚔%d⚁", u.GetUName(), attack.GetName(), dieRoll, ac, damage, stDamage))
-	battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\t%s\troll:%dvs%d🛡️%d⚔%d⚁", u.GetUName(), attackIcon, dieRoll, ac, damage, stDamage))
-	damage += stDamage
-	otherHp -= damage
-	other.GetHitPoints().SetScore(otherHp)
-	return true, damage
-}
+//// RollAttack method rolls the attack for the given index against the given
+//// unit.
+//func (u *Unit) RollAttack(index int, other IUnit) (bool, int) {
+//    dieRoll := u.GetDieRoll()
+//    // TODO: any feats, traits or proficiencies related with die roll have to
+//    // be applied now.
+//    dieRollChecks := u.checkForAction(constants.DieRoll)
+//    dieRollChecksResult := u.checkProcessingToInt(dieRollChecks)
+//    dieRoll += dieRollChecksResult
+//    ac := other.GetArmorClass()
+//    tools.Logger.WithField("module", "unit").
+//        WithField("method", "RollAttack").
+//        Debug(dieRoll, ac)
+//    // if die-roll is greater than the other unit armor class, it is a hit.
+//    if dieRoll < ac {
+//        //battlelog.BLog.PushInfo(fmt.Sprintf("[%s] miss!\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
+//        battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\t❌\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
+//        return false, 0
+//    }
+//    // TODO: fix to used the first attack, usually attack/weapon
+//    attack := u.GetAttacks().GetAttacks()[index]
+//    attackIcon := ""
+//    switch index {
+//    case 0:
+//        attackIcon = "🗡"
+//    case 1:
+//        attackIcon = "⚒"
+//    case 2:
+//        attackIcon = "⚡"
+//    }
+//    damage := attack.Roll()
+//    stDamage := attack.RollSavingThrows(other)
+//    otherHp := other.GetHitPoints().GetScore()
+//    //battlelog.BLog.PushInfo(fmt.Sprintf("[%s] %s roll:%dvs%d🛡️%d⚔%d⚁", u.GetUName(), attack.GetName(), dieRoll, ac, damage, stDamage))
+//    battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\t%s\troll:%dvs%d🛡️%d⚔%d⚁", u.GetUName(), attackIcon, dieRoll, ac, damage, stDamage))
+//    damage += stDamage
+//    // TODO: any feats, traits or proficiencies related with damage have to
+//    // be applied now.
+//    damageChecks := u.checkForAction(constants.DieRoll)
+//    damageChecksResult := u.checkProcessingToInt(damageChecks)
+//    damage += damageChecksResult
+//    otherHp -= damage
+//    other.GetHitPoints().SetScore(otherHp)
+//    return true, damage
+//}
 
 // RollConditions method roll damages for every condition applied to the unit.
 func (u *Unit) RollConditions() []int {
@@ -582,6 +632,61 @@ func (u *Unit) RollConditions() []int {
 		result = append(result, damage)
 	}
 	return result
+}
+
+func (u *Unit) RollDamage(index int, other IUnit) (bool, int) {
+	attack := u.GetAttacks().GetAttacks()[index]
+	attackIcon := ""
+	switch index {
+	case 0:
+		attackIcon = "🗡"
+	case 1:
+		attackIcon = "⚒"
+	case 2:
+		attackIcon = "⚡"
+	}
+	damage := attack.Roll(u)
+	stDamage := attack.RollSavingThrows(other)
+	otherHp := other.GetHitPoints().GetScore()
+	damage += stDamage
+	// TODO: any feats, traits or proficiencies related with damage have to
+	// be applied now.
+	damageChecks := u.checkForAction(constants.DamageRoll)
+	damageChecksResult := u.checkProcessingToInt(damageChecks)
+	damage += damageChecksResult
+	otherHp -= damage
+	other.GetHitPoints().SetScore(otherHp)
+	//battlelog.BLog.PushInfo(fmt.Sprintf("[%s] %s roll:%dvs%d🛡️%d⚔%d⚁", u.GetUName(), attack.GetName(), dieRoll, ac, damage, stDamage))
+	battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\t%s\t%d⚔%d⚁", u.GetUName(), attackIcon, damage, stDamage))
+	return true, damage
+}
+
+func (u *Unit) RollDieRoll(index int, other IUnit) bool {
+	dieRoll := u.GetDieRoll()
+	// Call attack die roll for any die roll effect provided by the attack that
+	// can involve activation of any feat, trait, proficiency, ...
+	attack := u.GetAttacks().GetAttacks()[index]
+	tools.Logger.WithField("module", "unit").
+		WithField("method", "RollAttack").
+		Debugf("%+#v", attack)
+	dieRoll += attack.DieRoll(u)
+	// TODO: any feats, traits or proficiencies related with die roll have to
+	// be applied now.
+	dieRollChecks := u.checkForAction(constants.DieRoll)
+	dieRollChecksResult := u.checkProcessingToInt(dieRollChecks)
+	dieRoll += dieRollChecksResult
+	ac := other.GetArmorClass()
+	tools.Logger.WithField("module", "unit").
+		WithField("method", "RollAttack").
+		Debug(dieRoll, ac)
+	// if die-roll is greater than the other unit armor class, it is a hit.
+	if dieRoll < ac {
+		//battlelog.BLog.PushInfo(fmt.Sprintf("[%s] miss!\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
+		battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\t❌\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
+		return false
+	}
+	battlelog.BLog.PushInfo(fmt.Sprintf("[%s]\troll:%dvs%d🛡️", u.GetUName(), dieRoll, ac))
+	return true
 }
 
 func (u *Unit) SetAbilities(abilities IAbilities) {
