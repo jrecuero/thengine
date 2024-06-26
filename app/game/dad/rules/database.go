@@ -18,6 +18,8 @@ const (
 	DbSectionAccessories = "accessories"
 	DbSectionSpells      = "spells"
 	DbSectionSkills      = "skills"
+	DbSectionInventory   = "inventory"
+	DbSectionConsumables = "consumables"
 )
 
 var (
@@ -163,6 +165,12 @@ func NewDatabase(name string) *Database {
 
 	dbase.sections[DbSectionSkills] = NewDatabaseSection(DbSectionSkills)
 	dbase.sections[DbSectionSkills].entries = make(map[string]*DatabaseEntry)
+
+	dbase.sections[DbSectionInventory] = NewDatabaseSection(DbSectionInventory)
+	dbase.sections[DbSectionInventory].sections = make(map[string]*DatabaseSection)
+	dbase.sections[DbSectionInventory].sections[DbSectionConsumables] = NewDatabaseSection(DbSectionConsumables)
+	dbase.sections[DbSectionInventory].sections[DbSectionConsumables].entries = make(map[string]*DatabaseEntry)
+
 	return dbase
 }
 

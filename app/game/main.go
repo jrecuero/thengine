@@ -62,6 +62,7 @@ const (
 	EnemyNameTextName        = "text/enemy/name/1"
 	EnemyHealthBarName       = "health-bar/enemy/live/1"
 	PlayerPosTextName        = "text/player-position/1"
+	InventoryTextName        = "text/inventory/1"
 )
 
 // -----------------------------------------------------------------------------
@@ -231,6 +232,16 @@ func buildUI(scene engine.IScene, player *Player, enemy *Enemy) {
 		api.NewSize(10, 1), &constants.WhiteOverBlack, "[2,2]")
 	playerPosText.SetZLevel(1)
 	scene.AddEntity(playerPosText)
+
+	inventoryStr := "Inventory\n"
+	inventory := player.GetInventory()
+	for _, consumable := range inventory.GetConsumables() {
+		inventoryStr += consumable.GetUName() + "\n"
+	}
+	inventoryText := widgets.NewText(InventoryTextName, api.NewPoint(81, 14),
+		api.NewSize(10, 5), &constants.WhiteOverBlack, inventoryStr)
+
+	scene.AddEntity(inventoryText)
 }
 
 func newTrap(name string, pos *api.Point, style *tcell.Style) *assets.Trap {

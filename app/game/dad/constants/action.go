@@ -5,6 +5,7 @@ package constants
 
 const (
 	InitiativeRoll = "initiative roll"
+	ConsumableRoll = "consumable roll"
 	PerceptionRoll = "perception roll"
 	//DieRoll                      = "die roll"
 	DamageRoll                   = "damage roll"

@@ -26,16 +26,18 @@ type attackInfo struct {
 }
 
 type inputAction struct {
-	selAttack bool
-	attack    *attackInfo
-	pos       *api.Point
+	selAttack   bool
+	attack      *attackInfo
+	pos         *api.Point
+	consumeItem bool
 }
 
 func newInputActionWithSelectAttack() *inputAction {
 	return &inputAction{
-		selAttack: true,
-		attack:    nil,
-		pos:       nil,
+		selAttack:   true,
+		attack:      nil,
+		pos:         nil,
+		consumeItem: false,
 	}
 }
 
@@ -46,15 +48,26 @@ func newInputActionWithAttack(index int, name string) *inputAction {
 			index: index,
 			name:  name,
 		},
-		pos: nil,
+		pos:         nil,
+		consumeItem: false,
 	}
 }
 
 func newInputActionWithPosition(pos *api.Point) *inputAction {
 	return &inputAction{
-		selAttack: false,
-		attack:    nil,
-		pos:       pos,
+		selAttack:   false,
+		attack:      nil,
+		pos:         pos,
+		consumeItem: false,
+	}
+}
+
+func newInputActionWithConsumeItem() *inputAction {
+	return &inputAction{
+		selAttack:   false,
+		attack:      nil,
+		pos:         nil,
+		consumeItem: true,
 	}
 }
 
@@ -142,6 +155,16 @@ func updateDataBox(scene engine.IScene, player *Player) {
 		if playerHealthBar, ok := tmp.(*HealthBar); ok {
 			playerHealthBar.UpdateStyle(player.GetHitPoints().GetScore())
 			playerHealthBar.SetCompleted(player.GetHitPoints().GetScore())
+		}
+	}
+	if tmp := scene.GetEntityByName(InventoryTextName); tmp != nil {
+		if inventoryText, ok := tmp.(*widgets.Text); ok {
+			inventoryStr := "Inventory\n"
+			inventory := player.GetInventory()
+			for _, consumable := range inventory.GetConsumables() {
+				inventoryStr += consumable.GetUName() + "\n"
+			}
+			inventoryText.SetText(inventoryStr)
 		}
 	}
 }
@@ -341,17 +364,27 @@ func (h *GameHandler) RunStartTurn(scene engine.IScene, input *inputAction) {
 	enemies := getEnemiesInScene(scene)
 	// TODO: initiative should be checked for player and enemies in order to
 	// define who should be take action first and in which order.
-	if input != nil && input.selAttack {
-		if enemy := isAnyEnemyAdjacent(h.player, enemies); enemy != nil {
-			x, y := h.player.GetPosition().Get()
-			options := widgets.NewListBox("list-box/player-options/1",
-				api.NewPoint(x, y), api.NewSize(10, 5), &theStyleBlueOverBlack,
-				[]string{"weapon", "power", "magical"}, 0)
-			options.SetZLevel(1)
-			options.SetWidgetCallback(h.playerSelection, scene)
-			scene.AddEntity(options)
-			theEngine.GetSceneManager().UpdateFocus()
-			return
+	if input != nil {
+		if input.consumeItem {
+			consumables := h.player.GetInventory().GetConsumables()
+			if len(consumables) != 0 {
+				potion := consumables[0]
+				potion.Consume(h.player)
+				h.player.GetInventory().RemoveConsumable(potion)
+				updateDataBox(scene, h.player)
+			}
+		} else if input.selAttack {
+			if enemy := isAnyEnemyAdjacent(h.player, enemies); enemy != nil {
+				x, y := h.player.GetPosition().Get()
+				options := widgets.NewListBox("list-box/player-options/1",
+					api.NewPoint(x, y), api.NewSize(10, 5), &theStyleBlueOverBlack,
+					[]string{"weapon", "power", "magical"}, 0)
+				options.SetZLevel(1)
+				options.SetWidgetCallback(h.playerSelection, scene)
+				scene.AddEntity(options)
+				theEngine.GetSceneManager().UpdateFocus()
+				return
+			}
 		}
 	}
 	h.RunStateMachineTurn(scene, input)
@@ -427,6 +460,8 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 				//    input = newInputActionWithAttack(0, "weapon attack")
 				//case 'M', 'm':
 				//    input = newInputActionWithAttack(1, "magical attack")
+			case '1':
+				input = newInputActionWithConsumeItem()
 			}
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/jrecuero/thengine/app/game/dad/gear/body"
 	"github.com/jrecuero/thengine/app/game/dad/gear/shields"
 	"github.com/jrecuero/thengine/app/game/dad/gear/weapons"
+	"github.com/jrecuero/thengine/app/game/dad/inventory/consumables"
 	"github.com/jrecuero/thengine/app/game/dad/rules"
 	"github.com/jrecuero/thengine/app/game/dad/spells"
 	"github.com/jrecuero/thengine/pkg/api"
@@ -104,6 +105,18 @@ func NewPlayer(name string, position *api.Point, style *tcell.Style) *Player {
 
 	magicalAttack := rules.NewSpellMeleeAttack("attack/spell/melee/guiding-bolt", spells.NewGuidingBolt())
 	player.GetAttacks().AddAttack(magicalAttack)
+
+	sections := []string{rules.DbSectionInventory, rules.DbSectionConsumables}
+	//tools.Logger.WithField("module", "potion").
+	//    WithField("function", "init").
+	//    Debugf("DBase: %+#v", rules.DBase.GetSections()[rules.DbSectionInventory].GetSections()[rules.DbSectionConsumables])
+	tmp := rules.DBase.GetCreator(sections, consumables.PotionName)
+	potionCreator := tmp.(func(int) *rules.Consumable)
+	potion := potionCreator(5)
+	player.GetInventory().AddConsumables(potion)
+	tools.Logger.WithField("module", "potion").
+		WithField("function", "init").
+		Debugf("Inventory: %+#v", player.GetInventory())
 
 	strengthModifier := player.GetAbilities().GetStrength().GetModifier()
 	tools.Logger.WithField("module", "player").

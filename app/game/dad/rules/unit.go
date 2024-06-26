@@ -43,6 +43,7 @@ type IUnit interface {
 	GetHitting(IUnit) bool
 	GetHitPoints() IHitPoints
 	GetInitiativeRoll() int // unit initiative 1d20 + mod(dex)
+	GetInventory() IInventory
 	GetLanguages() []ILanguage
 	GetProficiencies() []IProficiency
 	GetProficiencyBonus() int // unit proficiency bonus.
@@ -67,6 +68,7 @@ type IUnit interface {
 	SetFeats([]IFeat)
 	SetGear(IGear)
 	SetHitPoints(IHitPoints)
+	SetInventory(IInventory)
 	SetLanguages([]ILanguage)
 	SetProficiencies([]IProficiency)
 	SetRace(IRace)
@@ -117,6 +119,7 @@ type Unit struct {
 	feats                []IFeat
 	gear                 IGear       // unit gear
 	hitPoints            IHitPoints  // unit hit points.
+	inventory            IInventory  // unit inventory
 	languages            []ILanguage // unit languages
 	level                ILevel      // unit level.
 	proficiencies        []IProficiency
@@ -140,6 +143,7 @@ func NewUnit(name string) *Unit {
 		feats:                nil,
 		gear:                 NewGear(),
 		hitPoints:            NewHitPoints(0),
+		inventory:            NewInventory("inventory/1"),
 		languages:            nil,
 		level:                NewLevel(0, 0),
 		proficiencies:        nil,
@@ -459,6 +463,10 @@ func (u *Unit) GetInitiativeRoll() int {
 	return initiative
 }
 
+func (u *Unit) GetInventory() IInventory {
+	return u.inventory
+}
+
 func (u *Unit) GetLanguages() []ILanguage {
 	return u.languages
 }
@@ -683,6 +691,10 @@ func (u *Unit) SetGear(gear IGear) {
 
 func (u *Unit) SetHitPoints(hp IHitPoints) {
 	u.hitPoints = hp
+}
+
+func (u *Unit) SetInventory(inventory IInventory) {
+	u.inventory = inventory
 }
 
 func (u *Unit) SetLanguages(langs []ILanguage) {
