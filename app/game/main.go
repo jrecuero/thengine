@@ -207,8 +207,10 @@ func buildUI(scene engine.IScene, player *Player, enemy *Enemy) {
 		api.NewSize(10, 1), &theStyleBlueOverBlack, acText)
 	scene.AddEntity(playerACText)
 
+	playerLevel := player.GetLevel()
+	playerStr := fmt.Sprintf("%s L%d [%d]", player.GetUName(), playerLevel.GetScore(), playerLevel.GetExperience())
 	playerNameText := widgets.NewText(PlayerNameTextName, api.NewPoint(81, 9),
-		api.NewSize(18, 1), &theStyleBlueOverBlack, player.GetUName())
+		api.NewSize(18, 1), &theStyleBlueOverBlack, playerStr)
 	scene.AddEntity(playerNameText)
 
 	playerHealthBar := NewHealthBar(PlayerHealthBar, api.NewPoint(81, 10),
@@ -280,6 +282,10 @@ func main() {
 	enemy2 := NewEnemy(GenerateEnemyName(), api.NewPoint(67, 7), &constants.AquaOverWhite)
 	mainScene.AddEntity(enemy2)
 	TheEnemies = append(TheEnemies, enemy2)
+
+	enemy3 := NewEnemy(GenerateEnemyName(), api.NewPoint(18, 6), &constants.RedOverBlack)
+	mainScene.AddEntity(enemy3)
+	TheEnemies = append(TheEnemies, enemy3)
 
 	buildUI(mainScene, player, enemy1)
 

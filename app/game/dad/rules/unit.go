@@ -45,6 +45,7 @@ type IUnit interface {
 	GetInitiativeRoll() int // unit initiative 1d20 + mod(dex)
 	GetInventory() IInventory
 	GetLanguages() []ILanguage
+	GetLevel() ILevel
 	GetProficiencies() []IProficiency
 	GetProficiencyBonus() int // unit proficiency bonus.
 	GetSkills() []ISkill
@@ -70,6 +71,7 @@ type IUnit interface {
 	SetHitPoints(IHitPoints)
 	SetInventory(IInventory)
 	SetLanguages([]ILanguage)
+	SetLevel(ILevel)
 	SetProficiencies([]IProficiency)
 	SetRace(IRace)
 	SetSkills([]ISkill)
@@ -145,7 +147,7 @@ func NewUnit(name string) *Unit {
 		hitPoints:            NewHitPoints(0),
 		inventory:            NewInventory("inventory/1"),
 		languages:            nil,
-		level:                NewLevel(0, 0),
+		level:                NewLevel(0, 0, 0),
 		proficiencies:        nil,
 		race:                 nil,
 		skills:               CreateSkills(),
@@ -463,12 +465,19 @@ func (u *Unit) GetInitiativeRoll() int {
 	return initiative
 }
 
+// GetInventory method returns the unit inventory.
 func (u *Unit) GetInventory() IInventory {
 	return u.inventory
 }
 
+// GetLanguages method returns the unit languages.
 func (u *Unit) GetLanguages() []ILanguage {
 	return u.languages
+}
+
+// GetLevel method returns the unit Level instance.
+func (u *Unit) GetLevel() ILevel {
+	return u.level
 }
 
 // GetProficiencies method returns all unit proficiencies.
@@ -655,10 +664,12 @@ func (u *Unit) RollDieRoll(index int, other IUnit) bool {
 	return true
 }
 
+// SetAbilities method sets unit abilitities.
 func (u *Unit) SetAbilities(abilities IAbilities) {
 	u.abilities = abilities
 }
 
+// SetAttacks method sets unit attacks.
 func (u *Unit) SetAttacks(attacks IAttacks) {
 	u.attacks = attacks
 }
@@ -668,14 +679,18 @@ func (u *Unit) SetClass(class IClass) {
 	u.class = class
 }
 
+// SetConditions method sets unit conditions/status effects.
 func (u *Unit) SetConditions(conditions []ICondition) {
 	u.conditions = conditions
 }
 
+// SetConditionResistances method sets unit resistances to multiple
+// conditions/status effects.
 func (u *Unit) SetConditionResistances(resitances map[string]int) {
 	u.conditionResistances = resitances
 }
 
+// SetDescription method sets the unit description.
 func (u *Unit) SetDescription(desc string) {
 	u.description = desc
 }
@@ -685,20 +700,29 @@ func (u *Unit) SetFeats(feats []IFeat) {
 	u.feats = feats
 }
 
+// SetGear method sets the unit gear.
 func (u *Unit) SetGear(gear IGear) {
 	u.gear = gear
 }
 
+// SetHitPoints method sets the unit hit points.
 func (u *Unit) SetHitPoints(hp IHitPoints) {
 	u.hitPoints = hp
 }
 
+// SetInventory method sets the unit inventory.
 func (u *Unit) SetInventory(inventory IInventory) {
 	u.inventory = inventory
 }
 
+// SetLanguages method sets the unit languages.
 func (u *Unit) SetLanguages(langs []ILanguage) {
 	u.languages = langs
+}
+
+// SetLevel method sets the unit Level instance.
+func (u *Unit) SetLevel(level ILevel) {
+	u.level = level
 }
 
 // SetProficiencies method sets the given slice of proficiencies.

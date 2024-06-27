@@ -41,7 +41,7 @@ func (e *Enemy) populate(content map[string]any) {
 		Debugf("%+v", content)
 	e.SetSolid(true)
 	defaults := map[string]any{
-		"hp":           50,
+		"hp":           10,
 		"strength":     10,
 		"dexterity":    10,
 		"constitution": 10,
@@ -50,6 +50,7 @@ func (e *Enemy) populate(content map[string]any) {
 		"charisma":     10,
 	}
 	e.Populate(defaults, content)
+	e.GetLevel().SetToGive(600)
 	if _, ok := content["gear"]; ok {
 		e.GetGear().UnmarshalMap(content)
 	} else {

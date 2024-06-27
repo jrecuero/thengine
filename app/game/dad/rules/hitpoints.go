@@ -107,7 +107,7 @@ func (l *HitPoints) Inc(score int) int {
 
 // Dec method substracts the given value to the hit points score.
 func (l *HitPoints) Dec(score int) int {
-	l.score = int(math.Max(0, float64(l.score+score)))
+	l.score = int(math.Max(0, float64(l.score-score)))
 	return l.score
 }
 

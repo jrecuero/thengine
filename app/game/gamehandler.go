@@ -145,6 +145,13 @@ func readFromBattleLog(scene engine.IScene) {
 }
 
 func updateDataBox(scene engine.IScene, player *Player) {
+	if tmp := scene.GetEntityByName(PlayerNameTextName); tmp != nil {
+		if playerNameText, ok := tmp.(*widgets.Text); ok {
+			playerLevel := player.GetLevel()
+			playerStr := fmt.Sprintf("%s L%d [%d]", player.GetUName(), playerLevel.GetScore(), playerLevel.GetExperience())
+			playerNameText.SetText(playerStr)
+		}
+	}
 	if tmp := scene.GetEntityByName(PlayerLiveTextName); tmp != nil {
 		if playerLiveText, ok := tmp.(*widgets.Text); ok {
 			hpText := fmt.Sprintf("HP:  %d", player.GetHitPoints().GetScore())
@@ -251,11 +258,19 @@ func (h *GameHandler) PlayerAttack(scene engine.IScene, attack *attackInfo) {
 			if hit := h.player.RollDieRoll(attack.index, e); hit {
 				h.player.RollDamage(attack.index, e)
 			}
-			updateDataBox(scene, h.player)
+			readFromBattleLog(scene)
+			// if enemy has equal or lower than 0 hit points, remove it from
+			// the scene.
+			if e.GetHitPoints().GetScore() <= 0 {
+				exp := e.GetLevel().GetToGive()
+				h.player.GetLevel().IncExperience(exp)
+				scene.RemoveEntity(e)
+				h.enemy = nil
+				writeToCommandLine(scene, fmt.Sprintf("\n> Enemy %s defeated", e.GetUName()))
+			}
 			tools.Logger.WithField("module", "gamehandler").
 				WithField("method", "Update").
 				Debugf("player %s to %s", attack.name, enemy.GetName())
-			readFromBattleLog(scene)
 		}
 	} else {
 		writeToCommandLine(scene, fmt.Sprintf("\n> Player attack not available"))
@@ -282,21 +297,25 @@ func (h *GameHandler) PlayerMove(scene engine.IScene, playerNewPosition *api.Poi
 			// if trap is properly disarmed, trap is removed and player update
 			// the position.
 			if trap, ok := entity.(*assets.Trap); ok {
+				damage := 0
 				if entity.IsVisible() {
 					if disarm := trap.CanDisarm(h.player); disarm {
 						writeToCommandLine(scene, fmt.Sprintf("\n> player %s disarm trap %s",
 							h.player.GetName(), trap.GetName()))
 					} else {
 						h.player.SetPosition(api.NewPoint(playerX, playerY))
-						damage := trap.RollDamageValue()
+						damage = trap.RollDamageValue()
 						writeToCommandLine(scene, fmt.Sprintf("\n> player %s damaged disarming trap %s for %d",
 							h.player.GetName(), trap.GetName(), damage))
 					}
 				} else {
 					h.player.SetPosition(api.NewPoint(playerX, playerY))
-					damage := trap.RollDamageValue()
+					damage = trap.RollDamageValue()
 					writeToCommandLine(scene, fmt.Sprintf("\n> player %s damaged by trap %s for %d",
 						h.player.GetName(), trap.GetName(), damage))
+				}
+				if damage != 0 {
+					h.player.GetHitPoints().Dec(damage)
 				}
 				scene.RemoveEntity(entity)
 			}
@@ -354,6 +373,7 @@ func (h *GameHandler) RunPlayerTurn(scene engine.IScene, input *inputAction) {
 	if input != nil && input.pos != nil {
 		h.PlayerMove(scene, input.pos)
 	}
+	updateDataBox(scene, h.player)
 	h.RunStateMachineTurn(scene, input)
 }
 
@@ -455,24 +475,12 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 			switch ev.Rune() {
 			case 'A', 'a':
 				input = newInputActionWithSelectAttack()
-				//h.RunStateMachineTurn(scene, input)
-				//case 'A', 'a':
-				//    input = newInputActionWithAttack(0, "weapon attack")
-				//case 'M', 'm':
-				//    input = newInputActionWithAttack(1, "magical attack")
 			case '1':
 				input = newInputActionWithConsumeItem()
 			}
 		}
 	}
 	if input != nil {
-		//    if input.attack != nil {
-		//        h.PlayerAttack(scene, input.attack)
-		//    }
-		//    if input.pos != nil {
-		//        h.PlayerMove(scene, input.pos)
-		//    }
-		//TheStateMachine.Next()
 		tools.Logger.WithField("module", "gamehandler").
 			WithField("method", "Update").
 			Debugf("CALL RunStateMachineTurn %+v", input)

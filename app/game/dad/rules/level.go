@@ -1,3 +1,5 @@
+// level.go package contains all data and logic required to handle level and
+// experience for any player character.
 package rules
 
 import "math"
@@ -10,15 +12,17 @@ import "math"
 
 // ILevel interface defines all methods required for any level.
 type ILevel interface {
-	GetScore() int
-	SetScore(int)
-	GetExperience() int
-	SetExperience(int)
-	IncExperience(int) int
 	DecExperience(int) int
+	GetExperience() int
+	GetScore() int
+	GetToGive() int
 	GetToNext() int
-	LevelUp(int) int
-	LevelDown(int) int
+	IncExperience(int) int
+	LevelDown(int, bool) int
+	LevelUp(int, bool) int
+	SetExperience(int)
+	SetScore(int)
+	SetToGive(int)
 }
 
 // -----------------------------------------------------------------------------
@@ -47,15 +51,17 @@ type ILevel interface {
 // a character's abilities, equipment, and overall effectiveness in combat and
 // other challenges.
 type Level struct {
-	score      int // level score.
 	experience int // level experience.
+	score      int // level score.
+	togive     int // experience to give to player character
 }
 
 // NewLevel functions creates a new Level instance.
-func NewLevel(score, exp int) *Level {
+func NewLevel(score int, exp int, togive int) *Level {
 	level := &Level{
-		score:      score,
 		experience: exp,
+		score:      score,
+		togive:     togive,
 	}
 	tonext := level.GetToNext()
 	level.SetExperience(int(math.Min(float64(exp), float64(tonext-1))))
@@ -66,20 +72,13 @@ func NewLevel(score, exp int) *Level {
 // Level public methods
 // -----------------------------------------------------------------------------
 
-// ToNext method returns the default value for the experience required to
-// reach a given level.
-func (l *Level) ToNext(level int) int {
-	return level * 1000
-}
-
-// GetScore method returns the actual level score.
-func (l *Level) GetScore() int {
-	return l.score
-}
-
-// SetScore method sets the actual level score.
-func (l *Level) SetScore(score int) {
-	l.score = score
+// DecExperience method decreases the experience score with the given value.
+func (l *Level) DecExperience(exp int) int {
+	l.experience -= exp
+	for l.experience < l.ToNext(l.GetScore()) {
+		l.LevelDown(1, false)
+	}
+	return l.experience
 }
 
 // GetExperience method returns the actual experience score.
@@ -87,9 +86,15 @@ func (l *Level) GetExperience() int {
 	return l.experience
 }
 
-// SetExperience method sets the actual experience score.
-func (l *Level) SetExperience(exp int) {
-	l.experience = exp
+// GetScore method returns the actual level score.
+func (l *Level) GetScore() int {
+	return l.score
+}
+
+// GetToGive method returns the experience the player character will get when
+// defeating the unit with this Level instance.
+func (l *Level) GetToGive() int {
+	return l.togive
 }
 
 // GetToNext method returns the experience score required to get to the next
@@ -102,36 +107,53 @@ func (l *Level) GetToNext() int {
 func (l *Level) IncExperience(exp int) int {
 	l.experience += exp
 	for l.experience > l.GetToNext() {
-		l.LevelUp(1)
+		l.LevelUp(1, false)
 	}
 	return l.experience
-}
-
-// DecExperience method decreases the experience score with the given value.
-func (l *Level) DecExperience(exp int) int {
-	l.experience -= exp
-	for l.experience < l.ToNext(l.GetScore()) {
-		l.LevelDown(1)
-	}
-	return l.experience
-}
-
-// LevelUp method levels up the level score the given value.
-func (l *Level) LevelUp(score int) int {
-	for i := 0; i < score; i++ {
-		l.score++
-		l.experience = l.GetToNext()
-	}
-	return l.score
 }
 
 // LevelDown method levels down the level score the given value.
-func (l *Level) LevelDown(score int) int {
+func (l *Level) LevelDown(score int, updateExp bool) int {
 	for i := 0; i < score; i++ {
 		l.score--
-		l.experience = l.ToNext(l.score)
+		if updateExp {
+			l.experience = l.ToNext(l.score)
+		}
 	}
 	return l.score
+}
+
+// LevelUp method levels up the level score the given value.
+func (l *Level) LevelUp(score int, updateExp bool) int {
+	for i := 0; i < score; i++ {
+		if updateExp {
+			l.experience += l.GetToNext()
+		}
+		l.score++
+	}
+	return l.score
+}
+
+// SetExperience method sets the actual experience score.
+func (l *Level) SetExperience(exp int) {
+	l.experience = exp
+}
+
+// SetScore method sets the actual level score.
+func (l *Level) SetScore(score int) {
+	l.score = score
+}
+
+// SetToGive method sets the experience the player character will get when
+// defeating the unit with this Level instance.
+func (l *Level) SetToGive(togive int) {
+	l.togive = togive
+}
+
+// ToNext method returns the default value for the experience required to
+// reach a given level.
+func (l *Level) ToNext(level int) int {
+	return level * 1000
 }
 
 var _ ILevel = (*Level)(nil)
