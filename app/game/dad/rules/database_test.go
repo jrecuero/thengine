@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	dbSections     = 4
+	dbSections     = 5
 	dbGearSections = 9
 )
 

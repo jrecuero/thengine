@@ -63,6 +63,7 @@ const (
 	EnemyHealthBarName       = "health-bar/enemy/live/1"
 	PlayerPosTextName        = "text/player-position/1"
 	InventoryTextName        = "text/inventory/1"
+	DoorEventName            = "entity/event/door/1"
 )
 
 // -----------------------------------------------------------------------------
@@ -286,6 +287,12 @@ func main() {
 	enemy3 := NewEnemy(GenerateEnemyName(), api.NewPoint(18, 6), &constants.RedOverBlack)
 	mainScene.AddEntity(enemy3)
 	TheEnemies = append(TheEnemies, enemy3)
+
+	// Events
+	doorEvent := NewDoorEvent(DoorEventName, api.NewPoint(10, 4), api.NewSize(1, 1),
+		&constants.SilverOverBlack, mainScene)
+	//doorEvent.ParentScene = mainScene
+	mainScene.AddEntity(doorEvent)
 
 	buildUI(mainScene, player, enemy1)
 

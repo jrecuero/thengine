@@ -740,7 +740,8 @@ func demoFifteen(dryRun bool) {
 	button2 := widgets.NewButton("button/2", nil, nil, &styleCancel, "CANCEL")
 	button2.SetWidgetCallback(cancelCallback)
 	//dialog := widgets.NewDialog("dialog", api.NewPoint(1, 1), api.NewSize(30, 7), &styleOne, scene,
-	dialog := widgets.NewDialog("dialog", api.NewPoint(1, 1), api.NewSize(30, 7), &styleOne, modalDialog.GetDialogScene(),
+	dialog := widgets.NewDialog("dialog", api.NewPoint(1, 1), api.NewSize(30, 7), &styleOne,
+		modalDialog.GetDialogScene(),
 		[]*widgets.Text{text1, text2, text3},
 		[]*widgets.TextInput{input1, input2, input3},
 		[]*widgets.Button{button1, button2})

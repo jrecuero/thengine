@@ -283,6 +283,10 @@ func (h *GameHandler) PlayerMove(scene engine.IScene, playerNewPosition *api.Poi
 	collisions := scene.CheckCollisionWith(h.player)
 	for _, entity := range collisions {
 		switch entity.(type) {
+		case IDungeonEvent:
+			h.player.SetPosition(api.NewPoint(playerX, playerY))
+			doorEvent := entity.(*DoorEvent)
+			doorEvent.Event.Run(scene, doorEvent)
 		case *Wall:
 			h.player.SetPosition(api.NewPoint(playerX, playerY))
 		case *Enemy:
