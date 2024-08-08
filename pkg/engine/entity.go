@@ -1,4 +1,4 @@
-// entify.go contains all data and methods required for handling an entity
+// entity.go contains all data and methods required for handling an entity
 // in the application. An entity is the basic object that engine handles.
 package engine
 
