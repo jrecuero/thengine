@@ -50,6 +50,12 @@ func (p *Point) Add(point *Point) {
 	p.Y += point.Y
 }
 
+// AddScale method adds given X and Y values to the point instance.
+func (p *Point) AddScale(x int, y int) {
+	p.X += x
+	p.Y += y
+}
+
 // Clone method clones all attributes from the given Point instance.
 func (p *Point) Clone(point *Point) {
 	p.X = point.X
