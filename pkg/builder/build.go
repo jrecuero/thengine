@@ -6,90 +6,16 @@ import (
 	"github.com/jrecuero/thengine/pkg/widgets"
 )
 
-type EDoorPlace int
-
-const (
-	TopDoor EDoorPlace = iota
-	BottomDoor
-	LeftDoor
-	RightDoor
-	NoDoor
-)
-
-type EAxe int
-
-const (
-	AxeX EAxe = iota
-	AxeY
-)
-
-type DoorHook struct {
-	hookA *api.Point
-	hookB *api.Point
-}
-
-func NewDoorHook(hookA *api.Point, hookB *api.Point) *DoorHook {
-	return &DoorHook{
-		hookA: hookA,
-		hookB: hookB,
-	}
-}
-
-type Door struct {
-	place EDoorPlace
-	wide  int
-	hook  *DoorHook
-}
-
-func NewDoor(place EDoorPlace, wide int, hook *DoorHook) *Door {
-	return &Door{
-		place: place,
-		wide:  wide,
-		hook:  hook,
-	}
-}
-
-func (d *Door) SetHooksInWall(wallOrigin *api.Point, wallLen int) {
-	hookA := api.ClonePoint(wallOrigin)
-	hookB := api.ClonePoint(wallOrigin)
-	start, end := getDoorHooksInWall(wallLen, d.wide)
-	switch d.place {
-	case TopDoor:
-		hookA.AddScale(start, -1)
-		hookB.AddScale(end, -1)
-	case BottomDoor:
-		hookA.AddScale(start, 1)
-		hookB.AddScale(end, 1)
-	case LeftDoor:
-		hookA.AddScale(-1, start)
-		hookB.AddScale(-1, end)
-	case RightDoor:
-		hookA.AddScale(1, start)
-		hookB.AddScale(1, end)
-	case NoDoor:
-		return
-	}
-	d.hook = NewDoorHook(hookA, hookB)
-}
-
-type Room struct {
-	*widgets.Sprite
-	doors []*Door
-}
-
-func NewRoom(name string, position *api.Point, size *api.Size, cell *engine.Cell, opts ...any) *Room {
-	room := &Room{
-		Sprite: nil,
-		doors:  nil,
-	}
-	return room
+type RoomData struct {
+	doorPlace  EDoorPlace
+	axe        EAxe
+	fix        int
+	length     int
+	wallOrigin *api.Point
 }
 
 func isMiddle(x int, length int) bool {
 	middle := length / 2
-	//if (length % 2) != 0 {
-	//    middle++
-	//}
 	return x == middle
 }
 
@@ -138,47 +64,16 @@ func buildWall(isXAxe EAxe, fixAxe int, length int, cell *engine.Cell,
 	return spriteCells, door
 }
 
-func BuildHWall(y int, w int, cell *engine.Cell, doorPlace EDoorPlace, doorWide int) ([]*widgets.SpriteCell, *Door) {
-	//spriteCells := []*widgets.SpriteCell{}
-	//var spriteCell *widgets.SpriteCell
-	//var door *Door
-	//if doorPlace != NoDoor {
-	//    door = NewDoor(doorPlace, doorWide, nil)
-	//}
-	//for x := 0; x < w; x++ {
-	//    if !(door != nil && isMiddle(x, w)) {
-	//        spriteCell = widgets.NewSpriteCell(api.NewPoint(x, y), cell)
-	//        spriteCells = append(spriteCells, spriteCell)
-	//    }
-	//}
-	//return spriteCells, door
-	return buildWall(0, y, w, cell, doorPlace, doorWide)
+func BuildHWall(y int, w int, cell *engine.Cell, doorPlace EDoorPlace,
+	doorWide int) ([]*widgets.SpriteCell, *Door) {
+
+	return buildWall(AxeX, y, w, cell, doorPlace, doorWide)
 
 }
 
-func BuildVWall(x int, h int, cell *engine.Cell, doorPlace EDoorPlace, doorWide int) ([]*widgets.SpriteCell, *Door) {
-	//spriteCells := []*widgets.SpriteCell{}
-	//var spriteCell *widgets.SpriteCell
-	//var door *Door
-	//if doorPlace != NoDoor {
-	//    door = NewDoor(doorPlace, doorWide, nil)
-	//}
-	//for y := 0; y < h; y++ {
-	//    if !(door != nil && isMiddle(y, h)) {
-	//        spriteCell = widgets.NewSpriteCell(api.NewPoint(x, y), cell)
-	//        spriteCells = append(spriteCells, spriteCell)
-	//    }
-	//}
-	//return spriteCells, door
-	return buildWall(1, x, h, cell, doorPlace, doorWide)
-}
-
-type RoomData struct {
-	doorPlace  EDoorPlace
-	axe        EAxe
-	fix        int
-	length     int
-	wallOrigin *api.Point
+func BuildVWall(x int, h int, cell *engine.Cell, doorPlace EDoorPlace,
+	doorWide int) ([]*widgets.SpriteCell, *Door) {
+	return buildWall(AxeY, x, h, cell, doorPlace, doorWide)
 }
 
 func NewRoomData(doorPlace EDoorPlace, axe EAxe, fix int, length int,
@@ -205,79 +100,19 @@ func BuildRoomWithDoors(name string, position *api.Point, size *api.Size,
 		NewRoomData(LeftDoor, AxeY, 0, h, api.NewPoint(x, y)),
 		NewRoomData(RightDoor, AxeY, w-1, h, api.NewPoint(x+w-1, y)),
 	}
-	//posANDsize := [][]int{
-	//    {int(TopDoor), 0, 0, size.W, x, y},
-	//    {int(BottomDoor), 0, size.H - 1, size.W, x, y + size.H - 1},
-	//    {int(LeftDoor), 1, 0, size.H, x, y},
-	//    {int(RightDoor), 1, size.W - 1, size.H, x + size.W - 1, y},
-	//}
 	for _, entry := range roomData {
 		doorPlace := NoDoor
 		if isDoors[entry.doorPlace] {
 			doorPlace = entry.doorPlace
 		}
-		wall, door := buildWall(entry.axe, entry.fix, entry.length, cell, doorPlace, doorsWide[entry.doorPlace])
+		wall, door := buildWall(entry.axe, entry.fix, entry.length, cell, doorPlace,
+			doorsWide[entry.doorPlace])
 		spriteCells = append(spriteCells, wall...)
 		if door != nil {
 			door.SetHooksInWall(entry.wallOrigin, entry.length)
 			doors = append(doors, door)
 		}
 	}
-	//for _, entry := range posANDsize {
-	//    doorPlace := NoDoor
-	//    edoorPlace := EDoorPlace(entry[0])
-	//    if isDoors[edoorPlace] {
-	//        doorPlace = edoorPlace
-	//    }
-	//    wall, door := buildWall(entry[1], entry[2], entry[3], cell, doorPlace, doorsWide[edoorPlace])
-	//    spriteCells = append(spriteCells, wall...)
-	//    if door != nil {
-	//        wallOrigin := api.NewPoint(entry[4], entry[5])
-	//        door.SetHooksInWall(wallOrigin, entry[3])
-	//        doors = append(doors, door)
-	//    }
-	//}
-
-	//topDoorPlace := NoDoor
-	//bottomDoorPlace := NoDoor
-	//leftDoorPlace := NoDoor
-	//rightDoorPlace := NoDoor
-
-	//if isDoors[TopDoor] {
-	//    topDoorPlace = TopDoor
-	//}
-	//topWall, topDoor := BuildHWall(0, size.W, cell, topDoorPlace, doorsWide[TopDoor])
-	//spriteCells = append(spriteCells, topWall...)
-	//if topDoor != nil {
-	//    doors = append(doors, topDoor)
-	//}
-
-	//if isDoors[BottomDoor] {
-	//    bottomDoorPlace = BottomDoor
-	//}
-	//bottomWall, bottomDoor := BuildHWall(size.H-1, size.W, cell, bottomDoorPlace, doorsWide[BottomDoor])
-	//spriteCells = append(spriteCells, bottomWall...)
-	//if bottomDoor != nil {
-	//    doors = append(doors, bottomDoor)
-	//}
-
-	//if isDoors[LeftDoor] {
-	//    leftDoorPlace = LeftDoor
-	//}
-	//leftWall, leftDoor := BuildVWall(0, size.H, cell, leftDoorPlace, doorsWide[LeftDoor])
-	//spriteCells = append(spriteCells, leftWall...)
-	//if leftDoor != nil {
-	//    doors = append(doors, leftDoor)
-	//}
-
-	//if isDoors[RightDoor] {
-	//    rightDoorPlace = RightDoor
-	//}
-	//rightWall, rightDoor := BuildVWall(size.W-1, size.H, cell, rightDoorPlace, doorsWide[RightDoor])
-	//spriteCells = append(spriteCells, rightWall...)
-	//if rightDoor != nil {
-	//    doors = append(doors, rightDoor)
-	//}
 
 	sprite := widgets.NewSprite(name, position, spriteCells)
 	sprite.SetSolid(true)
@@ -289,7 +124,19 @@ func BuildRoomWithDoors(name string, position *api.Point, size *api.Size,
 
 }
 
-func BuildRoom(name string, position *api.Point, size *api.Size, cell *engine.Cell, opts ...any) *widgets.Sprite {
+func ConnectRooms(name string, doorA *Door, doorB *Door, cell *engine.Cell) *widgets.Sprite {
+	spriteA := BuildLine("", doorA.hook.hookA, doorB.hook.hookA, cell)
+	spriteB := BuildLine("", doorA.hook.hookB, doorB.hook.hookB, cell)
+	spriteCells := spriteA.GetSpriteCells()
+	spriteCells = append(spriteCells, spriteB.GetSpriteCells()...)
+	sprite := widgets.NewSprite(name, api.NewPoint(0, 0), spriteCells)
+	sprite.SetSolid(true)
+	return sprite
+}
+
+func BuildRoom(name string, position *api.Point, size *api.Size,
+	cell *engine.Cell, opts ...any) *widgets.Sprite {
+
 	var doors []bool
 	if len(opts) != 0 {
 		doors = opts[0].([]bool)
@@ -336,17 +183,28 @@ func getAxe(origin *api.Point, dest *api.Point) (bool, bool) {
 	return axeX, axeY
 }
 
-func BuildCorridor(name string, origin *api.Point, dest *api.Point, cell *engine.Cell, opts ...any) *widgets.Sprite {
+func BuildCorridor(name string, origin *api.Point, dest *api.Point,
+	cell *engine.Cell, opts ...any) *widgets.Sprite {
+
 	axeX, axeY := getAxe(origin, dest)
 	originX, originY := origin.Get()
 	destX, destY := dest.Get()
 	if !axeX && !axeY {
 		return nil
 	}
+	wideA, wideB := 1, 1
+	if len(opts) == 1 {
+		wideA = opts[0].(int)
+		wideB = opts[0].(int)
+	} else if len(opts) == 2 {
+		wideA = opts[0].(int)
+		wideB = opts[1].(int)
+	}
+
 	spriteCells := []*widgets.SpriteCell{}
 	var spriteCell *widgets.SpriteCell
 	if axeX {
-		y := []int{originY - 1, destY + 1}
+		y := []int{originY - wideA, destY + wideB}
 		for x := originX; x <= destX; x++ {
 			spriteCell = widgets.NewSpriteCell(api.NewPoint(x, y[0]), cell)
 			spriteCells = append(spriteCells, spriteCell)
@@ -354,7 +212,7 @@ func BuildCorridor(name string, origin *api.Point, dest *api.Point, cell *engine
 			spriteCells = append(spriteCells, spriteCell)
 		}
 	} else if axeY {
-		x := []int{originX - 1, destX + 1}
+		x := []int{originX - wideA, destX + wideB}
 		for y := originY; y <= destY; y++ {
 			spriteCell = widgets.NewSpriteCell(api.NewPoint(x[0], y), cell)
 			spriteCells = append(spriteCells, spriteCell)
@@ -367,7 +225,9 @@ func BuildCorridor(name string, origin *api.Point, dest *api.Point, cell *engine
 	return sprite
 }
 
-func BuildLine(name string, origin *api.Point, dest *api.Point, cell *engine.Cell, opts ...any) *widgets.Sprite {
+func BuildLine(name string, origin *api.Point, dest *api.Point,
+	cell *engine.Cell, opts ...any) *widgets.Sprite {
+
 	axeX, axeY := getAxe(origin, dest)
 	originX, originY := origin.Get()
 	destX, destY := dest.Get()

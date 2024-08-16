@@ -95,9 +95,18 @@ func buildBoxes(scene engine.IScene) {
 func buildDungeon(scene engine.IScene) {
 
 	cell := engine.NewCell(&constants.YellowOverBlack, '#')
-	room1 := builder.BuildRoomWithDoors("room/1", api.NewPoint(3, 3), api.NewSize(10, 7), cell,
-		[]bool{false, false, false, true}, []int{0, 0, 0, 1})
+
+	room1 := builder.BuildRoomWithDoors("room/1", api.NewPoint(3, 3),
+		api.NewSize(10, 7), cell, []bool{false, false, false, true}, []int{0, 0, 0, 1})
 	scene.AddEntity(room1.Sprite)
+
+	room2 := builder.BuildRoomWithDoors("room/2", api.NewPoint(20, 3),
+		api.NewSize(12, 7), cell, []bool{false, false, true, false}, []int{0, 0, 1, 0})
+	scene.AddEntity(room2.Sprite)
+
+	corridor1 := builder.ConnectRooms("corridor/1", room1.GetDoorAt(builder.RightDoor),
+		room2.GetDoorAt(builder.LeftDoor), cell)
+	scene.AddEntity(corridor1)
 
 	//cell := engine.NewCell(&constants.YellowOverBlack, '#')
 	//room1 := builder.BuildRoom("room/1", api.NewPoint(2, 2), api.NewSize(10, 7), cell,
