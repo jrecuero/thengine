@@ -82,3 +82,10 @@ func (b EBucketCat) IsExtra() bool {
 		return false
 	}
 }
+
+func (b EBucketCat) Equal(other IComparable) bool {
+	if o, ok := other.(EBucketCat); ok {
+		return b == o
+	}
+	return false
+}

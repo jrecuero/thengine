@@ -7,8 +7,8 @@ var (
 )
 
 type IRhune interface {
-	Execute(any) (any, error)
-	GetCat() ERhuneCat
+	Execute(IAvatar) (any, error)
+	GetCat() IComparable
 	GetDescription() string
 	GetName() string
 	GetShort() string
@@ -17,7 +17,7 @@ type IRhune interface {
 type Rhune struct {
 	cat         ERhuneCat
 	description string
-	execute     func(any) (any, error)
+	execute     func(IAvatar) (any, error)
 	name        string
 	short       string
 }
@@ -52,14 +52,14 @@ func NewSkillRhune() *Rhune {
 	}
 }
 
-func (r *Rhune) Execute(v any) (any, error) {
+func (r *Rhune) Execute(avatar IAvatar) (any, error) {
 	if r.execute != nil {
-		return r.execute(v)
+		return r.execute(avatar)
 	}
 	return nil, nil
 }
 
-func (r *Rhune) GetCat() ERhuneCat {
+func (r *Rhune) GetCat() IComparable {
 	return r.cat
 }
 
