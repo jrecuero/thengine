@@ -7,13 +7,13 @@ type IAvatar interface {
 	GetBuckets() IBucketSet
 	GetEquipment() IEquipment
 	GetName() string
-	GetRhunes() []IRhune
+	GetStats() []IStat
 	GetSelected() IBucketSet
 	SetActions([]IAction)
 	SetBuckets(IBucketSet)
 	SetEquipment(IEquipment)
 	SetName(string)
-	SetRhunes([]IRhune)
+	SetStats([]IStat)
 	SetSelected(IBucketSet)
 	String() string
 }
@@ -23,7 +23,7 @@ type Avatar struct {
 	buckets   IBucketSet
 	equipment IEquipment
 	name      string
-	rhunes    []IRhune
+	rhunes    []IStat
 	selected  IBucketSet
 }
 
@@ -43,7 +43,7 @@ func (a *Avatar) GetName() string {
 	return a.name
 }
 
-func (a *Avatar) GetRhunes() []IRhune {
+func (a *Avatar) GetStats() []IStat {
 	return a.rhunes
 }
 
@@ -67,7 +67,7 @@ func (a *Avatar) SetName(name string) {
 	a.name = name
 }
 
-func (a *Avatar) SetRhunes(rhunes []IRhune) {
+func (a *Avatar) SetStats(rhunes []IStat) {
 	a.rhunes = rhunes
 }
 

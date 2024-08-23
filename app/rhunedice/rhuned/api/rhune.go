@@ -1,11 +1,5 @@
 package api
 
-var (
-	AttackRhune  = NewAttackRhune()
-	DefenseRhune = NewDefenseRhune()
-	SkillRhune   = NewSkillRhune()
-)
-
 type IRhune interface {
 	Execute(IAvatar) (any, error)
 	GetCat() IComparable
@@ -22,33 +16,14 @@ type Rhune struct {
 	short       string
 }
 
-func NewAttackRhune() *Rhune {
+func NewRhune(name string, short string, description string, cat ERhuneCat,
+	execute func(IAvatar) (any, error)) *Rhune {
 	return &Rhune{
-		cat:         BaseRhune,
-		description: "Attack rhune is used to damage",
-		execute:     nil,
-		name:        "attack",
-		short:       "ATK",
-	}
-}
-
-func NewDefenseRhune() *Rhune {
-	return &Rhune{
-		cat:         BaseRhune,
-		description: "Base rhune is used to defense against damage",
-		execute:     nil,
-		name:        "defense",
-		short:       "DEF",
-	}
-}
-
-func NewSkillRhune() *Rhune {
-	return &Rhune{
-		cat:         BaseRhune,
-		description: "Skill rhune provides avatar skill abilities",
-		execute:     nil,
-		name:        "skill",
-		short:       "SKL",
+		cat:         cat,
+		description: description,
+		execute:     execute,
+		name:        name,
+		short:       short,
 	}
 }
 

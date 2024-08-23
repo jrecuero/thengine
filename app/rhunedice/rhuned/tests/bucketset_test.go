@@ -5,22 +5,24 @@ import (
 	"testing"
 
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/api"
+	"github.com/jrecuero/thengine/app/rhunedice/rhuned/faces"
+	"github.com/jrecuero/thengine/app/rhunedice/rhuned/rhunes"
 )
 
 func TestBucketSet(t *testing.T) {
 	// create dice faces
-	faces := []api.IFace{
-		api.AttackFace,
-		api.DefenseFace,
-		api.SkillFace,
+	diceFaces := []api.IFace{
+		faces.AttackFace,
+		faces.DefenseFace,
+		faces.SkillFace,
 	}
-	fmt.Println(faces)
+	fmt.Println(diceFaces)
 
 	// create multiple dice
 	dices := make([]api.IDice, 3)
 	for i := range dices {
 		diceName := fmt.Sprintf("dice/%d", i)
-		dices[i] = api.NewDice(diceName, faces)
+		dices[i] = api.NewDice(diceName, diceFaces)
 	}
 	fmt.Println(dices)
 
@@ -34,9 +36,9 @@ func TestBucketSet(t *testing.T) {
 
 	// create buckets
 	buckets := []api.IBucket{
-		api.NewBucket("atk/1", api.AttackRhune),
-		api.NewBucket("def/1", api.DefenseRhune),
-		api.NewBucket("skl/1", api.SkillRhune),
+		api.NewBucket("atk/1", rhunes.AttackRhune),
+		api.NewBucket("def/1", rhunes.DefenseRhune),
+		api.NewBucket("skl/1", rhunes.SkillRhune),
 	}
 	fmt.Println(buckets)
 

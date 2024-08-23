@@ -1,11 +1,7 @@
 package api
 
-import "fmt"
-
-var (
-	AttackFace  = NewFace(AttackRhune)
-	DefenseFace = NewFace(DefenseRhune)
-	SkillFace   = NewFace(SkillRhune)
+import (
+	"fmt"
 )
 
 type IFace interface {
