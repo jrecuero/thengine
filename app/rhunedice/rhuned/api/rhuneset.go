@@ -19,13 +19,14 @@ type RhuneSet struct {
 	name   string
 }
 
+func NewRhuneSet(name string, rhunes []IRhune) *RhuneSet {
+	return &RhuneSet{
+		rhunes: rhunes,
+		name:   name,
+	}
+}
+
 func (r *RhuneSet) getRhuneAndIndex(name string) (IRhune, int) {
-	//for index, rhune := range r.rhunes {
-	//    if rhune.GetName() == name {
-	//        return rhune, index
-	//    }
-	//}
-	//return nil, -1
 	if rhune, index, found := FindByNameWithIndex(r.rhunes, name); found {
 		return rhune, index
 	}
@@ -34,6 +35,19 @@ func (r *RhuneSet) getRhuneAndIndex(name string) (IRhune, int) {
 
 func (r *RhuneSet) AddRhune(rhune IRhune) error {
 	return nil
+}
+
+func (r *RhuneSet) GetName() string {
+	return r.name
+}
+
+func (r *RhuneSet) GetRhuneByName(name string) IRhune {
+	rhune, _ := r.getRhuneAndIndex(name)
+	return rhune
+}
+
+func (r *RhuneSet) GetRhunes() []IRhune {
+	return r.rhunes
 }
 
 func (r *RhuneSet) GetRhunesForCat(cat ERhuneCat) []IRhune {

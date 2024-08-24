@@ -8,7 +8,7 @@ import (
 type IBucket interface {
 	Dec(int)
 	Inc(int)
-	GetCat() EBucketCat
+	GetCat() IComparable
 	GetLimit() int
 	GetName() string
 	GetRhune() IRhune
@@ -49,7 +49,7 @@ func (b *Bucket) Inc(value int) {
 	}
 }
 
-func (b *Bucket) GetCat() EBucketCat {
+func (b *Bucket) GetCat() IComparable {
 	return b.cat
 }
 

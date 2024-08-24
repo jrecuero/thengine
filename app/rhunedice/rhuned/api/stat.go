@@ -24,6 +24,17 @@ type Stat struct {
 	value       int
 }
 
+func NewStat(name string, short string, description string,
+	bucket IBucket, value int) *Stat {
+	return &Stat{
+		bucket:      bucket,
+		description: description,
+		name:        name,
+		short:       short,
+		value:       value,
+	}
+}
+
 func (s *Stat) GetBucket() IBucket {
 	return s.bucket
 }

@@ -7,14 +7,15 @@ type IAvatar interface {
 	GetBuckets() IBucketSet
 	GetEquipment() IEquipment
 	GetName() string
-	GetStats() []IStat
+	GetStats() IStatSet
 	GetSelected() IBucketSet
 	SetActions([]IAction)
 	SetBuckets(IBucketSet)
 	SetEquipment(IEquipment)
 	SetName(string)
-	SetStats([]IStat)
+	SetStats(IStatSet)
 	SetSelected(IBucketSet)
+	StartTurn()
 	String() string
 }
 
@@ -23,8 +24,29 @@ type Avatar struct {
 	buckets   IBucketSet
 	equipment IEquipment
 	name      string
-	rhunes    []IStat
+	stats     IStatSet
 	selected  IBucketSet
+}
+
+func NewAvatar(name string, stats IStatSet, buckets IBucketSet,
+	equipment IEquipment, actions []IAction) *Avatar {
+	return &Avatar{
+		actions:   actions,
+		buckets:   buckets,
+		equipment: equipment,
+		name:      name,
+		stats:     stats,
+		selected:  nil,
+	}
+}
+
+func (a *Avatar) updateBucketsWithEquipment() {
+}
+
+func (a *Avatar) updateBucketsWithStats() {
+	for _, stat := range a.stats.GetStats() {
+		stat.GetBucket().Inc(stat.GetValue())
+	}
 }
 
 func (a *Avatar) GetActions() []IAction {
@@ -43,8 +65,8 @@ func (a *Avatar) GetName() string {
 	return a.name
 }
 
-func (a *Avatar) GetStats() []IStat {
-	return a.rhunes
+func (a *Avatar) GetStats() IStatSet {
+	return a.stats
 }
 
 func (a *Avatar) GetSelected() IBucketSet {
@@ -67,16 +89,21 @@ func (a *Avatar) SetName(name string) {
 	a.name = name
 }
 
-func (a *Avatar) SetStats(rhunes []IStat) {
-	a.rhunes = rhunes
+func (a *Avatar) SetStats(stats IStatSet) {
+	a.stats = stats
 }
 
 func (a *Avatar) SetSelected(buckets IBucketSet) {
 	a.selected = buckets
 }
 
+func (a *Avatar) StartTurn() {
+	a.updateBucketsWithStats()
+	a.updateBucketsWithEquipment()
+}
+
 func (a *Avatar) String() string {
-	return fmt.Sprintf("%s", a.name)
+	return fmt.Sprintf("%s %s %s", a.name, a.stats, a.buckets)
 }
 
 var _ IAvatar = (*Avatar)(nil)

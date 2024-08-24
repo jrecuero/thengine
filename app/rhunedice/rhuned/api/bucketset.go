@@ -28,10 +28,13 @@ func NewBucketSet(name string, buckets []IBucket) *BucketSet {
 }
 
 func (b *BucketSet) getBucketAndIndex(name string) (IBucket, int) {
-	for index, bucket := range b.buckets {
-		if bucket.GetName() == name {
-			return bucket, index
-		}
+	//for index, bucket := range b.buckets {
+	//    if bucket.GetName() == name {
+	//        return bucket, index
+	//    }
+	//}
+	if bucket, index, found := FindByNameWithIndex(b.buckets, name); found {
+		return bucket, index
 	}
 	return nil, -1
 }
@@ -45,8 +48,8 @@ func (b *BucketSet) AddBucket(bucket IBucket) error {
 }
 
 func (b *BucketSet) GetBucketByName(name string) IBucket {
-	result, _ := b.getBucketAndIndex(name)
-	return result
+	bucket, _ := b.getBucketAndIndex(name)
+	return bucket
 }
 
 func (b *BucketSet) GetBuckets() []IBucket {
@@ -54,13 +57,14 @@ func (b *BucketSet) GetBuckets() []IBucket {
 }
 
 func (b *BucketSet) GetBucketsForCat(cat EBucketCat) []IBucket {
-	result := []IBucket{}
-	for _, bucket := range b.buckets {
-		if bucket.GetCat() == cat {
-			result = append(result, bucket)
-		}
-	}
-	return result
+	//result := []IBucket{}
+	//for _, bucket := range b.buckets {
+	//    if bucket.GetCat() == cat {
+	//        result = append(result, bucket)
+	//    }
+	//}
+	//return result
+	return FindByCat(b.buckets, cat)
 }
 
 func (b *BucketSet) GetName() string {
