@@ -41,6 +41,10 @@ func NewAvatar(name string, stats IStatSet, buckets IBucketSet,
 }
 
 func (a *Avatar) updateBucketsWithEquipment() {
+	if armor := a.GetEquipment().GetArmor(); armor != nil {
+		bucket := a.GetBuckets().GetBucketByName(armor.GetBucketName())
+		bucket.Inc(armor.GetValue())
+	}
 }
 
 func (a *Avatar) updateBucketsWithStats() {

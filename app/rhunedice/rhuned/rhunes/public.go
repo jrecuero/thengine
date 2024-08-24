@@ -4,4 +4,6 @@ var (
 	AttackRhune  = NewAttackRhune()
 	DefenseRhune = NewDefenseRhune()
 	SkillRhune   = NewSkillRhune()
+
+	ClothesRhune = NewClothesRhune()
 )

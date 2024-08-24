@@ -52,5 +52,4 @@ func TestDefaultAvatar(t *testing.T) {
 
 	avatar.StartTurn()
 	fmt.Println("default-avatar ", avatar)
-
 }

@@ -24,7 +24,12 @@ func DefaultAvatar(name string, givenStats map[string]int) *api.Avatar {
 	defaultStatSet := api.NewStatSet(statSetName, defaultStats)
 
 	// create avatar
-	defaultAvatar := api.NewAvatar(name, defaultStatSet, defaultBucketSet, nil, nil)
+	defaultAvatar := api.NewAvatar(
+		name,
+		defaultStatSet,
+		defaultBucketSet,
+		api.NewEquipment(nil, nil, nil),
+		nil)
 
 	return defaultAvatar
 }

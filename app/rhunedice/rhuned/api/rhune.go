@@ -6,6 +6,7 @@ type IRhune interface {
 	GetDescription() string
 	GetName() string
 	GetShort() string
+	SetExecute(func(IAvatar) (any, error))
 }
 
 type Rhune struct {
@@ -48,6 +49,10 @@ func (r *Rhune) GetName() string {
 
 func (r *Rhune) GetShort() string {
 	return r.short
+}
+
+func (r *Rhune) SetExecute(execute func(IAvatar) (any, error)) {
+	r.execute = execute
 }
 
 var _ IRhune = (*Rhune)(nil)
