@@ -8,5 +8,6 @@ func NewSkillRhune() *api.Rhune {
 		api.SkillShort,
 		"Skill rhune provides avatar skill abilities",
 		api.BaseRhune,
+		api.SkillBucket,
 		nil)
 }

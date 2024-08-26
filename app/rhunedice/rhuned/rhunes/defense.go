@@ -8,5 +8,6 @@ func NewDefenseRhune() *api.Rhune {
 		api.DefenseShort,
 		"Base rhune is used to defense against damage",
 		api.BaseRhune,
+		api.DefenseBucket,
 		nil)
 }

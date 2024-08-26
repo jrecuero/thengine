@@ -49,7 +49,9 @@ func (a *Avatar) updateBucketsWithEquipment() {
 
 func (a *Avatar) updateBucketsWithStats() {
 	for _, stat := range a.stats.GetStats() {
-		stat.GetBucket().Inc(stat.GetValue())
+		bucketName := stat.GetBucketName()
+		bucket := a.buckets.GetBucketByName(bucketName)
+		bucket.Inc(stat.GetValue())
 	}
 }
 

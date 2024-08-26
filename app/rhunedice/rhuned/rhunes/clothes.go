@@ -11,6 +11,7 @@ func NewClothesRhune() *api.Rhune {
 		api.ClothesShort,
 		"Clothes armor rhune",
 		api.ExtraRhune,
+		api.ExtraBucket,
 		func(avatar api.IAvatar) (any, error) {
 			clothes := armors.NewClothes()
 			avatar.GetEquipment().SetArmor(clothes)

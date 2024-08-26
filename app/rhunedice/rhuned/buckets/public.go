@@ -2,14 +2,18 @@ package buckets
 
 import (
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/api"
-	"github.com/jrecuero/thengine/app/rhunedice/rhuned/rhunes"
 )
 
 func DefaultBuckets() []api.IBucket {
 	defaultBuckets := []api.IBucket{
-		api.NewBucket(api.AttackName, rhunes.AttackRhune),
-		api.NewBucket(api.DefenseName, rhunes.DefenseRhune),
-		api.NewBucket(api.SkillName, rhunes.SkillRhune),
+		api.NewBucket(api.AttackName, api.AttackBucket),
+		api.NewBucket(api.DefenseName, api.DefenseBucket),
+		api.NewBucket(api.SkillName, api.SkillBucket),
+		api.NewBucket(api.StaminaName, api.StaminaBucket),
+		api.NewBucket(api.HealthName, api.HealthBucket),
+		api.NewBucket(api.StepName, api.StepBucket),
+		api.NewBucket(api.HungerName, api.HungerBucket),
+		api.NewBucket(api.ExtraName, api.ExtraBucket),
 	}
 	return defaultBuckets
 }

@@ -6,17 +6,17 @@ import (
 
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/api"
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/avatars"
-	"github.com/jrecuero/thengine/app/rhunedice/rhuned/rhunes"
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/stats"
 )
 
 func TestAvatar(t *testing.T) {
 	// create buckets
 	buckets := []api.IBucket{
-		api.NewBucket(api.AttackName, rhunes.AttackRhune),
-		api.NewBucket(api.DefenseName, rhunes.DefenseRhune),
-		api.NewBucket(api.SkillName, rhunes.SkillRhune),
+		api.NewBucket(api.AttackName, api.AttackBucket),
+		api.NewBucket(api.DefenseName, api.DefenseBucket),
+		api.NewBucket(api.SkillName, api.SkillBucket),
 	}
+
 	fmt.Println("buckets ", buckets)
 
 	// create bucket-set
@@ -25,9 +25,9 @@ func TestAvatar(t *testing.T) {
 
 	// create stats
 	avatarStats := []api.IStat{
-		stats.NewAttack(bucketset.GetBucketByName(api.AttackName), 1),
-		stats.NewDefense(bucketset.GetBucketByName(api.DefenseName), 1),
-		stats.NewSkill(bucketset.GetBucketByName(api.SkillName), 1),
+		stats.NewAttack(1),
+		stats.NewDefense(1),
+		stats.NewSkill(1),
 	}
 
 	// create stat-set

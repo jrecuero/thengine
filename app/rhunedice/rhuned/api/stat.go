@@ -3,12 +3,12 @@ package api
 import "fmt"
 
 type IStat interface {
-	GetBucket() IBucket
+	GetBucketName() string
 	GetDescription() string
 	GetName() string
 	GetShort() string
 	GetValue() int
-	SetBucket(IBucket)
+	SetBucketName(string)
 	SetDescription(string)
 	SetName(string)
 	SetShort(string)
@@ -17,7 +17,7 @@ type IStat interface {
 }
 
 type Stat struct {
-	bucket      IBucket
+	bucketName  string
 	description string
 	name        string
 	short       string
@@ -25,9 +25,9 @@ type Stat struct {
 }
 
 func NewStat(name string, short string, description string,
-	bucket IBucket, value int) *Stat {
+	bucketName string, value int) *Stat {
 	return &Stat{
-		bucket:      bucket,
+		bucketName:  bucketName,
 		description: description,
 		name:        name,
 		short:       short,
@@ -35,8 +35,8 @@ func NewStat(name string, short string, description string,
 	}
 }
 
-func (s *Stat) GetBucket() IBucket {
-	return s.bucket
+func (s *Stat) GetBucketName() string {
+	return s.bucketName
 }
 
 func (s *Stat) GetDescription() string {
@@ -55,8 +55,8 @@ func (s *Stat) GetValue() int {
 	return s.value
 }
 
-func (s *Stat) SetBucket(bucket IBucket) {
-	s.bucket = bucket
+func (s *Stat) SetBucketName(bucketName string) {
+	s.bucketName = bucketName
 }
 
 func (s *Stat) SetDescription(description string) {
@@ -76,7 +76,7 @@ func (s *Stat) SetValue(value int) {
 }
 
 func (s *Stat) String() string {
-	return fmt.Sprintf("%s %s %d", s.name, s.bucket, s.value)
+	return fmt.Sprintf("%s %s %d", s.name, s.bucketName, s.value)
 }
 
 var _ IStat = (*Stat)(nil)

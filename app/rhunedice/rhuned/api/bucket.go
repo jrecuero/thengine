@@ -11,7 +11,6 @@ type IBucket interface {
 	GetCat() IComparable
 	GetLimit() int
 	GetName() string
-	GetRhune() IRhune
 	GetValue() int
 	SetLimit(int)
 	SetName(string)
@@ -23,16 +22,14 @@ type Bucket struct {
 	cat   EBucketCat
 	limit int
 	name  string
-	rhune IRhune
 	value int
 }
 
-func NewBucket(name string, rhune IRhune) *Bucket {
+func NewBucket(name string, cat EBucketCat) *Bucket {
 	return &Bucket{
-		cat:   getBucketCatFromRhune(rhune),
+		cat:   cat,
 		limit: math.MaxInt,
 		name:  name,
-		rhune: rhune,
 		value: 0,
 	}
 }
@@ -59,10 +56,6 @@ func (b *Bucket) GetLimit() int {
 
 func (b *Bucket) GetName() string {
 	return b.name
-}
-
-func (b *Bucket) GetRhune() IRhune {
-	return b.rhune
 }
 
 func (b *Bucket) GetValue() int {

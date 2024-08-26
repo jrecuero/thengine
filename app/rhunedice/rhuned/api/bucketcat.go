@@ -3,57 +3,59 @@ package api
 type EBucketCat int
 
 const (
-	AtkBucket EBucketCat = iota
-	DefBucket
-	SklBucket
-	StaBucket
-	HltBucket
-	StpBucket
-	HngBucket
-	ExtBucket
+	AttackBucket EBucketCat = iota
+	DefenseBucket
+	SkillBucket
+	StaminaBucket
+	HealthBucket
+	StepBucket
+	HungerBucket
+	ExtraBucket
 	NilBucket
 )
 
 func (b EBucketCat) String() string {
 	switch b {
-	case AtkBucket:
-		return "attack"
-	case DefBucket:
-		return "defense"
-	case SklBucket:
-		return "skill"
-	case StaBucket:
-		return "stamina"
-	case HltBucket:
-		return "health"
-	case StpBucket:
-		return "step"
-	case HngBucket:
-		return "hunger"
-	case ExtBucket:
-		return "extra"
+	case AttackBucket:
+		return AttackName
+	case DefenseBucket:
+		return DefenseName
+	case SkillBucket:
+		return SkillName
+	case StaminaBucket:
+		return StaminaName
+	case HealthBucket:
+		return HealthName
+	case StepBucket:
+		return StepName
+	case HungerBucket:
+		return HungerName
+	case ExtraBucket:
+		return ExtraName
+	case NilBucket:
+		return NilName
 	default:
-		return "invalid bucket cat"
+		return NilName
 	}
 }
 
 func (b EBucketCat) IsBase() bool {
 	switch b {
-	case AtkBucket:
+	case AttackBucket:
 		return true
-	case DefBucket:
+	case DefenseBucket:
 		return true
-	case SklBucket:
+	case SkillBucket:
 		return true
-	case StaBucket:
+	case StaminaBucket:
 		return true
-	case HltBucket:
+	case HealthBucket:
 		return true
-	case StpBucket:
+	case StepBucket:
 		return true
-	case HngBucket:
+	case HungerBucket:
 		return true
-	case ExtBucket:
+	case ExtraBucket:
 		return false
 	default:
 		return false
@@ -62,21 +64,21 @@ func (b EBucketCat) IsBase() bool {
 
 func (b EBucketCat) IsExtra() bool {
 	switch b {
-	case AtkBucket:
+	case AttackBucket:
 		return false
-	case DefBucket:
+	case DefenseBucket:
 		return false
-	case SklBucket:
+	case SkillBucket:
 		return false
-	case StaBucket:
+	case StaminaBucket:
 		return false
-	case HltBucket:
+	case HealthBucket:
 		return false
-	case StpBucket:
+	case StepBucket:
 		return false
-	case HngBucket:
+	case HungerBucket:
 		return false
-	case ExtBucket:
+	case ExtraBucket:
 		return true
 	default:
 		return false

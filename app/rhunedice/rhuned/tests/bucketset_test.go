@@ -6,7 +6,6 @@ import (
 
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/api"
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/faces"
-	"github.com/jrecuero/thengine/app/rhunedice/rhuned/rhunes"
 )
 
 func TestBucketSet(t *testing.T) {
@@ -36,9 +35,9 @@ func TestBucketSet(t *testing.T) {
 
 	// create buckets
 	buckets := []api.IBucket{
-		api.NewBucket("atk/1", rhunes.AttackRhune),
-		api.NewBucket("def/1", rhunes.DefenseRhune),
-		api.NewBucket("skl/1", rhunes.SkillRhune),
+		api.NewBucket("atk/1", api.AttackBucket),
+		api.NewBucket("def/1", api.DefenseBucket),
+		api.NewBucket("skl/1", api.SkillBucket),
 	}
 	fmt.Println(buckets)
 

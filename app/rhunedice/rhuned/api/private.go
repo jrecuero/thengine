@@ -3,11 +3,11 @@ package api
 func getBucketCatFromRhune(rhune IRhune) EBucketCat {
 	switch rhune.GetShort() {
 	case AttackShort:
-		return AtkBucket
+		return AttackBucket
 	case DefenseShort:
-		return DefBucket
+		return DefenseBucket
 	case SkillShort:
-		return SklBucket
+		return SkillBucket
 	default:
 		return NilBucket
 	}

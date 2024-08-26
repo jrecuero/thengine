@@ -28,11 +28,6 @@ func NewBucketSet(name string, buckets []IBucket) *BucketSet {
 }
 
 func (b *BucketSet) getBucketAndIndex(name string) (IBucket, int) {
-	//for index, bucket := range b.buckets {
-	//    if bucket.GetName() == name {
-	//        return bucket, index
-	//    }
-	//}
 	if bucket, index, found := FindByNameWithIndex(b.buckets, name); found {
 		return bucket, index
 	}
@@ -57,13 +52,6 @@ func (b *BucketSet) GetBuckets() []IBucket {
 }
 
 func (b *BucketSet) GetBucketsForCat(cat EBucketCat) []IBucket {
-	//result := []IBucket{}
-	//for _, bucket := range b.buckets {
-	//    if bucket.GetCat() == cat {
-	//        result = append(result, bucket)
-	//    }
-	//}
-	//return result
 	return FindByCat(b.buckets, cat)
 }
 
@@ -88,7 +76,7 @@ func (b *BucketSet) SetName(name string) {
 func (b *BucketSet) UpdateBucketsFromDiceSetRoll(roll []IFace) {
 	for _, face := range roll {
 		rhune := face.GetRhune()
-		cat := getBucketCatFromRhune(rhune)
+		cat := rhune.GetBucketCat()
 		for _, bucket := range b.GetBucketsForCat(cat) {
 			bucket.Inc(1)
 		}

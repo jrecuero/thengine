@@ -2,32 +2,72 @@ package stats
 
 import "github.com/jrecuero/thengine/app/rhunedice/rhuned/api"
 
-func NewAttack(bucket api.IBucket, value int) *api.Stat {
+func NewAttack(value int) *api.Stat {
 	return api.NewStat(
 		api.AttackName,
 		api.AttackShort,
 		"attack stat used to damage",
-		bucket,
+		api.AttackName,
 		value,
 	)
 }
 
-func NewDefense(bucket api.IBucket, value int) *api.Stat {
+func NewDefense(value int) *api.Stat {
 	return api.NewStat(
 		api.DefenseName,
 		api.DefenseShort,
 		"defense stat used to defend against damage",
-		bucket,
+		api.DefenseName,
 		value,
 	)
 }
 
-func NewSkill(bucket api.IBucket, value int) *api.Stat {
+func NewHealth(value int) *api.Stat {
+	return api.NewStat(
+		api.HealthName,
+		api.HealthShort,
+		"health is used to provide avatar life",
+		api.HealthName,
+		value,
+	)
+}
+
+func NewHunger(value int) *api.Stat {
+	return api.NewStat(
+		api.HungerName,
+		api.HungerShort,
+		"hunger is used to measure avatar hunger and thirst",
+		api.HungerName,
+		value,
+	)
+}
+
+func NewSkill(value int) *api.Stat {
 	return api.NewStat(
 		api.SkillName,
 		api.SkillShort,
 		"skill is used to provide skill abilities",
-		bucket,
+		api.SkillName,
+		value,
+	)
+}
+
+func NewStamina(value int) *api.Stat {
+	return api.NewStat(
+		api.StaminaName,
+		api.StaminaShort,
+		"stamina is used to measure avatar tireness",
+		api.StaminaName,
+		value,
+	)
+}
+
+func NewStep(value int) *api.Stat {
+	return api.NewStat(
+		api.StepName,
+		api.StepShort,
+		"setp is used to provide avatar movement",
+		api.StepName,
 		value,
 	)
 }
@@ -38,14 +78,19 @@ func DefaultStats(givenStats map[string]int, bucketset api.IBucketSet) []api.ISt
 		var newStat api.IStat = nil
 		switch statName {
 		case api.AttackName:
-			newStat = NewAttack(
-				bucketset.GetBucketByName(api.AttackName), statValue)
+			newStat = NewAttack(statValue)
 		case api.DefenseName:
-			newStat = NewDefense(
-				bucketset.GetBucketByName(api.DefenseName), statValue)
+			newStat = NewDefense(statValue)
+		case api.HealthName:
+			newStat = NewHealth(statValue)
+		case api.HungerName:
+			newStat = NewHunger(statValue)
 		case api.SkillName:
-			newStat = NewSkill(
-				bucketset.GetBucketByName(api.SkillName), statValue)
+			newStat = NewSkill(statValue)
+		case api.StaminaName:
+			newStat = NewStamina(statValue)
+		case api.StepName:
+			newStat = NewStep(statValue)
 		}
 		if newStat != nil {
 			defaultStats = append(defaultStats, newStat)
