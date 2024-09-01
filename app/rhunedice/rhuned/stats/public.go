@@ -1,6 +1,37 @@
 package stats
 
-import "github.com/jrecuero/thengine/app/rhunedice/rhuned/api"
+import (
+	"fmt"
+
+	"github.com/jrecuero/thengine/app/rhunedice/rhuned/api"
+)
+
+func DefaultStats(givenStats map[string]int, bucketset api.IBucketSet) []api.IStat {
+	defaultStats := []api.IStat{}
+	for statName, statValue := range givenStats {
+		var newStat api.IStat = nil
+		switch statName {
+		case api.AttackName:
+			newStat = NewAttack(statValue)
+		case api.DefenseName:
+			newStat = NewDefense(statValue)
+		case api.HealthName:
+			newStat = NewHealth(statValue)
+		case api.HungerName:
+			newStat = NewHunger(statValue)
+		case api.SkillName:
+			newStat = NewSkill(statValue)
+		case api.StaminaName:
+			newStat = NewStamina(statValue)
+		case api.StepName:
+			newStat = NewStep(statValue)
+		}
+		if newStat != nil {
+			defaultStats = append(defaultStats, newStat)
+		}
+	}
+	return defaultStats
+}
 
 func NewAttack(value int) *api.Stat {
 	return api.NewStat(
@@ -10,6 +41,13 @@ func NewAttack(value int) *api.Stat {
 		api.AttackName,
 		value,
 	)
+}
+
+func NewDefaultStatSet(name string, givenStats map[string]int, bucketset api.IBucketSet) *api.StatSet {
+	defaultStats := DefaultStats(givenStats, bucketset)
+	statSetName := fmt.Sprintf("stat-set/default/%s", name)
+	defaultStatSet := api.NewStatSet(statSetName, defaultStats)
+	return defaultStatSet
 }
 
 func NewDefense(value int) *api.Stat {
@@ -70,31 +108,4 @@ func NewStep(value int) *api.Stat {
 		api.StepName,
 		value,
 	)
-}
-
-func DefaultStats(givenStats map[string]int, bucketset api.IBucketSet) []api.IStat {
-	defaultStats := []api.IStat{}
-	for statName, statValue := range givenStats {
-		var newStat api.IStat = nil
-		switch statName {
-		case api.AttackName:
-			newStat = NewAttack(statValue)
-		case api.DefenseName:
-			newStat = NewDefense(statValue)
-		case api.HealthName:
-			newStat = NewHealth(statValue)
-		case api.HungerName:
-			newStat = NewHunger(statValue)
-		case api.SkillName:
-			newStat = NewSkill(statValue)
-		case api.StaminaName:
-			newStat = NewStamina(statValue)
-		case api.StepName:
-			newStat = NewStep(statValue)
-		}
-		if newStat != nil {
-			defaultStats = append(defaultStats, newStat)
-		}
-	}
-	return defaultStats
 }

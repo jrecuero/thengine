@@ -1,6 +1,8 @@
 package buckets
 
 import (
+	"fmt"
+
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/api"
 )
 
@@ -16,4 +18,12 @@ func DefaultBuckets() []api.IBucket {
 		api.NewBucket(api.ExtraName, api.ExtraBucket),
 	}
 	return defaultBuckets
+}
+
+func NewDefaultBucketSet(name string) *api.BucketSet {
+	// create default bucket-set
+	bucketSetName := fmt.Sprintf("bucket-set/default/%s", name)
+	defaultBucketSet := api.NewBucketSet(bucketSetName, DefaultBuckets())
+
+	return defaultBucketSet
 }

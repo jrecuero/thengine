@@ -6,10 +6,31 @@ import (
 
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/api"
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/avatars"
+	"github.com/jrecuero/thengine/app/rhunedice/rhuned/faces"
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/stats"
 )
 
 func TestAvatar(t *testing.T) {
+	// create dice faces
+	diceFaces := []api.IFace{
+		faces.AttackFace,
+		faces.DefenseFace,
+		faces.SkillFace,
+	}
+	fmt.Println(diceFaces)
+
+	// create multiple dice
+	dices := make([]api.IDice, 3)
+	for i := range dices {
+		diceName := fmt.Sprintf("dice/%d", i)
+		dices[i] = api.NewDice(diceName, diceFaces)
+	}
+	fmt.Println(dices)
+
+	// create dice-set
+	diceset := api.NewDiceSet("diceset/1", dices)
+	fmt.Println(diceset)
+
 	// create buckets
 	buckets := []api.IBucket{
 		api.NewBucket(api.AttackName, api.AttackBucket),
@@ -34,7 +55,7 @@ func TestAvatar(t *testing.T) {
 	statset := api.NewStatSet("stats-set/1", avatarStats)
 
 	// create avatar
-	avatar := api.NewAvatar("avatar/1", statset, bucketset, nil, nil)
+	avatar := api.NewAvatar("avatar/1", statset, diceset, bucketset, nil, nil)
 	fmt.Println("avatar ", avatar)
 }
 
