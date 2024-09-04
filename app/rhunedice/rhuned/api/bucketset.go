@@ -12,6 +12,7 @@ type IBucketSet interface {
 	SetBuckets([]IBucket)
 	SetName(string)
 	String() string
+	UpdateBucketsFromBuckets([]IBucket)
 	UpdateBucketsFromDiceSetRoll([]IFace)
 }
 
@@ -73,12 +74,33 @@ func (b *BucketSet) SetName(name string) {
 	b.name = name
 }
 
+// UpdateBucketsFromBuckets method updates the bucketset with the list of
+// provided buckets.
+func (b *BucketSet) UpdateBucketsFromBuckets(buckets []IBucket) {
+	for _, bucket := range buckets {
+		cat := bucket.GetCat().(EBucketCat)
+		if cat == ExtraBucket {
+			bucket.SetRhune(bucket.GetRhune())
+		} else {
+			for _, buck := range b.GetBucketsForCat(cat) {
+				buck.Inc(bucket.GetValue())
+			}
+		}
+	}
+}
+
+// UpdateBucketsFromDiceSetRoll method updates the bucketset with the list of
+// faces from a rolldice.
 func (b *BucketSet) UpdateBucketsFromDiceSetRoll(roll []IFace) {
 	for _, face := range roll {
 		rhune := face.GetRhune()
 		cat := rhune.GetBucketCat()
 		for _, bucket := range b.GetBucketsForCat(cat) {
-			bucket.Inc(1)
+			if cat != ExtraBucket {
+				bucket.Inc(1)
+			} else {
+				bucket.SetRhune(rhune)
+			}
 		}
 	}
 }

@@ -22,3 +22,18 @@ func DefaultAvatar(name string, givenStats map[string]int) *api.Avatar {
 
 	return defaultAvatar
 }
+
+func DefaultEnemy(name string, giveStats map[string]int) *api.Avatar {
+	// create default bucket-set
+	defaultBucketSet := buckets.NewDefaultBucketSet(name)
+
+	// create enemy avatar
+	enemyAvatar := api.NewAvatar(
+		name,
+		stats.NewDefaultStatSet(name, giveStats, defaultBucketSet),
+		dicesets.NewThreeDiceSet(name),
+		defaultBucketSet,
+		api.NewEquipment(nil, nil, nil),
+		nil)
+	return enemyAvatar
+}

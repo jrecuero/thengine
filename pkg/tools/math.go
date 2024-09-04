@@ -13,8 +13,7 @@ var (
 )
 
 func init() {
-	source := rand.NewSource(time.Now().UnixNano())
-	RandomRing = rand.New(source)
+	InitRandom()
 }
 
 // -----------------------------------------------------------------------------
@@ -32,6 +31,12 @@ func Sign(a int) int {
 		return -1
 	}
 	return 1
+}
+
+func InitRandom() {
+	seed := time.Now().UnixNano()
+	source := rand.NewSource(seed)
+	RandomRing = rand.New(source)
 }
 
 // Max function returns the maximum integer in a sequence of integers.

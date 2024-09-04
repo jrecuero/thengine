@@ -1,5 +1,7 @@
 package api
 
+import "github.com/jrecuero/thengine/pkg/tools"
+
 type ETurnState string
 
 const (
@@ -69,6 +71,10 @@ func (t *TurnHandler) AddPlayer(player IAvatar) {
 func (t *TurnHandler) AvatarUpdate() ETurnState {
 	t.state = AvatarUpdateTurn
 
+	tools.Logger.WithField("module", "turn-handler").
+		WithField("method", "AvatarUpdate").
+		Tracef("Avatar update stage")
+
 	t.player.UpdateTurn()
 	for _, enemy := range t.activeEnemies {
 		enemy.UpdateTurn()
@@ -79,6 +85,10 @@ func (t *TurnHandler) AvatarUpdate() ETurnState {
 
 func (t *TurnHandler) AvatarUpdateBucket() ETurnState {
 	t.state = AvatarUpdateBucketTurn
+
+	tools.Logger.WithField("module", "turn-handler").
+		WithField("method", "AvatarUpdateBucket").
+		Tracef("Avatar update bucket stage")
 
 	t.player.UpdateBucketTurn()
 	for _, enemy := range t.activeEnemies {
@@ -91,9 +101,13 @@ func (t *TurnHandler) AvatarUpdateBucket() ETurnState {
 func (t *TurnHandler) BucketSelection() ETurnState {
 	t.state = BucketSelectionTurn
 
-	t.player.SelectBucketTurn()
+	tools.Logger.WithField("module", "turn-handler").
+		WithField("method", "BucketSelection").
+		Tracef("Bucket selection stage")
+
+	t.player.BucketSelectionTurn()
 	for _, enemy := range t.activeEnemies {
-		enemy.SelectBucketTurn()
+		enemy.BucketSelectionTurn()
 	}
 
 	return ExecuteBucketTurn
@@ -102,33 +116,61 @@ func (t *TurnHandler) BucketSelection() ETurnState {
 func (t *TurnHandler) End() ETurnState {
 	t.state = EndTurn
 
+	tools.Logger.WithField("module", "turn-handler").
+		WithField("method", "End").
+		Tracef("End stage")
+
 	t.player.EndTurn()
 	for _, enemy := range t.activeEnemies {
 		enemy.EndTurn()
 	}
 
-	return InitTurn
+	return StartTurn
 }
 
-func (t *TurnHandler) ExecuteBucket() ETurnState {
+func (t *TurnHandler) ExecuteBucket(args ...any) ETurnState {
 	t.state = ExecuteBucketTurn
 
-	t.player.ExecuteButcketTurn()
+	tools.Logger.WithField("module", "turn-handler").
+		WithField("method", "ExecuteBucket").
+		Tracef("Execute bucket stage %v", args)
+
+	t.player.ExecuteButcketTurn(t.activeEnemies[0])
 	for _, enemy := range t.activeEnemies {
-		enemy.ExecuteButcketTurn()
+		enemy.ExecuteButcketTurn(t.player)
 	}
 
 	return EndTurn
 }
 
+func (t *TurnHandler) GetEnemies() []IAvatar {
+	return t.enemies
+}
+
+func (t *TurnHandler) GetPlayer() IAvatar {
+	return t.player
+}
+
+func (t *TurnHandler) GetState() ETurnState {
+	return t.state
+}
+
 func (t *TurnHandler) Init() ETurnState {
 	t.state = InitTurn
+
+	tools.Logger.WithField("module", "turn-handler").
+		WithField("method", "Init").
+		Tracef("Initialize turn stage")
 
 	return StartTurn
 }
 
 func (t *TurnHandler) RollDice() ETurnState {
 	t.state = RollDiceTurn
+
+	tools.Logger.WithField("module", "turn-handler").
+		WithField("method", "RollDice").
+		Tracef("roll-dice stage")
 
 	t.player.RollDiceTurn()
 	for _, enemy := range t.activeEnemies {
@@ -138,7 +180,7 @@ func (t *TurnHandler) RollDice() ETurnState {
 	return BucketSelectionTurn
 }
 
-func (t *TurnHandler) Run() {
+func (t *TurnHandler) Run(args ...any) {
 	var newState ETurnState = NoneTurn
 
 	switch t.state {
@@ -151,11 +193,14 @@ func (t *TurnHandler) Run() {
 	case AvatarUpdateBucketTurn:
 		newState = t.AvatarUpdateBucket()
 	case RollDiceTurn:
+		// user input in order to run this stage
 		newState = t.RollDice()
 	case BucketSelectionTurn:
+		// user input/selection in order to run this stage
 		newState = t.BucketSelection()
 	case ExecuteBucketTurn:
-		newState = t.ExecuteBucket()
+		// user input in order to run this stage
+		newState = t.ExecuteBucket(args)
 	case EndTurn:
 		newState = t.End()
 	}
@@ -163,8 +208,16 @@ func (t *TurnHandler) Run() {
 	t.state = newState
 }
 
+func (t *TurnHandler) SetState(state ETurnState) {
+	t.state = state
+}
+
 func (t *TurnHandler) Start() ETurnState {
 	t.state = StartTurn
+
+	tools.Logger.WithField("module", "turn-handler").
+		WithField("method", "Start").
+		Tracef("Start stage")
 
 	t.populateActiveEnemies()
 

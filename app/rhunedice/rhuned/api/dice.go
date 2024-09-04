@@ -20,6 +20,15 @@ type Dice struct {
 	name  string
 }
 
+//func NewRandom(max int) int {
+//    maxBig := big.NewInt(int64(max))
+//    randomNumber, err := rand.Int(rand.Reader, maxBig)
+//    if err != nil {
+//        panic(err)
+//    }
+//    return int(randomNumber.Int64())
+//}
+
 func NewDice(name string, faces []IFace) *Dice {
 	return &Dice{
 		faces: faces,
@@ -38,6 +47,7 @@ func (d *Dice) GetName() string {
 func (d *Dice) Roll() IFace {
 	nbrFaces := len(d.faces)
 	index := tools.RandomRing.Intn(nbrFaces)
+	//index := NewRandom(nbrFaces)
 	return d.faces[index]
 }
 

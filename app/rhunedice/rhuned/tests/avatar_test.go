@@ -74,3 +74,19 @@ func TestDefaultAvatar(t *testing.T) {
 	avatar.StartTurn()
 	fmt.Println("default-avatar ", avatar)
 }
+
+func TestDefaultEnemy(t *testing.T) {
+	// create map from stat name to stat value
+	statsmap := map[string]int{
+		api.AttackName:  1,
+		api.DefenseName: 1,
+		api.SkillName:   1,
+	}
+
+	// create default enemy avatar
+	avatar := avatars.DefaultEnemy("enemy/1", statsmap)
+	fmt.Println("default-enemy ", avatar)
+
+	avatar.StartTurn()
+	fmt.Println("default-enemy ", avatar)
+}
