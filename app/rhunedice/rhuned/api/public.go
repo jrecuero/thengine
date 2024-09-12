@@ -7,11 +7,11 @@ const (
 	StaminaName = "stamina"
 	HealthName  = "health"
 	StepName    = "step"
-	HungerName  = "hunger"
 	ExtraName   = "extra"
 	NilName     = "nil"
 
-	ClothesName = "clothes"
+	ClothesName   = "clothes"
+	KnowledgeName = "knowledge"
 
 	AttackShort  = "ATK"
 	DefenseShort = "DEF"
@@ -19,11 +19,11 @@ const (
 	StaminaShort = "STA"
 	HealthShort  = "HLT"
 	StepShort    = "STP"
-	HungerShort  = "HUN"
 	ExtraShort   = "EXT"
 	NilShort     = "NIL"
 
-	ClothesShort = "CL1"
+	ClothesShort   = "CL1"
+	KnowledgeShort = "KNO"
 )
 
 func FacesToBuckets(faces []IFace) []IBucket {

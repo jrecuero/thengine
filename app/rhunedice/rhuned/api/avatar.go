@@ -15,6 +15,7 @@ type IAvatar interface {
 	GetBucketTotalValueByName(string) int
 	GetDiceSet() IDiceSet
 	GetEquipment() IEquipment
+	GetKnowledge() IKnowledge
 	GetName() string
 	GetRollDiceBuckets() []IBucket
 	GetStats() IStatSet
@@ -27,6 +28,7 @@ type IAvatar interface {
 	SetBuckets(IBucketSet)
 	SetDiceSet(IDiceSet)
 	SetEquipment(IEquipment)
+	SetKnowledge(IKnowledge)
 	SetName(string)
 	SetStats(IStatSet)
 	SetSelected([]IBucket)
@@ -42,6 +44,7 @@ type Avatar struct {
 	buckets     IBucketSet
 	diceset     IDiceSet
 	equipment   IEquipment
+	knowledge   IKnowledge
 	name        string
 	rollfaces   []IFace
 	rollbuckets []IBucket
@@ -63,6 +66,7 @@ func NewAvatar(
 		buckets:   buckets,
 		diceset:   diceset,
 		equipment: equipment,
+		knowledge: NewKnowledge(0),
 		name:      name,
 		rollfaces: nil,
 		stats:     stats,
@@ -146,21 +150,48 @@ func (a *Avatar) ExecuteButcketTurn(args ...any) {
 				otherHealth := other.GetBuckets().GetBucketByName(HealthName)
 				otherHealth.Dec(damage)
 			case DefenseBucket:
-				fallthrough
-			case SkillBucket:
-				fallthrough
-			case StepBucket:
-				fallthrough
-			case HealthBucket:
-				fallthrough
-			case StaminaBucket:
-				fallthrough
-			case HungerBucket:
 				tools.Logger.WithField("module", "avatar").
 					WithField("method", "ExecuteBucketTurn").
 					Tracef("%s execute %s bucket for %s",
 						a.GetName(), cat, totalSt)
+			case SkillBucket:
+				skill := bucket.GetValue() + buck.GetValue()
+				defense := other.GetBucketTotalValueByName(DefenseName)
+				damage := skill - defense
+				if damage < 0 {
+					damage = 0
+				}
+				tools.Logger.WithField("module", "avatar").
+					WithField("method", "ExecuteBucketTurn").
+					Tracef("%s execute %s bucket for %s vs %d. damage: %d",
+						a.GetName(), cat, totalSt, defense, damage)
+				otherHealth := other.GetBuckets().GetBucketByName(HealthName)
+				otherHealth.Dec(damage)
+			case StepBucket:
+				steps := bucket.GetValue() + buck.GetValue()
+				tools.Logger.WithField("module", "avatar").
+					WithField("method", "ExecuteBucketTurn").
+					Tracef("%s execute %s bucket for %s move %d steps",
+						a.GetName(), cat, totalSt, steps)
+			case HealthBucket:
+				incHealth := bucket.GetValue() + buck.GetValue()
+				health := a.GetBuckets().GetBucketByName(HealthName)
+				health.Inc(incHealth)
+				tools.Logger.WithField("module", "avatar").
+					WithField("method", "ExecuteBucketTurn").
+					Tracef("%s execute %s bucket for %s add %d health",
+						a.GetName(), cat, totalSt, incHealth)
+			case StaminaBucket:
+				incStamina := bucket.GetValue() + buck.GetValue()
+				stamina := a.GetBuckets().GetBucketByName(StaminaName)
+				stamina.Inc(incStamina)
+				tools.Logger.WithField("module", "avatar").
+					WithField("method", "ExecuteBucketTurn").
+					Tracef("%s execute %s bucket for %s add %d stamina",
+						a.GetName(), cat, totalSt, incStamina)
 			case ExtraBucket:
+				rhune := buck.GetRhune()
+				rhune.Execute(a)
 				tools.Logger.WithField("module", "avatar").
 					WithField("method", "ExecuteBucketTurn").
 					Tracef("%s execute %s bucket with %s",
@@ -207,6 +238,10 @@ func (a *Avatar) GetDiceSet() IDiceSet {
 
 func (a *Avatar) GetEquipment() IEquipment {
 	return a.equipment
+}
+
+func (a *Avatar) GetKnowledge() IKnowledge {
+	return a.knowledge
 }
 
 func (a *Avatar) GetName() string {
@@ -264,6 +299,10 @@ func (a *Avatar) SetDiceSet(diceset IDiceSet) {
 
 func (a *Avatar) SetEquipment(equipment IEquipment) {
 	a.equipment = equipment
+}
+
+func (a *Avatar) SetKnowledge(knowledge IKnowledge) {
+	a.knowledge = knowledge
 }
 
 func (a *Avatar) SetName(name string) {

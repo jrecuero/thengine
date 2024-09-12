@@ -15,7 +15,6 @@ func NewDefaultBaseDice(name string) *api.Dice {
 		faces.StaminaFace,
 		faces.HealthFace,
 		faces.StepFace,
-		faces.HungerFace,
 		faces.NilFace,
 	}
 	diceName := fmt.Sprintf("dice/base/%s", name)
@@ -25,7 +24,9 @@ func NewDefaultBaseDice(name string) *api.Dice {
 
 func NewDefaultExtraDice(name string) *api.Dice {
 	diceFaces := []api.IFace{
-		faces.NilFace,
+		//faces.NilFace,
+		//faces.KnowledgeFace,
+		faces.ClothesFace,
 	}
 	dice := api.NewDice(name, diceFaces)
 	return dice

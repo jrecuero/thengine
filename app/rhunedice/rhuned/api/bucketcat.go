@@ -9,7 +9,6 @@ const (
 	StaminaBucket
 	HealthBucket
 	StepBucket
-	HungerBucket
 	ExtraBucket
 	NilBucket
 )
@@ -28,8 +27,6 @@ func (b EBucketCat) String() string {
 		return HealthName
 	case StepBucket:
 		return StepName
-	case HungerBucket:
-		return HungerName
 	case ExtraBucket:
 		return ExtraName
 	case NilBucket:
@@ -53,8 +50,6 @@ func (b EBucketCat) IsBase() bool {
 		return true
 	case StepBucket:
 		return true
-	case HungerBucket:
-		return true
 	case ExtraBucket:
 		return false
 	default:
@@ -75,8 +70,6 @@ func (b EBucketCat) IsExtra() bool {
 	case HealthBucket:
 		return false
 	case StepBucket:
-		return false
-	case HungerBucket:
 		return false
 	case ExtraBucket:
 		return true

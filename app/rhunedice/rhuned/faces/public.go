@@ -13,9 +13,9 @@ var (
 	StaminaFace = api.NewFace(rhunes.StaminaRhune)
 	HealthFace  = api.NewFace(rhunes.HealthRhune)
 	StepFace    = api.NewFace(rhunes.StepRhune)
-	HungerFace  = api.NewFace(rhunes.HungerRhune)
 	NilFace     = api.NewFace(rhunes.NilRhune)
 
 	// Extra faces
-	ClothesFace = api.NewFace(rhunes.ClothesRhune)
+	ClothesFace   = api.NewFace(rhunes.ClothesRhune)
+	KnowledgeFace = api.NewFace(rhunes.KnowledgeRhune)
 )

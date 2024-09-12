@@ -14,7 +14,6 @@ func DefaultBuckets() []api.IBucket {
 		api.NewBucket(api.StaminaName, api.StaminaBucket),
 		api.NewBucket(api.HealthName, api.HealthBucket),
 		api.NewBucket(api.StepName, api.StepBucket),
-		api.NewBucket(api.HungerName, api.HungerBucket),
 		api.NewBucket(api.ExtraName, api.ExtraBucket),
 	}
 	return defaultBuckets

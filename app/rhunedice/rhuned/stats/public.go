@@ -17,8 +17,6 @@ func DefaultStats(givenStats map[string]int, bucketset api.IBucketSet) []api.ISt
 			newStat = NewDefense(statValue)
 		case api.HealthName:
 			newStat = NewHealth(statValue)
-		case api.HungerName:
-			newStat = NewHunger(statValue)
 		case api.SkillName:
 			newStat = NewSkill(statValue)
 		case api.StaminaName:
@@ -66,16 +64,6 @@ func NewHealth(value int) *api.Stat {
 		api.HealthShort,
 		"health is used to provide avatar life",
 		api.HealthName,
-		value,
-	)
-}
-
-func NewHunger(value int) *api.Stat {
-	return api.NewStat(
-		api.HungerName,
-		api.HungerShort,
-		"hunger is used to measure avatar hunger and thirst",
-		api.HungerName,
 		value,
 	)
 }

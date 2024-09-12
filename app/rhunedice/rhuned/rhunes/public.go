@@ -7,10 +7,10 @@ var (
 	StaminaRhune = NewStaminaRhune()
 	HealthRhune  = NewHealthRhune()
 	StepRhune    = NewStepRhune()
-	HungerRhune  = NewHungerRhune()
 
 	NilRhune = NewNilRhune()
 
-	ExtraRhune   = NewExtraRhune()
-	ClothesRhune = NewClothesRhune()
+	ExtraRhune     = NewExtraRhune()
+	ClothesRhune   = NewClothesRhune()
+	KnowledgeRhune = NewKnowledgeRhune(1)
 )
