@@ -9,7 +9,7 @@ import (
 type IAvatar interface {
 	BucketSelectionTurn()
 	EndTurn()
-	ExecuteButcketTurn(...any)
+	ExecuteButcketTurn(IBucket, ...any)
 	GetActions() []IAction
 	GetBuckets() IBucketSet
 	GetBucketTotalValueByName(string) int
@@ -21,6 +21,8 @@ type IAvatar interface {
 	GetStats() IStatSet
 	GetSelected() []IBucket
 	IsActive() bool
+	NextSelected() IBucket
+	RemoveNextSelected()
 	RollDiceTurn()
 	//SelectBucketTurn()
 	SetActions([]IAction)
@@ -123,80 +125,78 @@ func (a *Avatar) EndTurn() {
 	a.updateStatsWithBuckets()
 }
 
-func (a *Avatar) ExecuteButcketTurn(args ...any) {
+func (a *Avatar) ExecuteButcketTurn(selBucket IBucket, args ...any) {
 
 	tools.Logger.WithField("module", "avatar").
 		WithField("method", "ExecuteBucketTurn").
 		Tracef("%s execute bucket %#+v", a.GetName(), args)
 
 	other := args[0].(IAvatar)
-	for _, buck := range a.selected {
-		cat := buck.GetCat().(EBucketCat)
-		buckets := a.buckets.GetBucketsForCat(cat)
-		for _, bucket := range buckets {
-			totalSt := fmt.Sprintf("%d + %d", bucket.GetValue(), buck.GetValue())
-			switch cat {
-			case AttackBucket:
-				attack := bucket.GetValue() + buck.GetValue()
-				defense := other.GetBucketTotalValueByName(DefenseName)
-				damage := attack - defense
-				if damage < 0 {
-					damage = 0
-				}
-				tools.Logger.WithField("module", "avatar").
-					WithField("method", "ExecuteBucketTurn").
-					Tracef("%s execute %s bucket for %s vs %d. damage: %d",
-						a.GetName(), cat, totalSt, defense, damage)
-				otherHealth := other.GetBuckets().GetBucketByName(HealthName)
-				otherHealth.Dec(damage)
-			case DefenseBucket:
-				tools.Logger.WithField("module", "avatar").
-					WithField("method", "ExecuteBucketTurn").
-					Tracef("%s execute %s bucket for %s",
-						a.GetName(), cat, totalSt)
-			case SkillBucket:
-				skill := bucket.GetValue() + buck.GetValue()
-				defense := other.GetBucketTotalValueByName(DefenseName)
-				damage := skill - defense
-				if damage < 0 {
-					damage = 0
-				}
-				tools.Logger.WithField("module", "avatar").
-					WithField("method", "ExecuteBucketTurn").
-					Tracef("%s execute %s bucket for %s vs %d. damage: %d",
-						a.GetName(), cat, totalSt, defense, damage)
-				otherHealth := other.GetBuckets().GetBucketByName(HealthName)
-				otherHealth.Dec(damage)
-			case StepBucket:
-				steps := bucket.GetValue() + buck.GetValue()
-				tools.Logger.WithField("module", "avatar").
-					WithField("method", "ExecuteBucketTurn").
-					Tracef("%s execute %s bucket for %s move %d steps",
-						a.GetName(), cat, totalSt, steps)
-			case HealthBucket:
-				incHealth := bucket.GetValue() + buck.GetValue()
-				health := a.GetBuckets().GetBucketByName(HealthName)
-				health.Inc(incHealth)
-				tools.Logger.WithField("module", "avatar").
-					WithField("method", "ExecuteBucketTurn").
-					Tracef("%s execute %s bucket for %s add %d health",
-						a.GetName(), cat, totalSt, incHealth)
-			case StaminaBucket:
-				incStamina := bucket.GetValue() + buck.GetValue()
-				stamina := a.GetBuckets().GetBucketByName(StaminaName)
-				stamina.Inc(incStamina)
-				tools.Logger.WithField("module", "avatar").
-					WithField("method", "ExecuteBucketTurn").
-					Tracef("%s execute %s bucket for %s add %d stamina",
-						a.GetName(), cat, totalSt, incStamina)
-			case ExtraBucket:
-				rhune := buck.GetRhune()
-				rhune.Execute(a)
-				tools.Logger.WithField("module", "avatar").
-					WithField("method", "ExecuteBucketTurn").
-					Tracef("%s execute %s bucket with %s",
-						a.GetName(), cat, bucket.GetRhune())
+	cat := selBucket.GetCat().(EBucketCat)
+	buckets := a.buckets.GetBucketsForCat(cat)
+	for _, bucket := range buckets {
+		totalSt := fmt.Sprintf("%d + %d", bucket.GetValue(), selBucket.GetValue())
+		switch cat {
+		case AttackBucket:
+			attack := bucket.GetValue() + selBucket.GetValue()
+			defense := other.GetBucketTotalValueByName(DefenseName)
+			damage := attack - defense
+			if damage < 0 {
+				damage = 0
 			}
+			tools.Logger.WithField("module", "avatar").
+				WithField("method", "ExecuteBucketTurn").
+				Tracef("%s execute %s bucket for %s vs %d. damage: %d",
+					a.GetName(), cat, totalSt, defense, damage)
+			otherHealth := other.GetBuckets().GetBucketByName(HealthName)
+			otherHealth.Dec(damage)
+		case DefenseBucket:
+			tools.Logger.WithField("module", "avatar").
+				WithField("method", "ExecuteBucketTurn").
+				Tracef("%s execute %s bucket for %s",
+					a.GetName(), cat, totalSt)
+		case SkillBucket:
+			skill := bucket.GetValue() + selBucket.GetValue()
+			defense := other.GetBucketTotalValueByName(DefenseName)
+			damage := skill - defense
+			if damage < 0 {
+				damage = 0
+			}
+			tools.Logger.WithField("module", "avatar").
+				WithField("method", "ExecuteBucketTurn").
+				Tracef("%s execute %s bucket for %s vs %d. damage: %d",
+					a.GetName(), cat, totalSt, defense, damage)
+			otherHealth := other.GetBuckets().GetBucketByName(HealthName)
+			otherHealth.Dec(damage)
+		case StepBucket:
+			steps := bucket.GetValue() + selBucket.GetValue()
+			tools.Logger.WithField("module", "avatar").
+				WithField("method", "ExecuteBucketTurn").
+				Tracef("%s execute %s bucket for %s move %d steps",
+					a.GetName(), cat, totalSt, steps)
+		case HealthBucket:
+			incHealth := bucket.GetValue() + selBucket.GetValue()
+			health := a.GetBuckets().GetBucketByName(HealthName)
+			health.Inc(incHealth)
+			tools.Logger.WithField("module", "avatar").
+				WithField("method", "ExecuteBucketTurn").
+				Tracef("%s execute %s bucket for %s add %d health",
+					a.GetName(), cat, totalSt, incHealth)
+		case StaminaBucket:
+			incStamina := bucket.GetValue() + selBucket.GetValue()
+			stamina := a.GetBuckets().GetBucketByName(StaminaName)
+			stamina.Inc(incStamina)
+			tools.Logger.WithField("module", "avatar").
+				WithField("method", "ExecuteBucketTurn").
+				Tracef("%s execute %s bucket for %s add %d stamina",
+					a.GetName(), cat, totalSt, incStamina)
+		case ExtraBucket:
+			rhune := selBucket.GetRhune()
+			rhune.Execute(a)
+			tools.Logger.WithField("module", "avatar").
+				WithField("method", "ExecuteBucketTurn").
+				Tracef("%s execute %s bucket with %s",
+					a.GetName(), cat, bucket.GetRhune())
 		}
 	}
 }
@@ -262,6 +262,23 @@ func (a *Avatar) GetSelected() []IBucket {
 
 func (a *Avatar) IsActive() bool {
 	return a.active
+}
+
+// NextSelected method returns any remaining bucket still left in the selected
+// list.
+func (a *Avatar) NextSelected() IBucket {
+	if len(a.selected) != 0 {
+		return a.selected[0]
+	}
+	return nil
+}
+
+// RemoveNextSelected method removes the first bucket in the list of selected
+// buckets.
+func (a *Avatar) RemoveNextSelected() {
+	if len(a.selected) > 0 {
+		a.selected = a.selected[1:]
+	}
 }
 
 func (a *Avatar) RollDiceTurn() {

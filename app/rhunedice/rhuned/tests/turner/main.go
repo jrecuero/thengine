@@ -63,7 +63,7 @@ func setupTurn() {
 	turnHandler.SetState(api.InitTurn)
 
 	// turn-handler init -> start
-	turnHandler.Run()
+	turnHandler.RunState()
 	fmt.Println("turn-handler state ", turnHandler.GetState())
 }
 
@@ -73,15 +73,15 @@ func runTurn() bool {
 	enemy := turnHandler.GetEnemies()[0]
 
 	// turn-handler start -> avatar-update
-	turnHandler.Run()
+	turnHandler.RunState()
 	fmt.Println("turn-handler state ", turnHandler.GetState())
 
 	// turn-handler avatar-update -> avatar-update-bucket
-	turnHandler.Run()
+	turnHandler.RunState()
 	fmt.Println("turn-handler state ", turnHandler.GetState())
 
 	// turn-handler avatar-update-bucket -> roll-dice
-	turnHandler.Run()
+	turnHandler.RunState()
 	fmt.Println("turn-handler state ", turnHandler.GetState())
 
 	fmt.Println("player buckets", player.GetBuckets())
@@ -91,7 +91,7 @@ func runTurn() bool {
 	waitForKeyPressed("Press 'r' to roll dice..", 'r')
 
 	// turn-handler roll-dice -> bucket-selection
-	turnHandler.Run()
+	turnHandler.RunState()
 	fmt.Println("turn-handler state ", turnHandler.GetState())
 
 	// player: from the roll-dice-buckets, select first and second in the slice
@@ -118,16 +118,20 @@ func runTurn() bool {
 		fmt.Println("enemy select buckets ", selected)
 	}
 
-	// turn-handler bucket-selection -> execute-bucket
-	turnHandler.Run()
+	// turn-handler bucket-selection -> player-execute-bucket
+	turnHandler.RunState()
 	fmt.Println("turn-handler state ", turnHandler.GetState())
 
-	// turn-handler execute-bucket -> end
-	turnHandler.Run()
+	// turn-handler player-execute-bucket -> enemy-execute-bucket
+	turnHandler.RunState()
+	fmt.Println("turn-handler state ", turnHandler.GetState())
+
+	// turn-handler enemy-execute-bucket -> end
+	turnHandler.RunState()
 	fmt.Println("turn-handler state ", turnHandler.GetState())
 
 	// turn-handler end -> start
-	turnHandler.Run()
+	turnHandler.RunState()
 	fmt.Println("turn-handler state ", turnHandler.GetState())
 
 	fmt.Println("player buckets", player.GetBuckets())
@@ -138,10 +142,22 @@ func runTurn() bool {
 	return (enemy.GetBuckets().GetBucketByName(api.HealthName).GetValue() > 0)
 }
 
+func runNewTurn() {
+
+	//player := turnHandler.GetPlayer()
+	//enemy := turnHandler.GetEnemies()[0]
+
+	for run := turnHandler.RunState(); run; run = turnHandler.RunState() {
+		fmt.Println("turn-handler state ", turnHandler.GetState())
+	}
+}
+
 func main() {
 	fmt.Println("turner")
 	setupTurn()
 	for run := true; run; run = runTurn() {
 	}
+	//runNewTurn()
+
 	fmt.Println("game over")
 }

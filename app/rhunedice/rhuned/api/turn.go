@@ -5,15 +5,16 @@ import "github.com/jrecuero/thengine/pkg/tools"
 type ETurnState string
 
 const (
-	NoneTurn               ETurnState = "none"
-	InitTurn               ETurnState = "init"
-	StartTurn              ETurnState = "start"
-	AvatarUpdateTurn       ETurnState = "avatar-update"
-	AvatarUpdateBucketTurn ETurnState = "avatar-update-turn"
-	RollDiceTurn           ETurnState = "roll-dice"
-	BucketSelectionTurn    ETurnState = "bucket-selection"
-	ExecuteBucketTurn      ETurnState = "execute-bucket"
-	EndTurn                ETurnState = "end"
+	NoneTurn                ETurnState = "none"
+	InitTurn                ETurnState = "init"
+	StartTurn               ETurnState = "start"
+	AvatarUpdateTurn        ETurnState = "avatar-update"
+	AvatarUpdateBucketTurn  ETurnState = "avatar-update-turn"
+	RollDiceTurn            ETurnState = "roll-dice"
+	BucketSelectionTurn     ETurnState = "bucket-selection"
+	PlayerExecuteBucketTurn ETurnState = "player-execute-bucket"
+	EnemyExecuteBucketTurn  ETurnState = "enemy-execute-bucket"
+	EndTurn                 ETurnState = "end"
 )
 
 // TurnHandler struct contains all attributes and logic required for handling
@@ -32,8 +33,10 @@ const (
 //   - RollDiceTurn: roll all avatars dice sets.
 //   - BucketSelection: every avatar selects roll diceset buckets to be used in
 //     the turn.
-//   - ExecuteBucketTurn: selected roll diceset are applied on avatar buckets
-//     and executed.
+//   - PlayerExecuteBucketTurn: selected roll diceset are applied on avatar
+//     buckets and executed.
+//   - EnemyExecuteBucketTurn: selected roll diceset are applied on enemy
+//     avatar.
 //   - EndTurn: handler ends the turn and any avatar updates with all results.
 type TurnHandler struct {
 	player        IAvatar
@@ -110,7 +113,7 @@ func (t *TurnHandler) BucketSelection() ETurnState {
 		enemy.BucketSelectionTurn()
 	}
 
-	return ExecuteBucketTurn
+	return PlayerExecuteBucketTurn
 }
 
 func (t *TurnHandler) End() ETurnState {
@@ -128,19 +131,46 @@ func (t *TurnHandler) End() ETurnState {
 	return StartTurn
 }
 
-func (t *TurnHandler) ExecuteBucket(args ...any) ETurnState {
-	t.state = ExecuteBucketTurn
+func (t *TurnHandler) EnemyExecuteBucket(args ...any) ETurnState {
+	t.state = EnemyExecuteBucketTurn
 
 	tools.Logger.WithField("module", "turn-handler").
 		WithField("method", "ExecuteBucket").
 		Tracef("Execute bucket stage %v", args)
 
-	t.player.ExecuteButcketTurn(t.activeEnemies[0])
 	for _, enemy := range t.activeEnemies {
-		enemy.ExecuteButcketTurn(t.player)
+		if nextBucket := enemy.NextSelected(); nextBucket != nil {
+			enemy.ExecuteButcketTurn(nextBucket, t.player)
+			enemy.RemoveNextSelected()
+		}
 	}
 
+	// if at least one enemy had a bucket left to execute, don't move to the
+	// next state.
+	for _, enemy := range t.activeEnemies {
+		if nextBucket := enemy.NextSelected(); nextBucket != nil {
+			return t.state
+		}
+	}
 	return EndTurn
+}
+
+func (t *TurnHandler) PlayerExecuteBucket(args ...any) ETurnState {
+	t.state = PlayerExecuteBucketTurn
+
+	tools.Logger.WithField("module", "turn-handler").
+		WithField("method", "ExecuteBucket").
+		Tracef("Execute bucket stage %v", args)
+
+	if nextBucket := t.player.NextSelected(); nextBucket != nil {
+		t.player.ExecuteButcketTurn(nextBucket, t.activeEnemies[0])
+		t.player.RemoveNextSelected()
+	}
+
+	if nextBucket := t.player.NextSelected(); nextBucket != nil {
+		return t.state
+	}
+	return EnemyExecuteBucketTurn
 }
 
 func (t *TurnHandler) GetEnemies() []IAvatar {
@@ -181,7 +211,13 @@ func (t *TurnHandler) RollDice() ETurnState {
 }
 
 func (t *TurnHandler) Run(args ...any) {
+}
+
+// RunState method returns if the new stage should run (true) or it has to be
+// blocked (false).
+func (t *TurnHandler) RunState(args ...any) bool {
 	var newState ETurnState = NoneTurn
+	var run bool = true
 
 	switch t.state {
 	case InitTurn:
@@ -192,20 +228,26 @@ func (t *TurnHandler) Run(args ...any) {
 		newState = t.AvatarUpdate()
 	case AvatarUpdateBucketTurn:
 		newState = t.AvatarUpdateBucket()
+		run = false
 	case RollDiceTurn:
 		// user input in order to run this stage
 		newState = t.RollDice()
+		run = false
 	case BucketSelectionTurn:
 		// user input/selection in order to run this stage
 		newState = t.BucketSelection()
-	case ExecuteBucketTurn:
+	case PlayerExecuteBucketTurn:
 		// user input in order to run this stage
-		newState = t.ExecuteBucket(args)
+		newState = t.PlayerExecuteBucket(args)
+	case EnemyExecuteBucketTurn:
+		newState = t.EnemyExecuteBucket(args)
 	case EndTurn:
 		newState = t.End()
+		run = false
 	}
 
 	t.state = newState
+	return run
 }
 
 func (t *TurnHandler) SetState(state ETurnState) {
