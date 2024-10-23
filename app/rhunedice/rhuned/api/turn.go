@@ -54,6 +54,7 @@ func NewTurnHandler(player IAvatar, enemies []IAvatar) *TurnHandler {
 	}
 }
 
+// populateActiveEnemies private method loads all available active enemies.
 func (t *TurnHandler) populateActiveEnemies() {
 	t.activeEnemies = []IAvatar{}
 	for _, enemy := range t.enemies {
@@ -63,14 +64,17 @@ func (t *TurnHandler) populateActiveEnemies() {
 	}
 }
 
+// AddEnemy public method adds a new enemy to the list of available enemies.
 func (t *TurnHandler) AddEnemy(enemy IAvatar) {
 	t.enemies = append(t.enemies, enemy)
 }
 
+// AddPlayer public method adds the active player.
 func (t *TurnHandler) AddPlayer(player IAvatar) {
 	t.player = player
 }
 
+// AvatarUpdate public method updates player and all active enemies.
 func (t *TurnHandler) AvatarUpdate() ETurnState {
 	t.state = AvatarUpdateTurn
 
@@ -86,6 +90,8 @@ func (t *TurnHandler) AvatarUpdate() ETurnState {
 	return AvatarUpdateBucketTurn
 }
 
+// AvatarUpdateBucket public method updates player and all active enemies
+// buckets.
 func (t *TurnHandler) AvatarUpdateBucket() ETurnState {
 	t.state = AvatarUpdateBucketTurn
 
@@ -101,6 +107,8 @@ func (t *TurnHandler) AvatarUpdateBucket() ETurnState {
 	return RollDiceTurn
 }
 
+// BucketSelection public method allows the user to select up to two buckets
+// that have been rolled down.
 func (t *TurnHandler) BucketSelection() ETurnState {
 	t.state = BucketSelectionTurn
 
@@ -116,6 +124,8 @@ func (t *TurnHandler) BucketSelection() ETurnState {
 	return PlayerExecuteBucketTurn
 }
 
+// End public method ends the turn, calling any player or active enemies end
+// turn behavior.
 func (t *TurnHandler) End() ETurnState {
 	t.state = EndTurn
 
@@ -131,6 +141,7 @@ func (t *TurnHandler) End() ETurnState {
 	return StartTurn
 }
 
+// EnemyExecuteBucket public method executes active enemies selected buckets.
 func (t *TurnHandler) EnemyExecuteBucket(args ...any) ETurnState {
 	t.state = EnemyExecuteBucketTurn
 
@@ -155,6 +166,34 @@ func (t *TurnHandler) EnemyExecuteBucket(args ...any) ETurnState {
 	return EndTurn
 }
 
+// GetEnemies public method returns all available enemies.
+func (t *TurnHandler) GetEnemies() []IAvatar {
+	return t.enemies
+}
+
+// GetPlayer public method returns the player.
+func (t *TurnHandler) GetPlayer() IAvatar {
+	return t.player
+}
+
+// GetState public method returns the active turn state.
+func (t *TurnHandler) GetState() ETurnState {
+	return t.state
+}
+
+// Init public method initializes the turn. It should be called only one time
+// at initialization time
+func (t *TurnHandler) Init() ETurnState {
+	t.state = InitTurn
+
+	tools.Logger.WithField("module", "turn-handler").
+		WithField("method", "Init").
+		Tracef("Initialize turn stage")
+
+	return StartTurn
+}
+
+// PlayerExecuteBucket public method executes player selected buckets.
 func (t *TurnHandler) PlayerExecuteBucket(args ...any) ETurnState {
 	t.state = PlayerExecuteBucketTurn
 
@@ -173,28 +212,7 @@ func (t *TurnHandler) PlayerExecuteBucket(args ...any) ETurnState {
 	return EnemyExecuteBucketTurn
 }
 
-func (t *TurnHandler) GetEnemies() []IAvatar {
-	return t.enemies
-}
-
-func (t *TurnHandler) GetPlayer() IAvatar {
-	return t.player
-}
-
-func (t *TurnHandler) GetState() ETurnState {
-	return t.state
-}
-
-func (t *TurnHandler) Init() ETurnState {
-	t.state = InitTurn
-
-	tools.Logger.WithField("module", "turn-handler").
-		WithField("method", "Init").
-		Tracef("Initialize turn stage")
-
-	return StartTurn
-}
-
+// RollDice public method rolls player and active enemies dice.
 func (t *TurnHandler) RollDice() ETurnState {
 	t.state = RollDiceTurn
 
@@ -210,11 +228,12 @@ func (t *TurnHandler) RollDice() ETurnState {
 	return BucketSelectionTurn
 }
 
+// Run public method runs the turn.
 func (t *TurnHandler) Run(args ...any) {
 }
 
-// RunState method returns if the new stage should run (true) or it has to be
-// blocked (false).
+// RunState public method returns if the new stage should run (true) or it has
+// to be blocked (false).
 func (t *TurnHandler) RunState(args ...any) bool {
 	var newState ETurnState = NoneTurn
 	var run bool = true
@@ -250,10 +269,12 @@ func (t *TurnHandler) RunState(args ...any) bool {
 	return run
 }
 
+// SetState public method sets the active turn state.
 func (t *TurnHandler) SetState(state ETurnState) {
 	t.state = state
 }
 
+// Start public method starts the turn.
 func (t *TurnHandler) Start() ETurnState {
 	t.state = StartTurn
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/jrecuero/thengine/app/rhunedice/assets/tdice"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/builder"
 	"github.com/jrecuero/thengine/pkg/constants"
@@ -39,6 +40,11 @@ func buildBoxes(scene engine.IScene) {
 	diceBox.GetCanvas().WriteRectangleInCanvasAt(nil, nil, diceBox.GetStyle(),
 		engine.CanvasRectSingleLine)
 	scene.AddEntity(diceBox)
+
+	diePos := api.ClonePoint(TheDiceBoxOrigin)
+	diePos.AddScale(1, 1)
+	die := tdice.NewAnimBaseDie(diePos, 5)
+	scene.AddEntity(die)
 
 	diceBoxHeaderTextOrigin := api.ClonePoint(TheDiceBoxOrigin)
 	diceBoxHeaderTextOrigin.Add(headerTextOffset)
