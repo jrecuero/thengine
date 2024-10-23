@@ -20,51 +20,6 @@ const (
 
 // -----------------------------------------------------------------------------
 //
-// SpriteCell
-//
-// -----------------------------------------------------------------------------
-
-// SpriteCell struct defines the basic structure of an Sprite with a position
-// and a cell.
-type SpriteCell struct {
-	position *api.Point
-	cell     *engine.Cell
-}
-
-// NewSpriteCell function creates a new SpriteCell instance.
-func NewSpriteCell(position *api.Point, cell *engine.Cell) *SpriteCell {
-	return &SpriteCell{
-		position: position,
-		cell:     cell,
-	}
-}
-
-// -----------------------------------------------------------------------------
-// SpriteCell public methods
-// -----------------------------------------------------------------------------
-
-// GetCell method returns the cell from the SpriteCell instance.
-func (s *SpriteCell) GetCell() *engine.Cell {
-	return s.cell
-}
-
-// GetPosition method returs the position from the SpriteCell instance.
-func (s *SpriteCell) GetPosition() *api.Point {
-	return s.position
-}
-
-// SetCell method sets the cell in a SpriteCell instance.
-func (s *SpriteCell) SetCell(cell *engine.Cell) {
-	s.cell = cell
-}
-
-// SetPosition method sets the position in a SpriteCell instance.
-func (s *SpriteCell) SetPosition(position *api.Point) {
-	s.position = position
-}
-
-// -----------------------------------------------------------------------------
-//
 // Sprite
 //
 // -----------------------------------------------------------------------------
@@ -73,14 +28,14 @@ func (s *SpriteCell) SetPosition(position *api.Point) {
 // SpriteCells drawn in the screeen.
 type Sprite struct {
 	*Widget
-	spriteCells []*SpriteCell
+	cells engine.CellGroup
 }
 
 // NewSprite function creates a new Sprite instance.
-func NewSprite(name string, position *api.Point, spriteCells []*SpriteCell) *Sprite {
+func NewSprite(name string, position *api.Point, cells engine.CellGroup) *Sprite {
 	sprite := &Sprite{
-		Widget:      NewWidget(name, position, nil, nil),
-		spriteCells: spriteCells,
+		Widget: NewWidget(name, position, nil, nil),
+		cells:  cells,
 	}
 	sprite.SetSize(nil)
 	sprite.SetCanvas(nil)
@@ -91,37 +46,37 @@ func NewSprite(name string, position *api.Point, spriteCells []*SpriteCell) *Spr
 // Sprite public methods
 // -----------------------------------------------------------------------------
 
-func (s *Sprite) AddSpriteCellAt(atIndex int, spriteCell *SpriteCell) {
-	spriteCells := make([]*SpriteCell, len(s.spriteCells)+1)
+func (s *Sprite) AddSpriteCellAt(atIndex int, cell *engine.CellPos) {
+	spriteCells := make(engine.CellGroup, len(s.cells)+1)
 	// if the atIndex is equal to AtTheEnd(-1), add the sprite cell at the end.
 	if atIndex == AtTheEnd {
-		atIndex = len(s.spriteCells)
+		atIndex = len(s.cells)
 	}
-	for i, cell := range s.spriteCells {
+	for i, cell := range s.cells {
 		index := i
 		if i >= atIndex {
 			index++
 		}
 		spriteCells[index] = cell
 	}
-	spriteCells[atIndex] = spriteCell
-	s.spriteCells = spriteCells
+	spriteCells[atIndex] = cell
+	s.cells = spriteCells
 }
 
 func (s *Sprite) Draw(scene engine.IScene) {
 	defer s.Entity.Draw(scene)
 	if s.IsVisible() {
-		for _, spriteCell := range s.spriteCells {
+		for _, cell := range s.cells {
 			position := api.ClonePoint(s.GetPosition())
-			position.Add(spriteCell.GetPosition())
-			scene.GetCamera().RenderCellAt(position, spriteCell.GetCell())
+			position.Add(cell.GetPosition())
+			scene.GetCamera().RenderCellAt(position, cell.GetCell())
 		}
 	}
 }
 
 func (s *Sprite) GetCollider() *engine.Collider {
 	points := []*api.Point{}
-	for _, spriteCell := range s.spriteCells {
+	for _, spriteCell := range s.cells {
 		position := api.ClonePoint(s.GetPosition())
 		position.Add(spriteCell.GetPosition())
 		points = append(points, position)
@@ -129,8 +84,8 @@ func (s *Sprite) GetCollider() *engine.Collider {
 	return engine.NewCollider(nil, points)
 }
 
-func (s *Sprite) GetSpriteCells() []*SpriteCell {
-	return s.spriteCells
+func (s *Sprite) GetSpriteCells() engine.CellGroup {
+	return s.cells
 }
 
 // MarshalMap method is the custom marshal method to generate a map[string]any
@@ -148,11 +103,11 @@ func (s *Sprite) MarshalMap(origin *api.Point) (map[string]any, error) {
 	}
 	sprites := []map[string]any{}
 	for _, spriteCell := range s.GetSpriteCells() {
-		pos := api.ClonePoint(spriteCell.position)
+		pos := api.ClonePoint(spriteCell.GetPosition())
 		if origin != nil {
 			pos.Subtract(origin)
 		}
-		cell := spriteCell.cell
+		cell := spriteCell.GetCell()
 		ch := cell.Rune
 		fg, bg, attrs := cell.Style.Decompose()
 		sprite := map[string]any{
@@ -176,14 +131,14 @@ func (s *Sprite) MarshalCode(origin *api.Point) (string, error) {
 	result := ""
 	result += fmt.Sprintf("// sprite: Sprite:%s\n", s.GetName())
 	result += fmt.Sprintf("sprite := NewSprite(%s, api.Point(0, 0), nil, nil)\n", s.GetName())
-	for _, spriteCell := range s.GetSpriteCells() {
-		pos := api.ClonePoint(spriteCell.position)
+	for _, cell := range s.GetSpriteCells() {
+		pos := api.ClonePoint(cell.GetPosition())
 		if origin != nil {
 			pos.Subtract(origin)
 		}
-		fg, bg, attrs := spriteCell.GetCell().Style.Decompose()
+		fg, bg, attrs := cell.GetCell().Style.Decompose()
 		result += fmt.Sprintf("style := tcell.StyleDefault.Foreground(tcell.GetColor(%s)).Background(tcell.GetColor(%s)).Attributes(tcell.AttrMask(%d))\n", fg, bg, attrs)
-		result += fmt.Sprintf("cell := engine.NewCell(&style, %d)\n", spriteCell.GetCell().Rune)
+		result += fmt.Sprintf("cell := engine.NewCell(&style, %d)\n", cell.GetCell().Rune)
 		result += fmt.Sprintf("pos := engine.NewPoint(%d, %d)\n", pos.X, pos.Y)
 		result += fmt.Sprintf("spriteCell := widgets.NewSpriteCell(pos, cell)\n")
 		result += fmt.Sprintf("sprite.AddSpriteCellAt(AtTheEnd, spriteCell)\n")
@@ -194,20 +149,20 @@ func (s *Sprite) MarshalCode(origin *api.Point) (string, error) {
 	return result, nil
 }
 
-func (s *Sprite) RemoveSpriteCellAt(atIndex int) *SpriteCell {
+func (s *Sprite) RemoveSpriteCellAt(atIndex int) *engine.CellPos {
 	if atIndex == AtTheEnd {
-		atIndex = len(s.spriteCells) - 1
+		atIndex = len(s.cells) - 1
 	}
-	if (atIndex < 0) || (atIndex >= len(s.spriteCells)) {
+	if (atIndex < 0) || (atIndex >= len(s.cells)) {
 		return nil
 	}
-	spriteCell := s.spriteCells[atIndex]
-	s.spriteCells = append(s.spriteCells[:atIndex], s.spriteCells[atIndex+1:]...)
+	spriteCell := s.cells[atIndex]
+	s.cells = append(s.cells[:atIndex], s.cells[atIndex+1:]...)
 	return spriteCell
 }
 
-func (s *Sprite) SetSpriteCells(spriteCells []*SpriteCell) {
-	s.spriteCells = spriteCells
+func (s *Sprite) SetSpriteCells(cells engine.CellGroup) {
+	s.cells = cells
 }
 
 func (s *Sprite) StringToSprite(str string, style *tcell.Style, opts ...any) {
@@ -236,17 +191,17 @@ func (s *Sprite) StringToSpriteAt(str string, pos *api.Point, style *tcell.Style
 			}
 			cell := engine.NewCell(style, ch)
 			pos := api.NewPoint(x+posX, y+posY)
-			spriteCell := NewSpriteCell(pos, cell)
-			s.AddSpriteCellAt(AtTheEnd, spriteCell)
+			cellPos := engine.NewCellPos(pos, cell)
+			s.AddSpriteCellAt(AtTheEnd, cellPos)
 		}
 	}
 }
 
 func (s *Sprite) StringToSpriteAtEnd(str string, style *tcell.Style, opts ...any) {
 	var pos *api.Point
-	if lenSpriteCells := len(s.spriteCells); lenSpriteCells != 0 {
-		lastSpriteCell := s.spriteCells[lenSpriteCells-1]
-		pos = lastSpriteCell.position
+	if lenSpriteCells := len(s.cells); lenSpriteCells != 0 {
+		lastSpriteCell := s.cells[lenSpriteCells-1]
+		pos = lastSpriteCell.GetPosition()
 	}
 	s.StringToSpriteAt(str, pos, style, opts...)
 }
@@ -266,14 +221,14 @@ func (s *Sprite) UnmarshalMap(content map[string]any, origin *api.Point) error {
 	}
 	for _, spr := range content["sprites"].([]any) {
 		sprite := spr.(map[string]any)
-		spriteCell := NewSpriteCell(nil, nil)
+		cellPos := engine.NewCellPos(nil, nil)
 		cell := engine.NewCell(nil, 0)
 		if position, ok := sprite["position"].([]any); ok {
 			pos := api.NewPoint(int(position[0].(float64)), int(position[1].(float64)))
 			//if origin != nil {
 			//    pos.Add(origin)
 			//}
-			spriteCell.SetPosition(pos)
+			cellPos.SetPosition(pos)
 		}
 		if style, ok := sprite["style"].([]any); ok {
 			tcellStyle := tcell.StyleDefault.
@@ -284,11 +239,11 @@ func (s *Sprite) UnmarshalMap(content map[string]any, origin *api.Point) error {
 		if ch, ok := sprite["ch"].(string); ok {
 			cell.Rune = rune(ch[0])
 		}
-		spriteCell.SetCell(cell)
+		cellPos.SetCell(cell)
 		tools.Logger.WithField("module", "sprite").
 			WithField("method", "UnmarshalMap").
-			Debugf("spriteccell %s %s %+#v", s.GetName(), spriteCell.GetPosition().ToString(), spriteCell.GetCell())
-		s.AddSpriteCellAt(AtTheEnd, spriteCell)
+			Debugf("spriteccell %s %s %+#v", s.GetName(), cellPos.GetPosition().ToString(), cellPos.GetCell())
+		s.AddSpriteCellAt(AtTheEnd, cellPos)
 	}
 	return nil
 }

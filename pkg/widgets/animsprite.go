@@ -1,4 +1,7 @@
 // animSprite.go contains all resources requird to create an animates sprite.
+// AnimSprite is based in a Sprite, where every frame is an Sprite which can
+// have a different size. That is the difference with AnimWidget which has a
+// size size because Canvas is used for every frame.
 package widgets
 
 import (
@@ -10,50 +13,6 @@ import (
 
 // -----------------------------------------------------------------------------
 //
-// SpriteFrame
-//
-// -----------------------------------------------------------------------------
-
-// SpriteFrame structure defines the sprite frame to be used and how many ticks
-// has to be mantained.
-type SpriteFrame struct {
-	spriteCells []*SpriteCell
-	maxTicks    int
-	ticks       int
-}
-
-// NewSpriteFrameInfo function creates a new SpriteFrame instance.
-func NewSpriteFrame(spriteCells []*SpriteCell, maxTicks int) *SpriteFrame {
-	return &SpriteFrame{
-		spriteCells: spriteCells,
-		maxTicks:    maxTicks,
-		ticks:       0,
-	}
-}
-
-// -----------------------------------------------------------------------------
-// SpriteFrame public methods
-// -----------------------------------------------------------------------------
-
-// GetSpriteCells method returns the canvas instance number.
-func (f *SpriteFrame) GetSpriteCells() []*SpriteCell {
-	return f.spriteCells
-}
-
-// Inc method increase the actual counter for the sprite frame instance and
-// returns if that counter has reached the maxTicks.
-func (f *SpriteFrame) Inc() bool {
-	f.ticks++
-	return f.ticks >= f.maxTicks
-}
-
-// Reset method resets the sprite frame counter value.
-func (f *SpriteFrame) Reset() {
-	f.ticks = 0
-}
-
-// -----------------------------------------------------------------------------
-//
 // AnimSprite
 //
 // -----------------------------------------------------------------------------
@@ -62,14 +21,14 @@ func (f *SpriteFrame) Reset() {
 // animated widget.
 type AnimSprite struct {
 	*Sprite
-	frames        []*SpriteFrame
+	frames        engine.CellFrames
 	frameTraverse int
 	isfrozen      bool
 	isshuffle     bool
 }
 
 // NewAnimSprite function creates a new AnimSprite instance.
-func NewAnimSprite(name string, position *api.Point, frames []*SpriteFrame, initFrame int) *AnimSprite {
+func NewAnimSprite(name string, position *api.Point, frames engine.CellFrames, initFrame int) *AnimSprite {
 	widget := &AnimSprite{
 		Sprite:        NewSprite(name, position, nil),
 		frames:        frames,

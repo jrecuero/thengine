@@ -41,10 +41,13 @@ func buildBoxes(scene engine.IScene) {
 		engine.CanvasRectSingleLine)
 	scene.AddEntity(diceBox)
 
-	diePos := api.ClonePoint(TheDiceBoxOrigin)
-	diePos.AddScale(1, 1)
-	die := tdice.NewAnimBaseDie(diePos, 5)
-	scene.AddEntity(die)
+	// Create 6 animated base dice.
+	for d := 0; d < 6; d++ {
+		diePos := api.ClonePoint(TheDiceBoxOrigin)
+		diePos.AddScale(1+d*7, 1)
+		die := tdice.NewAnimBaseDie(diePos, 5)
+		scene.AddEntity(die)
+	}
 
 	diceBoxHeaderTextOrigin := api.ClonePoint(TheDiceBoxOrigin)
 	diceBoxHeaderTextOrigin.Add(headerTextOffset)

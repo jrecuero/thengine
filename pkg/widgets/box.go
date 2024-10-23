@@ -60,27 +60,27 @@ func (b *Box) updateBox() {
 	}
 	w, h := b.GetSize().Get()
 	style := b.GetStyle()
-	var spriteCell *SpriteCell
+	var cellPos *engine.CellPos
 	for col := 1; col < (w - 1); col++ {
 		cell := engine.NewCell(style, hl)
-		spriteCell = NewSpriteCell(api.NewPoint(col, 0), cell)
-		b.AddSpriteCellAt(-1, spriteCell)
-		spriteCell = NewSpriteCell(api.NewPoint(col, h-1), cell)
-		b.AddSpriteCellAt(-1, spriteCell)
+		cellPos = engine.NewCellPos(api.NewPoint(col, 0), cell)
+		b.AddSpriteCellAt(-1, cellPos)
+		cellPos = engine.NewCellPos(api.NewPoint(col, h-1), cell)
+		b.AddSpriteCellAt(-1, cellPos)
 	}
 	for row := 1; row < (h - 1); row++ {
 		cell := engine.NewCell(style, vl)
-		spriteCell = NewSpriteCell(api.NewPoint(0, row), cell)
-		b.AddSpriteCellAt(-1, spriteCell)
-		spriteCell = NewSpriteCell(api.NewPoint(w-1, row), cell)
-		b.AddSpriteCellAt(-1, spriteCell)
+		cellPos = engine.NewCellPos(api.NewPoint(0, row), cell)
+		b.AddSpriteCellAt(-1, cellPos)
+		cellPos = engine.NewCellPos(api.NewPoint(w-1, row), cell)
+		b.AddSpriteCellAt(-1, cellPos)
 	}
-	spriteCell = NewSpriteCell(api.NewPoint(0, 0), engine.NewCell(style, ul))
-	b.AddSpriteCellAt(-1, spriteCell)
-	spriteCell = NewSpriteCell(api.NewPoint(w-1, 0), engine.NewCell(style, ur))
-	b.AddSpriteCellAt(-1, spriteCell)
-	spriteCell = NewSpriteCell(api.NewPoint(0, h-1), engine.NewCell(style, ll))
-	b.AddSpriteCellAt(-1, spriteCell)
-	spriteCell = NewSpriteCell(api.NewPoint(w-1, h-1), engine.NewCell(style, lr))
-	b.AddSpriteCellAt(-1, spriteCell)
+	cellPos = engine.NewCellPos(api.NewPoint(0, 0), engine.NewCell(style, ul))
+	b.AddSpriteCellAt(-1, cellPos)
+	cellPos = engine.NewCellPos(api.NewPoint(w-1, 0), engine.NewCell(style, ur))
+	b.AddSpriteCellAt(-1, cellPos)
+	cellPos = engine.NewCellPos(api.NewPoint(0, h-1), engine.NewCell(style, ll))
+	b.AddSpriteCellAt(-1, cellPos)
+	cellPos = engine.NewCellPos(api.NewPoint(w-1, h-1), engine.NewCell(style, lr))
+	b.AddSpriteCellAt(-1, cellPos)
 }

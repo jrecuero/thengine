@@ -42,10 +42,10 @@ func isInDoorSpace(x int, length int, wide int) bool {
 }
 
 func buildWall(isXAxe EAxe, fixAxe int, length int, cell *engine.Cell,
-	doorPlace EDoorPlace, doorWide int) ([]*widgets.SpriteCell, *Door) {
+	doorPlace EDoorPlace, doorWide int) (engine.CellGroup, *Door) {
 
-	spriteCells := []*widgets.SpriteCell{}
-	var spriteCell *widgets.SpriteCell
+	cells := engine.CellGroup{}
+	var cellPos *engine.CellPos
 	var door *Door
 	if doorPlace != NoDoor {
 		door = NewDoor(doorPlace, doorWide, nil)
@@ -53,26 +53,26 @@ func buildWall(isXAxe EAxe, fixAxe int, length int, cell *engine.Cell,
 	for x := 0; x < length; x++ {
 		if !(door != nil && isInDoorSpace(x, length, doorWide)) {
 			if isXAxe == AxeX {
-				spriteCell = widgets.NewSpriteCell(api.NewPoint(x, fixAxe), cell)
+				cellPos = engine.NewCellPos(api.NewPoint(x, fixAxe), cell)
 			} else {
-				spriteCell = widgets.NewSpriteCell(api.NewPoint(fixAxe, x), cell)
+				cellPos = engine.NewCellPos(api.NewPoint(fixAxe, x), cell)
 			}
 
-			spriteCells = append(spriteCells, spriteCell)
+			cells = append(cells, cellPos)
 		}
 	}
-	return spriteCells, door
+	return cells, door
 }
 
 func BuildHWall(y int, w int, cell *engine.Cell, doorPlace EDoorPlace,
-	doorWide int) ([]*widgets.SpriteCell, *Door) {
+	doorWide int) (engine.CellGroup, *Door) {
 
 	return buildWall(AxeX, y, w, cell, doorPlace, doorWide)
 
 }
 
 func BuildVWall(x int, h int, cell *engine.Cell, doorPlace EDoorPlace,
-	doorWide int) ([]*widgets.SpriteCell, *Door) {
+	doorWide int) (engine.CellGroup, *Door) {
 	return buildWall(AxeY, x, h, cell, doorPlace, doorWide)
 }
 
@@ -90,7 +90,7 @@ func NewRoomData(doorPlace EDoorPlace, axe EAxe, fix int, length int,
 func BuildRoomWithDoors(name string, position *api.Point, size *api.Size,
 	cell *engine.Cell, isDoors []bool, doorsWide []int) *Room {
 
-	spriteCells := []*widgets.SpriteCell{}
+	cells := engine.CellGroup{}
 	doors := []*Door{}
 	x, y := position.Get()
 	w, h := size.Get()
@@ -107,14 +107,14 @@ func BuildRoomWithDoors(name string, position *api.Point, size *api.Size,
 		}
 		wall, door := buildWall(entry.axe, entry.fix, entry.length, cell, doorPlace,
 			doorsWide[entry.doorPlace])
-		spriteCells = append(spriteCells, wall...)
+		cells = append(cells, wall...)
 		if door != nil {
 			door.SetHooksInWall(entry.wallOrigin, entry.length)
 			doors = append(doors, door)
 		}
 	}
 
-	sprite := widgets.NewSprite(name, position, spriteCells)
+	sprite := widgets.NewSprite(name, position, cells)
 	sprite.SetSolid(true)
 	room := &Room{
 		Sprite: sprite,
@@ -141,30 +141,30 @@ func BuildRoom(name string, position *api.Point, size *api.Size,
 	if len(opts) != 0 {
 		doors = opts[0].([]bool)
 	}
-	spriteCells := []*widgets.SpriteCell{}
-	var spriteCell *widgets.SpriteCell
+	cells := engine.CellGroup{}
+	var cellPos *engine.CellPos
 	w, h := size.Get()
 	for x := 0; x < w; x++ {
 		if !(doors[0] && isMiddle(x, w)) {
-			spriteCell = widgets.NewSpriteCell(api.NewPoint(x, 0), cell)
-			spriteCells = append(spriteCells, spriteCell)
+			cellPos = engine.NewCellPos(api.NewPoint(x, 0), cell)
+			cells = append(cells, cellPos)
 		}
 		if !(doors[1] && isMiddle(x, w)) {
-			spriteCell = widgets.NewSpriteCell(api.NewPoint(x, h-1), cell)
-			spriteCells = append(spriteCells, spriteCell)
+			cellPos = engine.NewCellPos(api.NewPoint(x, h-1), cell)
+			cells = append(cells, cellPos)
 		}
 	}
 	for y := 1; y < h-1; y++ {
 		if !(doors[2] && isMiddle(y, h)) {
-			spriteCell = widgets.NewSpriteCell(api.NewPoint(0, y), cell)
-			spriteCells = append(spriteCells, spriteCell)
+			cellPos = engine.NewCellPos(api.NewPoint(0, y), cell)
+			cells = append(cells, cellPos)
 		}
 		if !(doors[3] && isMiddle(y, h)) {
-			spriteCell = widgets.NewSpriteCell(api.NewPoint(w-1, y), cell)
-			spriteCells = append(spriteCells, spriteCell)
+			cellPos = engine.NewCellPos(api.NewPoint(w-1, y), cell)
+			cells = append(cells, cellPos)
 		}
 	}
-	sprite := widgets.NewSprite(name, position, spriteCells)
+	sprite := widgets.NewSprite(name, position, cells)
 	sprite.SetSolid(true)
 	return sprite
 }
@@ -201,26 +201,26 @@ func BuildCorridor(name string, origin *api.Point, dest *api.Point,
 		wideB = opts[1].(int)
 	}
 
-	spriteCells := []*widgets.SpriteCell{}
-	var spriteCell *widgets.SpriteCell
+	cells := engine.CellGroup{}
+	var spriteCell *engine.CellPos
 	if axeX {
 		y := []int{originY - wideA, destY + wideB}
 		for x := originX; x <= destX; x++ {
-			spriteCell = widgets.NewSpriteCell(api.NewPoint(x, y[0]), cell)
-			spriteCells = append(spriteCells, spriteCell)
-			spriteCell = widgets.NewSpriteCell(api.NewPoint(x, y[1]), cell)
-			spriteCells = append(spriteCells, spriteCell)
+			spriteCell = engine.NewCellPos(api.NewPoint(x, y[0]), cell)
+			cells = append(cells, spriteCell)
+			spriteCell = engine.NewCellPos(api.NewPoint(x, y[1]), cell)
+			cells = append(cells, spriteCell)
 		}
 	} else if axeY {
 		x := []int{originX - wideA, destX + wideB}
 		for y := originY; y <= destY; y++ {
-			spriteCell = widgets.NewSpriteCell(api.NewPoint(x[0], y), cell)
-			spriteCells = append(spriteCells, spriteCell)
-			spriteCell = widgets.NewSpriteCell(api.NewPoint(x[1], y), cell)
-			spriteCells = append(spriteCells, spriteCell)
+			spriteCell = engine.NewCellPos(api.NewPoint(x[0], y), cell)
+			cells = append(cells, spriteCell)
+			spriteCell = engine.NewCellPos(api.NewPoint(x[1], y), cell)
+			cells = append(cells, spriteCell)
 		}
 	}
-	sprite := widgets.NewSprite(name, api.NewPoint(0, 0), spriteCells)
+	sprite := widgets.NewSprite(name, api.NewPoint(0, 0), cells)
 	sprite.SetSolid(true)
 	return sprite
 }
@@ -234,22 +234,22 @@ func BuildLine(name string, origin *api.Point, dest *api.Point,
 	if !axeX && !axeY {
 		return nil
 	}
-	spriteCells := []*widgets.SpriteCell{}
-	var spriteCell *widgets.SpriteCell
+	cells := engine.CellGroup{}
+	var cellPos *engine.CellPos
 	if axeX {
 		y := originY
 		for x := originX; x <= destX; x++ {
-			spriteCell = widgets.NewSpriteCell(api.NewPoint(x, y), cell)
-			spriteCells = append(spriteCells, spriteCell)
+			cellPos = engine.NewCellPos(api.NewPoint(x, y), cell)
+			cells = append(cells, cellPos)
 		}
 	} else if axeY {
 		x := originX
 		for y := originY; y <= destY; y++ {
-			spriteCell = widgets.NewSpriteCell(api.NewPoint(x, y), cell)
-			spriteCells = append(spriteCells, spriteCell)
+			cellPos = engine.NewCellPos(api.NewPoint(x, y), cell)
+			cells = append(cells, cellPos)
 		}
 	}
-	sprite := widgets.NewSprite(name, api.NewPoint(0, 0), spriteCells)
+	sprite := widgets.NewSprite(name, api.NewPoint(0, 0), cells)
 	sprite.SetSolid(true)
 	return sprite
 }

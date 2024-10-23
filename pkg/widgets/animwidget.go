@@ -1,5 +1,7 @@
 // animWidget.go contains all resources required to create an animated widget
 // based on a set of canvas instances.
+// AnimWdiget is based in a fixed canvas where every frame in the animation
+// has the same canvas size.
 package widgets
 
 import (
