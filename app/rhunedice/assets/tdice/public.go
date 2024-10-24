@@ -11,9 +11,11 @@ type AnimBaseDie struct {
 }
 
 func NewAnimBaseDie(pos *API.Point, ticks int) *AnimBaseDie {
-	frames := tfaces.NewAsciiFramesFromAllFaces(ticks)
+	//frames := tfaces.NewAsciiFramesFromAllFaces(ticks)
+	frames := tfaces.NewBaseRhuneFames()
 	animDie := &AnimBaseDie{
-		AnimWidget: widgets.NewAnimWidget("assets/tdice/anim-base-die/1", pos, tfaces.AsciiFaceSize, frames, 0),
+		AnimWidget: widgets.NewAnimWidget("assets/tdice/anim-base-die/1",
+			pos, tfaces.AsciiFaceSize, frames, 0),
 	}
 	animDie.Shuffle()
 	return animDie

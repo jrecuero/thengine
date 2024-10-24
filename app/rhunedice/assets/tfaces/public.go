@@ -3,6 +3,7 @@ package tfaces
 import (
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/api"
 	"github.com/jrecuero/thengine/app/rhunedice/rhuned/faces"
+	"github.com/jrecuero/thengine/app/rhunedice/rhuned/rhunes"
 	API "github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/constants"
 	"github.com/jrecuero/thengine/pkg/engine"
@@ -39,6 +40,44 @@ var (
 		AsciiCanvasNil,
 	}
 )
+
+type RhuneFrame struct {
+	*widgets.Frame
+	rhune *api.Rhune
+}
+
+func NewRhuneFrame(rhune *api.Rhune, canvas *engine.Canvas, maxTicks int) *RhuneFrame {
+	return &RhuneFrame{
+		Frame: widgets.NewFrameWithCanvas(canvas, maxTicks),
+		rhune: rhune,
+	}
+}
+
+const (
+	RhuneFrameMaxTicks int = 5
+)
+
+var (
+	AttackRhuneFrame  *RhuneFrame = NewRhuneFrame(rhunes.AttackRhune, AsciiCanvasAttack, RhuneFrameMaxTicks)
+	DefenseRhuneFrame *RhuneFrame = NewRhuneFrame(rhunes.DefenseRhune, AsciiCanvasDefense, RhuneFrameMaxTicks)
+	SkillRhuneFrame   *RhuneFrame = NewRhuneFrame(rhunes.SkillRhune, AsciiCanvasSkill, RhuneFrameMaxTicks)
+	StepRhuneFrame    *RhuneFrame = NewRhuneFrame(rhunes.StepRhune, AsciiCanvasStep, RhuneFrameMaxTicks)
+	HealthRhuneFrame  *RhuneFrame = NewRhuneFrame(rhunes.HealthRhune, AsciiCanvasHealth, RhuneFrameMaxTicks)
+	NilRhuneFrame     *RhuneFrame = NewRhuneFrame(rhunes.NilRhune, AsciiCanvasNil, RhuneFrameMaxTicks)
+
+	BaseRhuneFrames []widgets.IFrame = []widgets.IFrame{
+		AttackRhuneFrame,
+		DefenseRhuneFrame,
+		SkillRhuneFrame,
+		StepRhuneFrame,
+		HealthRhuneFrame,
+		NilRhuneFrame,
+	}
+)
+
+func NewBaseRhuneFames() []widgets.IFrame {
+	return BaseRhuneFrames
+}
 
 func NewAsciiFramesFromAllFaces(ticks int) []widgets.IFrame {
 	var frames []widgets.IFrame = make([]widgets.IFrame, len(AsciiCanvasAllFaces))
