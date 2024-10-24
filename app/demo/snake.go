@@ -140,7 +140,7 @@ func NewSnake(position *api.Point, style *tcell.Style) *snake {
 	cell := engine.NewCell(style, '#')
 	snake := &snake{
 		Sprite: widgets.NewSprite(SnakeWidgetName, position,
-			[]*widgets.SpriteCell{widgets.NewSpriteCell(api.NewPoint(5, 5), cell)}),
+			engine.CellGroup{engine.NewCellPos(api.NewPoint(5, 5), cell)}),
 		speed:           10.0,
 		direction:       "none",
 		alive:           true,
@@ -176,7 +176,7 @@ func (s *snake) Shoot(args ...any) {
 	if s.BulletAvailable {
 		scene := args[0].(engine.IScene)
 		BulletCounter++
-		spriteCell := s.GetSpriteCells()[0]
+		spriteCell := s.GetCells()[0]
 		position := api.ClonePoint(s.GetPosition())
 		position.Add(spriteCell.GetPosition())
 		bullet := NewBullet(position, s.GetStyle(), s.direction)
@@ -245,7 +245,7 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 		}
 		s.x += float64(vx) / s.speed
 		s.y += float64(vy) / s.speed
-		spriteCell := s.GetSpriteCells()[0]
+		spriteCell := s.GetCells()[0]
 		intX := int(s.x)
 		intY := int(s.y)
 		if (intX != spriteCell.GetPosition().X) || (intY != spriteCell.GetPosition().Y) {
@@ -260,7 +260,7 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 			}
 			// Remove the last entry and place first with position increased
 			// based in the direction the snake is running.
-			lastCell := s.RemoveSpriteCellAt(widgets.AtTheEnd)
+			lastCell := s.RemoveCellAt(widgets.AtTheEnd)
 			lastCell.SetPosition(api.NewPoint(intX, intY))
 			s.AddSpriteCellAt(0, lastCell)
 			//tools.Logger.WithField("module", "main").
@@ -269,9 +269,9 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 			//    Debugf("rotate %s", lastCell.GetPosition().ToString())
 		}
 		// check collision with itself.
-		spriteCells := s.GetSpriteCells()
+		spriteCells := s.GetCells()
 		spriteCell = spriteCells[0]
-		for i := 1; i < len(s.GetSpriteCells()); i++ {
+		for i := 1; i < len(s.GetCells()); i++ {
 			if spriteCell.GetPosition().IsEqual(spriteCells[i].GetPosition()) {
 				s.alive = false
 				tools.Logger.WithField("module", "main").
@@ -288,17 +288,17 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 		if len(collisions) != 0 {
 			for _, ent := range collisions {
 				if _, ok := ent.(*TimerFoodPiece); ok {
-					spriteCell = s.GetSpriteCells()[0]
+					spriteCell = s.GetCells()[0]
 					scene.RemoveEntity(ent)
 					// Update float64 position with new entry.
 					s.x = float64(spriteCell.GetPosition().X + vx)
 					s.y = float64(spriteCell.GetPosition().Y + vy)
-					newSpriteCell := widgets.NewSpriteCell(api.NewPoint(int(s.x), int(s.y)), spriteCell.GetCell())
-					s.AddSpriteCellAt(0, newSpriteCell)
+					newCellPos := engine.NewCellPos(api.NewPoint(int(s.x), int(s.y)), spriteCell.GetCell())
+					s.AddSpriteCellAt(0, newCellPos)
 					tools.Logger.WithField("module", "main").
 						WithField("struct", "snake").
 						WithField("method", "Update").
-						Debugf("collision with %s at %s", ent.GetName(), newSpriteCell.GetPosition().ToString())
+						Debugf("collision with %s at %s", ent.GetName(), newCellPos.GetPosition().ToString())
 					s.PublishCollision(ent.(*TimerFoodPiece).Points)
 				}
 			}

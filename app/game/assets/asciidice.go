@@ -59,8 +59,8 @@ func NewAsciiFrameForNumber(number int, ticks int) *widgets.Frame {
 	return widgets.NewFrame(canvas, ticks)
 }
 
-func NewAsciiFramesForAllNumbers(ticks int) []*widgets.Frame {
-	var frames []*widgets.Frame = make([]*widgets.Frame, 10)
+func NewAsciiFramesForAllNumbers(ticks int) []widgets.IFrame {
+	var frames []widgets.IFrame = make([]widgets.IFrame, 10)
 	for i := 0; i <= 9; i++ {
 		frames[i] = NewAsciiFrameForNumber(i, ticks)
 	}

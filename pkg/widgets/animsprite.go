@@ -45,8 +45,8 @@ func NewAnimSprite(name string, position *api.Point, frames engine.CellFrames, i
 // -----------------------------------------------------------------------------
 
 func (w *AnimSprite) updateSprite() {
-	spriteCells := w.frames[w.frameTraverse].GetSpriteCells()
-	w.SetSpriteCells(spriteCells)
+	cells := w.frames[w.frameTraverse].GetCells()
+	w.SetCells(cells)
 }
 
 // -----------------------------------------------------------------------------

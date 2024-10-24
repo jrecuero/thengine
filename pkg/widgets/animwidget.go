@@ -17,6 +17,12 @@ import (
 //
 // -----------------------------------------------------------------------------
 
+type IFrame interface {
+	GetCanvas() *engine.Canvas
+	Inc() bool
+	Reset()
+}
+
 // Frame structure defines the frame to be used and how many ticks has to
 // be mantained.
 type Frame struct {
@@ -55,6 +61,8 @@ func (f *Frame) Reset() {
 	f.ticks = 0
 }
 
+var _ IFrame = (*Frame)(nil)
+
 // -----------------------------------------------------------------------------
 //
 // AnimWidget
@@ -65,14 +73,14 @@ func (f *Frame) Reset() {
 // animated widget.
 type AnimWidget struct {
 	*Widget
-	frames        []*Frame
+	frames        []IFrame
 	frameTraverse int
 	isfrozen      bool
 	isshuffle     bool
 }
 
 // NewAnimWidget function creates a new AnimWidget instance.
-func NewAnimWidget(name string, position *api.Point, size *api.Size, frames []*Frame, initFrame int) *AnimWidget {
+func NewAnimWidget(name string, position *api.Point, size *api.Size, frames []IFrame, initFrame int) *AnimWidget {
 	widget := &AnimWidget{
 		Widget:        NewWidget(name, position, size, nil),
 		frames:        frames,

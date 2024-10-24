@@ -127,8 +127,8 @@ func BuildRoomWithDoors(name string, position *api.Point, size *api.Size,
 func ConnectRooms(name string, doorA *Door, doorB *Door, cell *engine.Cell) *widgets.Sprite {
 	spriteA := BuildLine("", doorA.hook.hookA, doorB.hook.hookA, cell)
 	spriteB := BuildLine("", doorA.hook.hookB, doorB.hook.hookB, cell)
-	spriteCells := spriteA.GetSpriteCells()
-	spriteCells = append(spriteCells, spriteB.GetSpriteCells()...)
+	spriteCells := spriteA.GetCells()
+	spriteCells = append(spriteCells, spriteB.GetCells()...)
 	sprite := widgets.NewSprite(name, api.NewPoint(0, 0), spriteCells)
 	sprite.SetSolid(true)
 	return sprite

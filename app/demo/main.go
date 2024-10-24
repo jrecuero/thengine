@@ -559,7 +559,7 @@ func demoTwelve(dryRun bool) {
 
 	cell := engine.NewCell(&styleFour, '#')
 	sprite := widgets.NewSprite("sprite/1", api.NewPoint(20, 11),
-		[]*widgets.SpriteCell{widgets.NewSpriteCell(api.NewPoint(0, 0), cell)})
+		[]*engine.CellPos{engine.NewCellPos(api.NewPoint(0, 0), cell)})
 	scene.AddEntity(sprite)
 
 	textClockCounter := 0
@@ -568,7 +568,7 @@ func demoTwelve(dryRun bool) {
 		textClockCounter++
 		textClock.SetText(fmt.Sprintf("clock: %d", textClockCounter))
 		if (textClockCounter % 10) == 0 {
-			sprite.AddSpriteCellAt(widgets.AtTheEnd, widgets.NewSpriteCell(api.NewPoint(textClockCounter/10, 0), cell))
+			sprite.AddSpriteCellAt(widgets.AtTheEnd, engine.NewCellPos(api.NewPoint(textClockCounter/10, 0), cell))
 		}
 		return true
 	})
@@ -594,7 +594,7 @@ func demoThirteen(dryRun bool) {
 	styleTwo := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorRed)
 	scene := engine.NewScene("scene", camera)
 
-	frames := []*widgets.Frame{}
+	frames := []widgets.IFrame{}
 	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("- \n  ", &styleOne), 10))
 	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString(" -\n  ", &styleOne), 10))
 	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("  \n- ", &styleOne), 10))
@@ -627,17 +627,17 @@ func demoFourteen(dryRun bool) {
 	scene := engine.NewScene("scene", camera)
 
 	cell := engine.NewCell(&styleOne, '#')
-	frames := []*widgets.SpriteFrame{}
-	frames = append(frames, widgets.NewSpriteFrame(
-		[]*widgets.SpriteCell{
-			widgets.NewSpriteCell(api.NewPoint(0, 0), cell),
-			widgets.NewSpriteCell(api.NewPoint(1, 1), cell),
-			widgets.NewSpriteCell(api.NewPoint(2, 2), cell),
+	frames := engine.CellFrames{}
+	frames = append(frames, engine.NewCellFrame(
+		[]*engine.CellPos{
+			engine.NewCellPos(api.NewPoint(0, 0), cell),
+			engine.NewCellPos(api.NewPoint(1, 1), cell),
+			engine.NewCellPos(api.NewPoint(2, 2), cell),
 		}, 20))
-	frames = append(frames, widgets.NewSpriteFrame(
-		[]*widgets.SpriteCell{
-			widgets.NewSpriteCell(api.NewPoint(0, 1), cell),
-			widgets.NewSpriteCell(api.NewPoint(1, 0), cell),
+	frames = append(frames, engine.NewCellFrame(
+		[]*engine.CellPos{
+			engine.NewCellPos(api.NewPoint(0, 1), cell),
+			engine.NewCellPos(api.NewPoint(1, 0), cell),
 		}, 20))
 	animSprite := widgets.NewAnimSprite("anim-sprite", api.NewPoint(1, 1), frames, 0)
 	scene.AddEntity(animSprite)
@@ -654,13 +654,13 @@ func demoFourteen(dryRun bool) {
 		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace5),
 		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace6),
 	}
-	diceSpriteCells := []*widgets.SpriteCell{}
+	diceSpriteCells := []*engine.CellPos{}
 	for _, d := range diceCells {
-		diceSpriteCells = append(diceSpriteCells, widgets.NewSpriteCell(api.NewPoint(0, 0), d))
+		diceSpriteCells = append(diceSpriteCells, engine.NewCellPos(api.NewPoint(0, 0), d))
 	}
-	diceFrames := []*widgets.SpriteFrame{}
+	diceFrames := engine.CellFrames{}
 	for _, d := range diceSpriteCells {
-		diceFrames = append(diceFrames, widgets.NewSpriteFrame([]*widgets.SpriteCell{d}, 5))
+		diceFrames = append(diceFrames, engine.NewCellFrame([]*engine.CellPos{d}, 5))
 	}
 	diceAnimSprite := widgets.NewAnimSprite("anim-sprite/dice", api.NewPoint(10, 1), diceFrames, 0)
 	diceAnimSprite.Shuffle()

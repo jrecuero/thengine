@@ -166,8 +166,8 @@ func NewCellFrame(cells CellGroup, maxTicks int) *CellFrame {
 // CellFrame public methods
 // -----------------------------------------------------------------------------
 
-// GetSpriteCells method returns the canvas instance number.
-func (f *CellFrame) GetSpriteCells() CellGroup {
+// GetCells method returns the canvas instance number.
+func (f *CellFrame) GetCells() CellGroup {
 	return f.cells
 }
 
