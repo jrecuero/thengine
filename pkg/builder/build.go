@@ -45,7 +45,7 @@ func buildWall(isXAxe EAxe, fixAxe int, length int, cell *engine.Cell,
 	doorPlace EDoorPlace, doorWide int) (engine.CellGroup, *Door) {
 
 	cells := engine.CellGroup{}
-	var cellPos *engine.CellPos
+	var newcell *engine.Cell
 	var door *Door
 	if doorPlace != NoDoor {
 		door = NewDoor(doorPlace, doorWide, nil)
@@ -53,12 +53,12 @@ func buildWall(isXAxe EAxe, fixAxe int, length int, cell *engine.Cell,
 	for x := 0; x < length; x++ {
 		if !(door != nil && isInDoorSpace(x, length, doorWide)) {
 			if isXAxe == AxeX {
-				cellPos = engine.NewCellPos(api.NewPoint(x, fixAxe), cell)
+				newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, fixAxe))
 			} else {
-				cellPos = engine.NewCellPos(api.NewPoint(fixAxe, x), cell)
+				newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(fixAxe, x))
 			}
 
-			cells = append(cells, cellPos)
+			cells = append(cells, newcell)
 		}
 	}
 	return cells, door
@@ -142,26 +142,26 @@ func BuildRoom(name string, position *api.Point, size *api.Size,
 		doors = opts[0].([]bool)
 	}
 	cells := engine.CellGroup{}
-	var cellPos *engine.CellPos
+	var newcell *engine.Cell
 	w, h := size.Get()
 	for x := 0; x < w; x++ {
 		if !(doors[0] && isMiddle(x, w)) {
-			cellPos = engine.NewCellPos(api.NewPoint(x, 0), cell)
-			cells = append(cells, cellPos)
+			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, 0))
+			cells = append(cells, newcell)
 		}
 		if !(doors[1] && isMiddle(x, w)) {
-			cellPos = engine.NewCellPos(api.NewPoint(x, h-1), cell)
-			cells = append(cells, cellPos)
+			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, h-1))
+			cells = append(cells, newcell)
 		}
 	}
 	for y := 1; y < h-1; y++ {
 		if !(doors[2] && isMiddle(y, h)) {
-			cellPos = engine.NewCellPos(api.NewPoint(0, y), cell)
-			cells = append(cells, cellPos)
+			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(0, y))
+			cells = append(cells, newcell)
 		}
 		if !(doors[3] && isMiddle(y, h)) {
-			cellPos = engine.NewCellPos(api.NewPoint(w-1, y), cell)
-			cells = append(cells, cellPos)
+			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(w-1, y))
+			cells = append(cells, newcell)
 		}
 	}
 	sprite := widgets.NewSprite(name, position, cells)
@@ -202,22 +202,22 @@ func BuildCorridor(name string, origin *api.Point, dest *api.Point,
 	}
 
 	cells := engine.CellGroup{}
-	var spriteCell *engine.CellPos
+	var newcell *engine.Cell
 	if axeX {
 		y := []int{originY - wideA, destY + wideB}
 		for x := originX; x <= destX; x++ {
-			spriteCell = engine.NewCellPos(api.NewPoint(x, y[0]), cell)
-			cells = append(cells, spriteCell)
-			spriteCell = engine.NewCellPos(api.NewPoint(x, y[1]), cell)
-			cells = append(cells, spriteCell)
+			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, y[0]))
+			cells = append(cells, newcell)
+			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, y[1]))
+			cells = append(cells, newcell)
 		}
 	} else if axeY {
 		x := []int{originX - wideA, destX + wideB}
 		for y := originY; y <= destY; y++ {
-			spriteCell = engine.NewCellPos(api.NewPoint(x[0], y), cell)
-			cells = append(cells, spriteCell)
-			spriteCell = engine.NewCellPos(api.NewPoint(x[1], y), cell)
-			cells = append(cells, spriteCell)
+			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x[0], y))
+			cells = append(cells, newcell)
+			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x[1], y))
+			cells = append(cells, newcell)
 		}
 	}
 	sprite := widgets.NewSprite(name, api.NewPoint(0, 0), cells)
@@ -235,18 +235,18 @@ func BuildLine(name string, origin *api.Point, dest *api.Point,
 		return nil
 	}
 	cells := engine.CellGroup{}
-	var cellPos *engine.CellPos
+	var newcell *engine.Cell
 	if axeX {
 		y := originY
 		for x := originX; x <= destX; x++ {
-			cellPos = engine.NewCellPos(api.NewPoint(x, y), cell)
-			cells = append(cells, cellPos)
+			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, y))
+			cells = append(cells, newcell)
 		}
 	} else if axeY {
 		x := originX
 		for y := originY; y <= destY; y++ {
-			cellPos = engine.NewCellPos(api.NewPoint(x, y), cell)
-			cells = append(cells, cellPos)
+			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, y))
+			cells = append(cells, newcell)
 		}
 	}
 	sprite := widgets.NewSprite(name, api.NewPoint(0, 0), cells)

@@ -3,8 +3,6 @@
 // displayed in any position in the canvas or screen.
 // Cell is the base class to represent information for a cell based only in the
 // rune and the color.
-// CellPos contains the cell information plus a position.
-// CellGroup contains a groups of CellPos that can be used for any widget or
 // sprite.
 package engine
 
@@ -24,9 +22,11 @@ import (
 // Cell structure defines a cell that is drawn in the canvas.
 // Style instance identifies color and other attributes.
 // Ch Rune identifies the character to be displayed in the cell.
+// position keep the position if provided, but with a default empty value.
 type Cell struct {
-	Style *tcell.Style
-	Rune  rune
+	position *api.Point
+	Style    *tcell.Style
+	Rune     rune
 }
 
 // NewCell function creates a new Cell instance with the given color and rune.
@@ -35,9 +35,18 @@ func NewCell(style *tcell.Style, ch rune) *Cell {
 		style = &tcell.StyleDefault
 	}
 	return &Cell{
-		Style: style,
-		Rune:  ch,
+		position: nil,
+		Style:    style,
+		Rune:     ch,
 	}
+}
+
+// NewCellAt function creates a new Cell instance with the given color, rune
+// and at the given position.
+func NewCellAt(style *tcell.Style, ch rune, position *api.Point) *Cell {
+	cell := NewCell(style, ch)
+	cell.SetPosition(position)
+	return cell
 }
 
 // NewEmptyCell function creates a new Cell instance without any color or rune.
@@ -49,8 +58,9 @@ func NewEmptyCell() *Cell {
 // given Cell instance.
 func CloneCell(cell *Cell) *Cell {
 	return &Cell{
-		Style: cell.Style,
-		Rune:  cell.Rune,
+		position: cell.GetPosition(),
+		Style:    cell.Style,
+		Rune:     cell.Rune,
 	}
 }
 
@@ -62,16 +72,28 @@ func CloneCell(cell *Cell) *Cell {
 func (c *Cell) Clone(cell *Cell) {
 	c.Style = cell.Style
 	c.Rune = cell.Rune
+	c.position = cell.GetPosition()
+}
+
+// GetPosition method returs the position from the Cell instance.
+func (c *Cell) GetPosition() *api.Point {
+	return c.position
 }
 
 // IsEqual method checks if the given Cell is equal to the instance, where Color
 // and Rune should be the same.
 func (c *Cell) IsEqual(cell *Cell) bool {
-	return CompareStyle(c.Style, cell.Style) && (c.Rune == cell.Rune)
+	return CompareStyle(c.Style, cell.Style) &&
+		(c.Rune == cell.Rune) &&
+		(c.GetPosition() == cell.GetPosition())
+
 }
 
 // ToString method returns the cell instance information as a string.
 func (c *Cell) ToString() string {
+	if c.GetPosition() != nil {
+		return fmt.Sprintf("[%c]%s %s", c.Rune, StyleToString(c.Style), c.GetPosition().ToString())
+	}
 	return fmt.Sprintf("[%c]%s", c.Rune, StyleToString(c.Style))
 }
 
@@ -81,52 +103,13 @@ func (c *Cell) SaveToDict() map[string]any {
 	result := map[string]any{}
 	result["style"] = c.Style
 	result["rune"] = c.Rune
+	result["position"] = c.GetPosition()
 	return result
 }
 
-// -----------------------------------------------------------------------------
-//
-// CellPos
-//
-// -----------------------------------------------------------------------------
-
-// CellPos struct defines a cell at a given position, which is used to create
-// sprite widgets.
-type CellPos struct {
-	position *api.Point
-	cell     *Cell
-}
-
-// NewCellPos function creates a new CellPos instance.
-func NewCellPos(position *api.Point, cell *Cell) *CellPos {
-	return &CellPos{
-		position: position,
-		cell:     cell,
-	}
-}
-
-// -----------------------------------------------------------------------------
-// CellPos public methods
-// -----------------------------------------------------------------------------
-
-// GetCell method returns the cell from the CellPos instance.
-func (s *CellPos) GetCell() *Cell {
-	return s.cell
-}
-
-// GetPosition method returs the position from the CellPos instance.
-func (s *CellPos) GetPosition() *api.Point {
-	return s.position
-}
-
-// SetCell method sets the cell in a CellPos instance.
-func (s *CellPos) SetCell(cell *Cell) {
-	s.cell = cell
-}
-
-// SetPosition method sets the position in a CellPos instance.
-func (s *CellPos) SetPosition(position *api.Point) {
-	s.position = position
+// SetPosition method sets the position in a Cell instance.
+func (c *Cell) SetPosition(position *api.Point) {
+	c.position = position
 }
 
 // -----------------------------------------------------------------------------
@@ -135,9 +118,9 @@ func (s *CellPos) SetPosition(position *api.Point) {
 //
 // -----------------------------------------------------------------------------
 
-// CellGroup type groups an array of CellPos, which is used to create sprite
+// CellGroup type groups an array of Cell, which is used to create sprite
 // widgets.
-type CellGroup []*CellPos
+type CellGroup []*Cell
 
 // -----------------------------------------------------------------------------
 //

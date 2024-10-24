@@ -33,8 +33,8 @@ func (h *SpriteHandler) AddPoint(point *api.Point, cell *engine.Cell) {
 	if h.sprite == nil {
 		return
 	}
-	spriteCell := widgets.NewSpriteCell(point, cell)
-	h.sprite.AddSpriteCellAt(widgets.AtTheEnd, spriteCell)
+	spriteCell := engine.NewCellAt(cell.Style, cell.Rune, point)
+	h.sprite.AddCellAt(widgets.AtTheEnd, spriteCell)
 	tools.Logger.WithField("module", "Spritehandler").
 		WithField("method", "AddPoint").
 		Debugf("%s %+#v", h.sprite.GetName(), spriteCell)

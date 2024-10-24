@@ -140,7 +140,7 @@ func NewSnake(position *api.Point, style *tcell.Style) *snake {
 	cell := engine.NewCell(style, '#')
 	snake := &snake{
 		Sprite: widgets.NewSprite(SnakeWidgetName, position,
-			engine.CellGroup{engine.NewCellPos(api.NewPoint(5, 5), cell)}),
+			engine.CellGroup{engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(5, 5))}),
 		speed:           10.0,
 		direction:       "none",
 		alive:           true,
@@ -262,7 +262,7 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 			// based in the direction the snake is running.
 			lastCell := s.RemoveCellAt(widgets.AtTheEnd)
 			lastCell.SetPosition(api.NewPoint(intX, intY))
-			s.AddSpriteCellAt(0, lastCell)
+			s.AddCellAt(0, lastCell)
 			//tools.Logger.WithField("module", "main").
 			//    WithField("struct", "snake").
 			//    WithField("method", "Update").
@@ -293,12 +293,12 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 					// Update float64 position with new entry.
 					s.x = float64(spriteCell.GetPosition().X + vx)
 					s.y = float64(spriteCell.GetPosition().Y + vy)
-					newCellPos := engine.NewCellPos(api.NewPoint(int(s.x), int(s.y)), spriteCell.GetCell())
-					s.AddSpriteCellAt(0, newCellPos)
+					newcell := engine.NewCellAt(spriteCell.Style, spriteCell.Rune, api.NewPoint(int(s.x), int(s.y)))
+					s.AddCellAt(0, newcell)
 					tools.Logger.WithField("module", "main").
 						WithField("struct", "snake").
 						WithField("method", "Update").
-						Debugf("collision with %s at %s", ent.GetName(), newCellPos.GetPosition().ToString())
+						Debugf("collision with %s at %s", ent.GetName(), newcell.GetPosition().ToString())
 					s.PublishCollision(ent.(*TimerFoodPiece).Points)
 				}
 			}
