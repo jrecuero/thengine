@@ -15,6 +15,29 @@ import (
 
 // -----------------------------------------------------------------------------
 //
+// ICell
+//
+// -----------------------------------------------------------------------------
+
+// ICell interface define the interface to be used for any cell implementation
+// so we can create cells that contains some additional information.
+type ICell interface {
+	Clone(ICell)
+	GetPayload() any
+	GetPosition() *api.Point
+	GetRune() rune
+	GetStyle() *tcell.Style
+	IsEqual(ICell) bool
+	ToString() string
+	SaveToDict() map[string]any
+	SetPayload(any)
+	SetPosition(*api.Point)
+	SetRune(rune)
+	SetStyle(*tcell.Style)
+}
+
+// -----------------------------------------------------------------------------
+//
 // Cell
 //
 // -----------------------------------------------------------------------------
@@ -24,9 +47,10 @@ import (
 // Ch Rune identifies the character to be displayed in the cell.
 // position keep the position if provided, but with a default empty value.
 type Cell struct {
+	payload  any
 	position *api.Point
-	Style    *tcell.Style
-	Rune     rune
+	rune     rune
+	style    *tcell.Style
 }
 
 // NewCell function creates a new Cell instance with the given color and rune.
@@ -35,9 +59,10 @@ func NewCell(style *tcell.Style, ch rune) *Cell {
 		style = &tcell.StyleDefault
 	}
 	return &Cell{
+		payload:  nil,
 		position: nil,
-		Style:    style,
-		Rune:     ch,
+		rune:     ch,
+		style:    style,
 	}
 }
 
@@ -56,11 +81,12 @@ func NewEmptyCell() *Cell {
 
 // CloneCell function creates a new Cell instance with same attributes as the
 // given Cell instance.
-func CloneCell(cell *Cell) *Cell {
+func CloneCell(cell ICell) *Cell {
 	return &Cell{
+		payload:  nil,
 		position: cell.GetPosition(),
-		Style:    cell.Style,
-		Rune:     cell.Rune,
+		rune:     cell.GetRune(),
+		style:    cell.GetStyle(),
 	}
 }
 
@@ -69,10 +95,14 @@ func CloneCell(cell *Cell) *Cell {
 // -----------------------------------------------------------------------------
 
 // Clone method clones all attributes from the given Cell in to the instance.
-func (c *Cell) Clone(cell *Cell) {
-	c.Style = cell.Style
-	c.Rune = cell.Rune
+func (c *Cell) Clone(cell ICell) {
+	c.style = cell.GetStyle()
+	c.rune = cell.GetRune()
 	c.position = cell.GetPosition()
+}
+
+func (c *Cell) GetPayload() any {
+	return c.payload
 }
 
 // GetPosition method returs the position from the Cell instance.
@@ -80,11 +110,19 @@ func (c *Cell) GetPosition() *api.Point {
 	return c.position
 }
 
+func (c *Cell) GetRune() rune {
+	return c.rune
+}
+
+func (c *Cell) GetStyle() *tcell.Style {
+	return c.style
+}
+
 // IsEqual method checks if the given Cell is equal to the instance, where Color
 // and Rune should be the same.
-func (c *Cell) IsEqual(cell *Cell) bool {
-	return CompareStyle(c.Style, cell.Style) &&
-		(c.Rune == cell.Rune) &&
+func (c *Cell) IsEqual(cell ICell) bool {
+	return CompareStyle(c.GetStyle(), cell.GetStyle()) &&
+		(c.GetRune() == cell.GetRune()) &&
 		(c.GetPosition() == cell.GetPosition())
 
 }
@@ -92,24 +130,36 @@ func (c *Cell) IsEqual(cell *Cell) bool {
 // ToString method returns the cell instance information as a string.
 func (c *Cell) ToString() string {
 	if c.GetPosition() != nil {
-		return fmt.Sprintf("[%c]%s %s", c.Rune, StyleToString(c.Style), c.GetPosition().ToString())
+		return fmt.Sprintf("[%c]%s %s", c.GetRune(), StyleToString(c.GetStyle()), c.GetPosition().ToString())
 	}
-	return fmt.Sprintf("[%c]%s", c.Rune, StyleToString(c.Style))
+	return fmt.Sprintf("[%c]%s", c.GetRune(), StyleToString(c.GetStyle()))
 }
 
 // SaveToDict method saves the instance information as a map.
 // TODO: to be revisited.
 func (c *Cell) SaveToDict() map[string]any {
 	result := map[string]any{}
-	result["style"] = c.Style
-	result["rune"] = c.Rune
+	result["style"] = c.GetStyle()
+	result["rune"] = c.GetRune()
 	result["position"] = c.GetPosition()
 	return result
+}
+
+func (c *Cell) SetPayload(payload any) {
+	c.payload = payload
 }
 
 // SetPosition method sets the position in a Cell instance.
 func (c *Cell) SetPosition(position *api.Point) {
 	c.position = position
+}
+
+func (c *Cell) SetRune(r rune) {
+	c.rune = r
+}
+
+func (c *Cell) SetStyle(style *tcell.Style) {
+	c.style = style
 }
 
 // -----------------------------------------------------------------------------
@@ -120,7 +170,7 @@ func (c *Cell) SetPosition(position *api.Point) {
 
 // CellGroup type groups an array of Cell, which is used to create sprite
 // widgets.
-type CellGroup []*Cell
+type CellGroup []ICell
 
 // -----------------------------------------------------------------------------
 //
@@ -175,3 +225,5 @@ func (f *CellFrame) Reset() {
 // CellFrames type groups an array of CellFrame, which is used to create sprite
 // widgets animations.
 type CellFrames []*CellFrame
+
+var _ ICell = (*Cell)(nil)

@@ -48,13 +48,13 @@ func newiterCanvas() *iterCanvas {
 // Row struct defines a sequence of cells for a row in the canvas. It defines
 // all columns in the canvas.
 type Row struct {
-	Cols []*Cell
+	Cols []ICell
 }
 
 // NewRow function creates a new Row instance with the give size.
 func NewRow(size int) *Row {
 	return &Row{
-		Cols: make([]*Cell, size),
+		Cols: make([]ICell, size),
 	}
 }
 
@@ -157,7 +157,7 @@ func (c *Canvas) IterHasNext() bool {
 
 // IterGetNext method returns the next entry to iterate and increase iterator
 // counters.
-func (c *Canvas) IterGetNext() (int, int, *Cell) {
+func (c *Canvas) IterGetNext() (int, int, ICell) {
 	col := c.iter.Col
 	row := c.iter.Row
 	point := api.NewPoint(col, row)
@@ -191,7 +191,7 @@ func (c *Canvas) Clone(canvas *Canvas) {
 }
 
 // FillWithCell method fills all cells in the canvas with the given cell.
-func (c *Canvas) FillWithCell(cell *Cell) {
+func (c *Canvas) FillWithCell(cell ICell) {
 	for row, rows := range c.Rows {
 		for col := range rows.Cols {
 			// Create a new instance for every cell position.
@@ -201,7 +201,7 @@ func (c *Canvas) FillWithCell(cell *Cell) {
 }
 
 // GetCellAt method returns the cell in the canvas at the given row and column.
-func (c *Canvas) GetCellAt(point *api.Point) *Cell {
+func (c *Canvas) GetCellAt(point *api.Point) ICell {
 	if point == nil {
 		point = api.NewPoint(0, 0)
 	}
@@ -221,7 +221,7 @@ func (c *Canvas) GetRect() *api.Rect {
 // column.
 func (c *Canvas) GetRuneAt(point *api.Point) rune {
 	if cell := c.GetCellAt(point); cell != nil {
-		ch := cell.Rune
+		ch := cell.GetRune()
 		return ch
 	}
 	return 0
@@ -231,7 +231,7 @@ func (c *Canvas) GetRuneAt(point *api.Point) rune {
 // column.
 func (c *Canvas) GetStyleAt(point *api.Point) *tcell.Style {
 	if cell := c.GetCellAt(point); cell != nil {
-		return cell.Style
+		return cell.GetStyle()
 	}
 	return nil
 }
@@ -330,7 +330,7 @@ func (c *Canvas) SaveToDict() map[string]any {
 }
 
 // SetCellAt method sets the given cell to the given row and column.
-func (c *Canvas) SetCellAt(point *api.Point, cell *Cell) bool {
+func (c *Canvas) SetCellAt(point *api.Point, cell ICell) bool {
 	// if no point value is being passed, set the (0, 0) point as default.
 	if point == nil {
 		point = api.NewPoint(0, 0)
@@ -346,7 +346,7 @@ func (c *Canvas) SetCellAt(point *api.Point, cell *Cell) bool {
 // column.
 func (c *Canvas) SetStyleAt(point *api.Point, style *tcell.Style) bool {
 	if cell := c.GetCellAt(point); cell != nil {
-		cell.Style = style
+		cell.SetStyle(style)
 		return true
 	}
 	return false
@@ -356,7 +356,7 @@ func (c *Canvas) SetStyleAt(point *api.Point, style *tcell.Style) bool {
 // column.
 func (c *Canvas) SetRuneAt(point *api.Point, ch rune) bool {
 	if cell := c.GetCellAt(point); cell != nil {
-		cell.Rune = ch
+		cell.SetRune(ch)
 		return true
 	}
 	return false

@@ -559,7 +559,7 @@ func demoTwelve(dryRun bool) {
 
 	cell := engine.NewCell(&styleFour, '#')
 	sprite := widgets.NewSprite("sprite/1", api.NewPoint(20, 11),
-		[]*engine.Cell{engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(0, 0))})
+		[]engine.ICell{engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(0, 0))})
 	scene.AddEntity(sprite)
 
 	textClockCounter := 0
@@ -568,7 +568,7 @@ func demoTwelve(dryRun bool) {
 		textClockCounter++
 		textClock.SetText(fmt.Sprintf("clock: %d", textClockCounter))
 		if (textClockCounter % 10) == 0 {
-			sprite.AddCellAt(widgets.AtTheEnd, engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(textClockCounter/10, 0)))
+			sprite.AddCellAt(widgets.AtTheEnd, engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(textClockCounter/10, 0)))
 		}
 		return true
 	})
@@ -629,15 +629,15 @@ func demoFourteen(dryRun bool) {
 	cell := engine.NewCell(&styleOne, '#')
 	frames := []widgets.IFrame{}
 	frames = append(frames, widgets.NewFrameWithCells(
-		[]*engine.Cell{
-			engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(0, 0)),
-			engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(1, 1)),
-			engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(2, 2)),
+		[]engine.ICell{
+			engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(0, 0)),
+			engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(1, 1)),
+			engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(2, 2)),
 		}, 20))
 	frames = append(frames, widgets.NewFrameWithCells(
-		[]*engine.Cell{
-			engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(0, 1)),
-			engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(1, 0)),
+		[]engine.ICell{
+			engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(0, 1)),
+			engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(1, 0)),
 		}, 20))
 	animSprite := widgets.NewAnimSprite("anim-sprite", api.NewPoint(1, 1), frames, 0)
 	scene.AddEntity(animSprite)
@@ -646,7 +646,7 @@ func demoFourteen(dryRun bool) {
 	comboBox := widgets.NewComboBox("combo-box/1", api.NewPoint(2, 5), api.NewSize(20, 6), &styleOne, selections, 0)
 	scene.AddEntity(comboBox)
 
-	diceCells := []*engine.Cell{
+	diceCells := []engine.ICell{
 		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace1),
 		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace2),
 		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace3),
@@ -654,13 +654,13 @@ func demoFourteen(dryRun bool) {
 		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace5),
 		engine.NewCell(&constants.WhiteOverBlack, constants.DieFace6),
 	}
-	diceSpriteCells := []*engine.Cell{}
+	diceSpriteCells := []engine.ICell{}
 	for _, d := range diceCells {
-		diceSpriteCells = append(diceSpriteCells, engine.NewCellAt(d.Style, d.Rune, api.NewPoint(0, 0)))
+		diceSpriteCells = append(diceSpriteCells, engine.NewCellAt(d.GetStyle(), d.GetRune(), api.NewPoint(0, 0)))
 	}
 	diceFrames := []widgets.IFrame{}
 	for _, d := range diceSpriteCells {
-		diceFrames = append(diceFrames, widgets.NewFrameWithCells([]*engine.Cell{d}, 5))
+		diceFrames = append(diceFrames, widgets.NewFrameWithCells([]engine.ICell{d}, 5))
 	}
 	diceAnimSprite := widgets.NewAnimSprite("anim-sprite/dice", api.NewPoint(10, 1), diceFrames, 0)
 	diceAnimSprite.Shuffle()

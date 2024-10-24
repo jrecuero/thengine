@@ -271,7 +271,7 @@ func (e *Entity) MarshalMap(origin *api.Point) (map[string]any, error) {
 		"position": []int{position.X, position.Y},
 		"size":     []int{e.size.W, e.size.H},
 		"style":    []string{fg.String(), bg.String(), strconv.Itoa(int(attrs))},
-		"ch":       string(cell.Rune),
+		"ch":       string(cell.GetRune()),
 	}
 	return content, nil
 }
@@ -290,7 +290,7 @@ func (e *Entity) MarshalCode(origin *api.Point) (string, error) {
 	result += fmt.Sprintf("style := tcell.StyleDefault.Foreground(tcell.GetColor(%s)).Background(tcell.GetColor(%s)).Attributes(tcell.AttrMask(%d))\n", fg, bg, attrs)
 	result += fmt.Sprintf("entity := New%s(%s, api.Point(%d, %d), api.NewSize(%d, %d), &style)\n",
 		e.GetClassName(), e.GetName(), position.X, position.Y, e.GetSize().W, e.GetSize().H)
-	result += fmt.Sprintf("cell := engine.NewCell(&style, %d)\n", cell.Rune)
+	result += fmt.Sprintf("cell := engine.NewCell(&style, %d)\n", cell.GetRune())
 	result += fmt.Sprintf("entity.GetCanvas().FillWithCell(cell)\n")
 	result += fmt.Sprintf("\n")
 	return result, nil
@@ -351,7 +351,7 @@ func (e *Entity) SetStyle(style *tcell.Style) {
 	for _, rows := range e.GetCanvas().Rows {
 		for _, cell := range rows.Cols {
 			if cell != nil {
-				cell.Style = e.style
+				cell.SetStyle(e.style)
 			}
 		}
 	}

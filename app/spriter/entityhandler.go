@@ -218,7 +218,7 @@ func (h *EntityHandler) createEntityScene() {
 		api.NewPoint(TheEntityBoxOrigin.X+13, TheEntityBoxOrigin.Y+6),
 		api.NewSize(1, 1),
 		&TheStyleBlackOverWhite,
-		fmt.Sprintf("%s", string(h.cursor.GetCanvas().GetCellAt(nil).Rune)))
+		fmt.Sprintf("%s", string(h.cursor.GetCanvas().GetCellAt(nil).GetRune())))
 	entityScene.AddEntity(runeTextInput)
 
 	newEntityTextInput := &EntityTextInput{

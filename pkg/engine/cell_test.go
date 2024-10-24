@@ -28,11 +28,11 @@ func TestCell(t *testing.T) {
 	}
 	for i, c := range cases {
 		got := engine.NewCell(c.input.style, c.input.ch)
-		if !engine.CompareStyleColor(c.exp.style, got.Style) {
-			t.Errorf("[%d] NewCell Color Error exp:%+v got:%+v", i, c.exp.style, got.Style)
+		if !engine.CompareStyleColor(c.exp.style, got.GetStyle()) {
+			t.Errorf("[%d] NewCell Color Error exp:%+v got:%+v", i, c.exp.style, got.GetStyle())
 		}
-		if c.exp.ch != got.Rune {
-			t.Errorf("[%d] NewCell Rune Error exp:%c got:%c", i, c.exp.ch, got.Rune)
+		if c.exp.ch != got.GetRune() {
+			t.Errorf("[%d] NewCell Rune Error exp:%c got:%c", i, c.exp.ch, got.GetRune())
 		}
 	}
 }
@@ -49,11 +49,11 @@ func TestCellEmptyCell(t *testing.T) {
 	}
 	for i, c := range cases {
 		got := engine.NewEmptyCell()
-		if c.exp.style != got.Style {
-			t.Errorf("[%d] NewEmptyCell Color Error exp:%+v got:%+v", i, c.exp.style, got.Style)
+		if c.exp.style != got.GetStyle() {
+			t.Errorf("[%d] NewEmptyCell Color Error exp:%+v got:%+v", i, c.exp.style, got.GetStyle())
 		}
-		if c.exp.ch != got.Rune {
-			t.Errorf("[%d] NewEmptyCell Rune Error exp:%c got:%c", i, c.exp.ch, got.Rune)
+		if c.exp.ch != got.GetRune() {
+			t.Errorf("[%d] NewEmptyCell Rune Error exp:%c got:%c", i, c.exp.ch, got.GetRune())
 		}
 	}
 }
@@ -75,11 +75,11 @@ func TestCellCloneCell(t *testing.T) {
 	for i, c := range cases {
 		toClone := engine.NewCell(c.input.style, c.input.ch)
 		got := engine.CloneCell(toClone)
-		if !engine.CompareStyleColor(c.exp.style, got.Style) {
-			t.Errorf("[%d] CloneCell Color Error exp:%+v got:%+v", i, c.exp.style, got.Style)
+		if !engine.CompareStyleColor(c.exp.style, got.GetStyle()) {
+			t.Errorf("[%d] CloneCell Color Error exp:%+v got:%+v", i, c.exp.style, got.GetStyle())
 		}
-		if c.exp.ch != got.Rune {
-			t.Errorf("[%d] CloneCell Rune Error exp:%c got:%c", i, c.exp.ch, got.Rune)
+		if c.exp.ch != got.GetRune() {
+			t.Errorf("[%d] CloneCell Rune Error exp:%c got:%c", i, c.exp.ch, got.GetRune())
 		}
 	}
 }
@@ -102,11 +102,11 @@ func TestCellClone(t *testing.T) {
 		toClone := engine.NewCell(c.input.style, c.input.ch)
 		got := engine.NewEmptyCell()
 		got.Clone(toClone)
-		if !engine.CompareStyleColor(c.exp.style, got.Style) {
-			t.Errorf("[%d] CloneCell Color Error exp:%+v got:%+v", i, c.exp.style, got.Style)
+		if !engine.CompareStyleColor(c.exp.style, got.GetStyle()) {
+			t.Errorf("[%d] CloneCell Color Error exp:%+v got:%+v", i, c.exp.style, got.GetStyle())
 		}
-		if c.exp.ch != got.Rune {
-			t.Errorf("[%d] CloneCell Rune Error exp:%c got:%c", i, c.exp.ch, got.Rune)
+		if c.exp.ch != got.GetRune() {
+			t.Errorf("[%d] CloneCelGetRune() Rune Error exp:%c got:%c", i, c.exp.ch, got.GetRune())
 		}
 	}
 }

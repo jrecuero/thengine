@@ -139,15 +139,15 @@ func TestCanvas(t *testing.T) {
 func TestCanvasCloneCanvas(t *testing.T) {
 	createCells()
 	cases := []struct {
-		input [][]*engine.Cell
+		input [][]engine.ICell
 		exp   *api.Size
 	}{
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			exp:   api.NewSize(2, 3),
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
 			exp:   api.NewSize(3, 2),
 		},
 	}
@@ -266,12 +266,12 @@ func TestCanvasNewCanvasFromString(t *testing.T) {
 					t.Errorf("[%d] NewCanvasFromString (%d,%d) Cell exp:*Cell got:nil", i, col, row)
 					continue
 				}
-				if !engine.CompareStyle(c.exp.style, cell.Style) {
+				if !engine.CompareStyle(c.exp.style, cell.GetStyle()) {
 					t.Errorf("[%d] NewCanvasFromString (%d,%d) Style exp:%s got:%s",
-						i, col, row, engine.StyleToString(c.exp.style), engine.StyleToString(cell.Style))
+						i, col, row, engine.StyleToString(c.exp.style), engine.StyleToString(cell.GetStyle()))
 				}
-				if ch != cell.Rune {
-					t.Errorf("[%d] NewCanvasFromString (%d,%d) Rune exp:%c got:%c", i, col, row, ch, cell.Rune)
+				if ch != cell.GetRune() {
+					t.Errorf("[%d] NewCanvasFromString (%d,%d) Rune exp:%c got:%c", i, col, row, ch, cell.GetRune())
 				}
 			}
 		}
@@ -441,12 +441,12 @@ func TestCanvasWriteStringInCanvas(t *testing.T) {
 					t.Errorf("[%d] NewCanvasFromString (%d,%d) Cell exp:*Cell got:nil", i, col, row)
 					continue
 				}
-				if !engine.CompareStyle(c.exp.style, cell.Style) {
+				if !engine.CompareStyle(c.exp.style, cell.GetStyle()) {
 					t.Errorf("[%d] NewCanvasFromString (%d,%d) Style exp:%s got:%s",
-						i, col, row, engine.StyleToString(c.exp.style), engine.StyleToString(cell.Style))
+						i, col, row, engine.StyleToString(c.exp.style), engine.StyleToString(cell.GetStyle()))
 				}
-				if ch != cell.Rune {
-					t.Errorf("[%d] NewCanvasFromString (%d,%d) Rune exp:%c got:%c", i, col, row, ch, cell.Rune)
+				if ch != cell.GetRune() {
+					t.Errorf("[%d] NewCanvasFromString (%d,%d) Rune exp:%c got:%c", i, col, row, ch, cell.GetRune())
 				}
 			}
 		}
@@ -542,12 +542,12 @@ func TestCanvasNewCanvasFromFile(t *testing.T) {
 					t.Errorf("[%d] NewCanvasFromString (%d,%d) Cell exp:*Cell got:nil", i, col, row)
 					continue
 				}
-				if !engine.CompareStyle(c.exp.style, cell.Style) {
+				if !engine.CompareStyle(c.exp.style, cell.GetStyle()) {
 					t.Errorf("[%d] NewCanvasFromString (%d,%d) Color exp:%s got:%s",
-						i, col, row, engine.StyleToString(c.exp.style), engine.StyleToString(cell.Style))
+						i, col, row, engine.StyleToString(c.exp.style), engine.StyleToString(cell.GetStyle()))
 				}
-				if ch != cell.Rune {
-					t.Errorf("[%d] NewCanvasFromString (%d,%d) Rune exp:%c got:%c", i, col, row, ch, cell.Rune)
+				if ch != cell.GetRune() {
+					t.Errorf("[%d] NewCanvasFromString (%d,%d) Rune exp:%c got:%c", i, col, row, ch, cell.GetRune())
 				}
 			}
 		}
@@ -614,15 +614,15 @@ func TestCanvasSize(t *testing.T) {
 func TestCanvasClone(t *testing.T) {
 	createCells()
 	cases := []struct {
-		input [][]*engine.Cell
+		input [][]engine.ICell
 		exp   *api.Size
 	}{
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			exp:   api.NewSize(2, 3),
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
 			exp:   api.NewSize(3, 2),
 		},
 	}
@@ -655,38 +655,38 @@ func TestCanvasClone(t *testing.T) {
 func TestCanvasIsEqual(t *testing.T) {
 	createCells()
 	cases := []struct {
-		input [][]*engine.Cell
-		idata [][]*engine.Cell
+		input [][]engine.ICell
+		idata [][]engine.ICell
 		exp   bool
 	}{
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
-			idata: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			idata: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			exp:   true,
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
-			idata: [][]*engine.Cell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
+			idata: [][]engine.ICell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
 			exp:   true,
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
-			idata: [][]*engine.Cell{{cells[0]}, {cells[2]}, {cells[4]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			idata: [][]engine.ICell{{cells[0]}, {cells[2]}, {cells[4]}},
 			exp:   false,
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
-			idata: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			idata: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}},
 			exp:   false,
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
-			idata: [][]*engine.Cell{{cells[0], cells[0]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			idata: [][]engine.ICell{{cells[0], cells[0]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			exp:   false,
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
-			idata: [][]*engine.Cell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[4]}},
+			input: [][]engine.ICell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
+			idata: [][]engine.ICell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[4]}},
 			exp:   false,
 		},
 	}
@@ -709,22 +709,22 @@ func TestCanvasIsEqual(t *testing.T) {
 func TestCanvasIsInside(t *testing.T) {
 	createCells()
 	cases := []struct {
-		input [][]*engine.Cell
+		input [][]engine.ICell
 		point *api.Point
 		exp   bool
 	}{
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			point: api.NewPoint(0, 0),
 			exp:   true,
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
 			point: api.NewPoint(2, 1),
 			exp:   true,
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			point: api.NewPoint(3, 3),
 			exp:   false,
 		},
@@ -745,22 +745,22 @@ func TestCanvasIsInside(t *testing.T) {
 func TestCanvasGetCellAt(t *testing.T) {
 	createCells()
 	cases := []struct {
-		input [][]*engine.Cell
+		input [][]engine.ICell
 		point *api.Point
 		exp   *engine.Cell
 	}{
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			point: api.NewPoint(0, 0),
 			exp:   cells[0],
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
 			point: api.NewPoint(2, 1),
 			exp:   cells[5],
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			point: api.NewPoint(3, 3),
 			exp:   nil,
 		},
@@ -837,22 +837,22 @@ func TestCanvasGetCellAt(t *testing.T) {
 func TestCanvasGetRuneAt(t *testing.T) {
 	createCells()
 	cases := []struct {
-		input [][]*engine.Cell
+		input [][]engine.ICell
 		point *api.Point
 		exp   rune
 	}{
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			point: api.NewPoint(0, 0),
-			exp:   cells[0].Rune,
+			exp:   cells[0].GetRune(),
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
 			point: api.NewPoint(2, 1),
-			exp:   cells[5].Rune,
+			exp:   cells[5].GetRune(),
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			point: api.NewPoint(3, 3),
 			exp:   0,
 		},
@@ -990,7 +990,7 @@ func TestCanvasGetRuneAt(t *testing.T) {
 func TestCanvasSetRuneAt(t *testing.T) {
 	createCells()
 	cases := []struct {
-		input [][]*engine.Cell
+		input [][]engine.ICell
 		point *api.Point
 		ch    rune
 		exp   struct {
@@ -999,7 +999,7 @@ func TestCanvasSetRuneAt(t *testing.T) {
 		}
 	}{
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			point: api.NewPoint(0, 0),
 			ch:    'a',
 			exp: struct {
@@ -1008,7 +1008,7 @@ func TestCanvasSetRuneAt(t *testing.T) {
 			}{true, 'a'},
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1], cells[2]}, {cells[3], cells[4], cells[5]}},
 			point: api.NewPoint(2, 1),
 			ch:    'b',
 			exp: struct {
@@ -1017,7 +1017,7 @@ func TestCanvasSetRuneAt(t *testing.T) {
 			}{true, 'b'},
 		},
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
 			point: api.NewPoint(3, 3),
 			ch:    'c',
 			exp: struct {
@@ -1112,12 +1112,12 @@ func TestCanvasIterator(t *testing.T) {
 func TestCanvasGetStylAt(t *testing.T) {
 	createCells()
 	cases := []struct {
-		input [][]*engine.Cell
+		input [][]engine.ICell
 		exp   []*tcell.Style
 	}{
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
-			exp:   []*tcell.Style{cells[0].Style, cells[1].Style, cells[2].Style, cells[3].Style, cells[4].Style, cells[5].Style},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}, {cells[4], cells[5]}},
+			exp:   []*tcell.Style{cells[0].GetStyle(), cells[1].GetStyle(), cells[2].GetStyle(), cells[3].GetStyle(), cells[4].GetStyle(), cells[5].GetStyle()},
 		},
 	}
 	for i, c := range cases {
@@ -1142,14 +1142,14 @@ func TestCanvasGetStylAt(t *testing.T) {
 func TestCanvasSetStyleAt(t *testing.T) {
 	createCells()
 	cases := []struct {
-		input [][]*engine.Cell
+		input [][]engine.ICell
 		cell  *tcell.Style
 		exp   *tcell.Style
 	}{
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}},
-			cell:  cells[5].Style,
-			exp:   cells[5].Style,
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}},
+			cell:  cells[5].GetStyle(),
+			exp:   cells[5].GetStyle(),
 		},
 	}
 	for i, c := range cases {
@@ -1165,8 +1165,8 @@ func TestCanvasSetStyleAt(t *testing.T) {
 		}
 		for canvas.CreateIter(); canvas.IterHasNext(); {
 			_, _, cell := canvas.IterGetNext()
-			if !tools.IsEqualStyle(c.exp, cell.Style) {
-				t.Errorf("[%d] SetStyleAt Error exp:%+v got:%+v", i, c.exp, cell.Style)
+			if !tools.IsEqualStyle(c.exp, cell.GetStyle()) {
+				t.Errorf("[%d] SetStyleAt Error exp:%+v got:%+v", i, c.exp, cell.GetStyle())
 			}
 		}
 	}
@@ -1175,12 +1175,12 @@ func TestCanvasSetStyleAt(t *testing.T) {
 func TestCanvasFillWithCell(t *testing.T) {
 	createCells()
 	cases := []struct {
-		input [][]*engine.Cell
+		input [][]engine.ICell
 		cell  *engine.Cell
 		exp   *engine.Cell
 	}{
 		{
-			input: [][]*engine.Cell{{cells[0], cells[1]}, {cells[2], cells[3]}},
+			input: [][]engine.ICell{{cells[0], cells[1]}, {cells[2], cells[3]}},
 			cell:  cells[5],
 			exp:   cells[5],
 		},

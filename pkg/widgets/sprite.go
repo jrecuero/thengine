@@ -46,7 +46,7 @@ func NewSprite(name string, position *api.Point, cells engine.CellGroup) *Sprite
 // Sprite public methods
 // -----------------------------------------------------------------------------
 
-func (s *Sprite) AddCellAt(atIndex int, cell *engine.Cell) {
+func (s *Sprite) AddCellAt(atIndex int, cell engine.ICell) {
 	cells := make(engine.CellGroup, len(s.cells)+1)
 	// if the atIndex is equal to AtTheEnd(-1), add the sprite cell at the end.
 	if atIndex == AtTheEnd {
@@ -107,8 +107,8 @@ func (s *Sprite) MarshalMap(origin *api.Point) (map[string]any, error) {
 		if origin != nil {
 			pos.Subtract(origin)
 		}
-		ch := cell.Rune
-		fg, bg, attrs := cell.Style.Decompose()
+		ch := cell.GetRune()
+		fg, bg, attrs := cell.GetStyle().Decompose()
 		sprite := map[string]any{
 			"position": []int{pos.X, pos.Y},
 			"size":     []int{1, 1},
@@ -136,9 +136,9 @@ func (s *Sprite) MarshalCode(origin *api.Point) (string, error) {
 		if origin != nil {
 			pos.Subtract(origin)
 		}
-		fg, bg, attrs := cell.Style.Decompose()
+		fg, bg, attrs := cell.GetStyle().Decompose()
 		result += fmt.Sprintf("style := tcell.StyleDefault.Foreground(tcell.GetColor(%s)).Background(tcell.GetColor(%s)).Attributes(tcell.AttrMask(%d))\n", fg, bg, attrs)
-		result += fmt.Sprintf("cell := engine.NewCell(&style, %d)\n", cell.Rune)
+		result += fmt.Sprintf("cell := engine.NewCell(&style, %d)\n", cell.GetRune())
 		result += fmt.Sprintf("pos := engine.NewPoint(%d, %d)\n", pos.X, pos.Y)
 		result += fmt.Sprintf("sprite.AddCellAt(AtTheEnd, cell)\n")
 		result += fmt.Sprintf("--\n")
@@ -148,7 +148,7 @@ func (s *Sprite) MarshalCode(origin *api.Point) (string, error) {
 	return result, nil
 }
 
-func (s *Sprite) RemoveCellAt(atIndex int) *engine.Cell {
+func (s *Sprite) RemoveCellAt(atIndex int) engine.ICell {
 	if atIndex == AtTheEnd {
 		atIndex = len(s.cells) - 1
 	}
@@ -231,10 +231,10 @@ func (s *Sprite) UnmarshalMap(content map[string]any, origin *api.Point) error {
 			tcellStyle := tcell.StyleDefault.
 				Foreground(tcell.GetColor(style[0].(string))).
 				Background(tcell.GetColor(style[1].(string)))
-			cell.Style = &tcellStyle
+			cell.SetStyle(&tcellStyle)
 		}
 		if ch, ok := sprite["ch"].(string); ok {
-			cell.Rune = rune(ch[0])
+			cell.SetRune(rune(ch[0]))
 		}
 		tools.Logger.WithField("module", "sprite").
 			WithField("struct", "Sprite").

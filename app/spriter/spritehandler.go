@@ -29,11 +29,11 @@ func NewSpriteHandler() *SpriteHandler {
 	return handler
 }
 
-func (h *SpriteHandler) AddPoint(point *api.Point, cell *engine.Cell) {
+func (h *SpriteHandler) AddPoint(point *api.Point, cell engine.ICell) {
 	if h.sprite == nil {
 		return
 	}
-	spriteCell := engine.NewCellAt(cell.Style, cell.Rune, point)
+	spriteCell := engine.NewCellAt(cell.GetStyle(), cell.GetRune(), point)
 	h.sprite.AddCellAt(widgets.AtTheEnd, spriteCell)
 	tools.Logger.WithField("module", "Spritehandler").
 		WithField("method", "AddPoint").

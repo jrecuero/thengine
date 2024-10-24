@@ -140,7 +140,7 @@ func NewSnake(position *api.Point, style *tcell.Style) *snake {
 	cell := engine.NewCell(style, '#')
 	snake := &snake{
 		Sprite: widgets.NewSprite(SnakeWidgetName, position,
-			engine.CellGroup{engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(5, 5))}),
+			engine.CellGroup{engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(5, 5))}),
 		speed:           10.0,
 		direction:       "none",
 		alive:           true,
@@ -293,7 +293,7 @@ func (s *snake) Update(event tcell.Event, scene engine.IScene) {
 					// Update float64 position with new entry.
 					s.x = float64(spriteCell.GetPosition().X + vx)
 					s.y = float64(spriteCell.GetPosition().Y + vy)
-					newcell := engine.NewCellAt(spriteCell.Style, spriteCell.Rune, api.NewPoint(int(s.x), int(s.y)))
+					newcell := engine.NewCellAt(spriteCell.GetStyle(), spriteCell.GetRune(), api.NewPoint(int(s.x), int(s.y)))
 					s.AddCellAt(0, newcell)
 					tools.Logger.WithField("module", "main").
 						WithField("struct", "snake").

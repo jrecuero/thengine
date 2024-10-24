@@ -20,7 +20,7 @@ type ICamera interface {
 	//Draw(bool, tcell.Screen)
 	GetOrigin() *api.Point
 	Init(tcell.Screen)
-	RenderCellAt(*api.Point, *Cell) bool
+	RenderCellAt(*api.Point, ICell) bool
 	SetDryRun(bool)
 }
 
@@ -96,12 +96,12 @@ func (s *Camera) Init(screen tcell.Screen) {
 }
 
 // RenderCellAt method renders the cell in the camera canvas.
-func (s *Camera) RenderCellAt(point *api.Point, cell *Cell) bool {
+func (s *Camera) RenderCellAt(point *api.Point, cell ICell) bool {
 	if !s.dryRun {
 		col, row := point.Get()
-		fg, bg, attrs := cell.Style.Decompose()
+		fg, bg, attrs := cell.GetStyle().Decompose()
 		style := tcell.StyleDefault.Background(bg).Foreground(fg).Attributes(attrs)
-		s.screen.SetContent(col+s.origin.X, row+s.origin.Y, cell.Rune, nil, style)
+		s.screen.SetContent(col+s.origin.X, row+s.origin.Y, cell.GetRune(), nil, style)
 	}
 	return true
 }

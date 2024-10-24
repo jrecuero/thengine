@@ -41,11 +41,11 @@ func isInDoorSpace(x int, length int, wide int) bool {
 	return (x >= start) && (x <= end)
 }
 
-func buildWall(isXAxe EAxe, fixAxe int, length int, cell *engine.Cell,
+func buildWall(isXAxe EAxe, fixAxe int, length int, cell engine.ICell,
 	doorPlace EDoorPlace, doorWide int) (engine.CellGroup, *Door) {
 
 	cells := engine.CellGroup{}
-	var newcell *engine.Cell
+	var newcell engine.ICell
 	var door *Door
 	if doorPlace != NoDoor {
 		door = NewDoor(doorPlace, doorWide, nil)
@@ -53,9 +53,9 @@ func buildWall(isXAxe EAxe, fixAxe int, length int, cell *engine.Cell,
 	for x := 0; x < length; x++ {
 		if !(door != nil && isInDoorSpace(x, length, doorWide)) {
 			if isXAxe == AxeX {
-				newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, fixAxe))
+				newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(x, fixAxe))
 			} else {
-				newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(fixAxe, x))
+				newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(fixAxe, x))
 			}
 
 			cells = append(cells, newcell)
@@ -64,14 +64,14 @@ func buildWall(isXAxe EAxe, fixAxe int, length int, cell *engine.Cell,
 	return cells, door
 }
 
-func BuildHWall(y int, w int, cell *engine.Cell, doorPlace EDoorPlace,
+func BuildHWall(y int, w int, cell engine.ICell, doorPlace EDoorPlace,
 	doorWide int) (engine.CellGroup, *Door) {
 
 	return buildWall(AxeX, y, w, cell, doorPlace, doorWide)
 
 }
 
-func BuildVWall(x int, h int, cell *engine.Cell, doorPlace EDoorPlace,
+func BuildVWall(x int, h int, cell engine.ICell, doorPlace EDoorPlace,
 	doorWide int) (engine.CellGroup, *Door) {
 	return buildWall(AxeY, x, h, cell, doorPlace, doorWide)
 }
@@ -88,7 +88,7 @@ func NewRoomData(doorPlace EDoorPlace, axe EAxe, fix int, length int,
 }
 
 func BuildRoomWithDoors(name string, position *api.Point, size *api.Size,
-	cell *engine.Cell, isDoors []bool, doorsWide []int) *Room {
+	cell engine.ICell, isDoors []bool, doorsWide []int) *Room {
 
 	cells := engine.CellGroup{}
 	doors := []*Door{}
@@ -124,7 +124,7 @@ func BuildRoomWithDoors(name string, position *api.Point, size *api.Size,
 
 }
 
-func ConnectRooms(name string, doorA *Door, doorB *Door, cell *engine.Cell) *widgets.Sprite {
+func ConnectRooms(name string, doorA *Door, doorB *Door, cell engine.ICell) *widgets.Sprite {
 	spriteA := BuildLine("", doorA.hook.hookA, doorB.hook.hookA, cell)
 	spriteB := BuildLine("", doorA.hook.hookB, doorB.hook.hookB, cell)
 	spriteCells := spriteA.GetCells()
@@ -135,32 +135,32 @@ func ConnectRooms(name string, doorA *Door, doorB *Door, cell *engine.Cell) *wid
 }
 
 func BuildRoom(name string, position *api.Point, size *api.Size,
-	cell *engine.Cell, opts ...any) *widgets.Sprite {
+	cell engine.ICell, opts ...any) *widgets.Sprite {
 
 	var doors []bool
 	if len(opts) != 0 {
 		doors = opts[0].([]bool)
 	}
 	cells := engine.CellGroup{}
-	var newcell *engine.Cell
+	var newcell engine.ICell
 	w, h := size.Get()
 	for x := 0; x < w; x++ {
 		if !(doors[0] && isMiddle(x, w)) {
-			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, 0))
+			newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(x, 0))
 			cells = append(cells, newcell)
 		}
 		if !(doors[1] && isMiddle(x, w)) {
-			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, h-1))
+			newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(x, h-1))
 			cells = append(cells, newcell)
 		}
 	}
 	for y := 1; y < h-1; y++ {
 		if !(doors[2] && isMiddle(y, h)) {
-			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(0, y))
+			newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(0, y))
 			cells = append(cells, newcell)
 		}
 		if !(doors[3] && isMiddle(y, h)) {
-			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(w-1, y))
+			newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(w-1, y))
 			cells = append(cells, newcell)
 		}
 	}
@@ -184,7 +184,7 @@ func getAxe(origin *api.Point, dest *api.Point) (bool, bool) {
 }
 
 func BuildCorridor(name string, origin *api.Point, dest *api.Point,
-	cell *engine.Cell, opts ...any) *widgets.Sprite {
+	cell engine.ICell, opts ...any) *widgets.Sprite {
 
 	axeX, axeY := getAxe(origin, dest)
 	originX, originY := origin.Get()
@@ -202,21 +202,21 @@ func BuildCorridor(name string, origin *api.Point, dest *api.Point,
 	}
 
 	cells := engine.CellGroup{}
-	var newcell *engine.Cell
+	var newcell engine.ICell
 	if axeX {
 		y := []int{originY - wideA, destY + wideB}
 		for x := originX; x <= destX; x++ {
-			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, y[0]))
+			newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(x, y[0]))
 			cells = append(cells, newcell)
-			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, y[1]))
+			newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(x, y[1]))
 			cells = append(cells, newcell)
 		}
 	} else if axeY {
 		x := []int{originX - wideA, destX + wideB}
 		for y := originY; y <= destY; y++ {
-			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x[0], y))
+			newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(x[0], y))
 			cells = append(cells, newcell)
-			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x[1], y))
+			newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(x[1], y))
 			cells = append(cells, newcell)
 		}
 	}
@@ -226,7 +226,7 @@ func BuildCorridor(name string, origin *api.Point, dest *api.Point,
 }
 
 func BuildLine(name string, origin *api.Point, dest *api.Point,
-	cell *engine.Cell, opts ...any) *widgets.Sprite {
+	cell engine.ICell, opts ...any) *widgets.Sprite {
 
 	axeX, axeY := getAxe(origin, dest)
 	originX, originY := origin.Get()
@@ -235,17 +235,17 @@ func BuildLine(name string, origin *api.Point, dest *api.Point,
 		return nil
 	}
 	cells := engine.CellGroup{}
-	var newcell *engine.Cell
+	var newcell engine.ICell
 	if axeX {
 		y := originY
 		for x := originX; x <= destX; x++ {
-			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, y))
+			newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(x, y))
 			cells = append(cells, newcell)
 		}
 	} else if axeY {
 		x := originX
 		for y := originY; y <= destY; y++ {
-			newcell = engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(x, y))
+			newcell = engine.NewCellAt(cell.GetStyle(), cell.GetRune(), api.NewPoint(x, y))
 			cells = append(cells, newcell)
 		}
 	}
