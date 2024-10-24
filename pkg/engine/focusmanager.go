@@ -171,6 +171,10 @@ func (m *FocusManager) AddEntity(scene IScene, entity IEntity) error {
 	if !entity.IsFocusEnable() {
 		return fmt.Errorf("entity %s in scene %s has focus disabled", entity.GetName(), scene.GetName())
 	}
+	tools.Logger.WithField("module", "focusmanager").
+		WithField("struct", "FocusManager").
+		WithField("method", "UpdateFocusForScene").
+		Debugf("add entity %s", scene.GetName())
 	m.entities[scene.GetName()] = append(m.entities[scene.GetName()], entity)
 	return nil
 }

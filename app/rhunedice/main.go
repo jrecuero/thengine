@@ -9,10 +9,13 @@ func main() {
 	tools.Logger.WithField("module", "main").WithField("function", "main").Infof("RhuneDice launched...")
 
 	mainScene := engine.NewScene(TheMainSceneName, theCamera)
+	gameHandler := NewGameHandler()
 
-	buildBoxes(mainScene)
+	buildBoxes(mainScene, gameHandler)
 
 	buildDungeon(mainScene)
+
+	mainScene.AddEntity(gameHandler)
 
 	theEngine.InitResources()
 	theEngine.GetSceneManager().AddScene(mainScene)

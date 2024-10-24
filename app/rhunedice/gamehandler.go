@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/jrecuero/thengine/app/rhunedice/assets/tdice"
 	"github.com/jrecuero/thengine/pkg/engine"
 	"github.com/jrecuero/thengine/pkg/tools"
 )
@@ -18,6 +19,7 @@ var (
 
 type GameHandler struct {
 	*engine.Entity
+	playerDice []*tdice.AnimBaseDie
 }
 
 func NewGameHandler() *GameHandler {
@@ -43,6 +45,14 @@ func NewGameHandler() *GameHandler {
 // GameHandler public methods
 // -----------------------------------------------------------------------------
 
+func (h *GameHandler) GetPlayerDice() []*tdice.AnimBaseDie {
+	return h.playerDice
+}
+
+func (h *GameHandler) SetPlayerDice(dice []*tdice.AnimBaseDie) {
+	h.playerDice = dice
+}
+
 func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 	if !h.HasFocus() {
 		return
@@ -51,7 +61,17 @@ func (h *GameHandler) Update(event tcell.Event, scene engine.IScene) {
 	case *tcell.EventKey:
 		switch ev.Key() {
 		case tcell.KeyUp:
+			for _, die := range h.playerDice {
+				die.UnFreeze()
+			}
 		case tcell.KeyDown:
+			//tools.Logger.WithField("module", "gamehandler").
+			//    WithField("struct", "GameHandler").
+			//    WithField("method", "Update").
+			//    Debugf("key down pressed")
+			for _, die := range h.playerDice {
+				die.Freeze()
+			}
 		case tcell.KeyLeft:
 		case tcell.KeyRight:
 		case tcell.KeyRune:

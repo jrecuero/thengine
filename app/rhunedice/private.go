@@ -13,7 +13,7 @@ import (
 // Module private methods
 // -----------------------------------------------------------------------------
 
-func buildBoxes(scene engine.IScene) {
+func buildBoxes(scene engine.IScene, gameHandler *GameHandler) {
 	headerTextOffset := api.NewPoint(5, 0)
 	boxStyle := &constants.WhiteOverBlack
 
@@ -42,12 +42,15 @@ func buildBoxes(scene engine.IScene) {
 	scene.AddEntity(diceBox)
 
 	// Create 6 animated base dice.
+	dice := []*tdice.AnimBaseDie{}
 	for d := 0; d < 6; d++ {
 		diePos := api.ClonePoint(TheDiceBoxOrigin)
 		diePos.AddScale(1+d*7, 1)
 		die := tdice.NewAnimBaseDie(diePos, 5)
+		dice = append(dice, die)
 		scene.AddEntity(die)
 	}
+	gameHandler.SetPlayerDice(dice)
 
 	diceBoxHeaderTextOrigin := api.ClonePoint(TheDiceBoxOrigin)
 	diceBoxHeaderTextOrigin.Add(headerTextOffset)

@@ -97,7 +97,11 @@ func (w *AnimWidget) updateCanvas() {
 // AnimWidget public methods
 // -----------------------------------------------------------------------------
 
-func (w *AnimWidget) Freeze(index int) {
+func (w *AnimWidget) Freeze() {
+	w.isfrozen = true
+}
+
+func (w *AnimWidget) FreezeAt(index int) {
 	w.isfrozen = true
 	if index >= 0 && index < len(w.frames) {
 		w.frameTraverse = index

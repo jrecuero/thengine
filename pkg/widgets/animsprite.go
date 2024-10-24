@@ -53,7 +53,11 @@ func (w *AnimSprite) updateSprite() {
 // AnimSprite public methods
 // -----------------------------------------------------------------------------
 
-func (w *AnimSprite) Freeze(index int) {
+func (w *AnimSprite) Freeze() {
+	w.isfrozen = true
+}
+
+func (w *AnimSprite) FreezeAt(index int) {
 	w.isfrozen = true
 	if index >= 0 && index < len(w.frames) {
 		w.frameTraverse = index
