@@ -595,14 +595,14 @@ func demoThirteen(dryRun bool) {
 	scene := engine.NewScene("scene", camera)
 
 	frames := []widgets.IFrame{}
-	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("- \n  ", &styleOne), 10))
-	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString(" -\n  ", &styleOne), 10))
-	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("  \n- ", &styleOne), 10))
-	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("  \n -", &styleOne), 10))
-	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("- \n  ", &styleTwo), 5))
-	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString(" -\n  ", &styleTwo), 5))
-	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("  \n- ", &styleTwo), 5))
-	frames = append(frames, widgets.NewFrame(engine.NewCanvasFromString("  \n -", &styleTwo), 5))
+	frames = append(frames, widgets.NewFrameWithCanvas(engine.NewCanvasFromString("- \n  ", &styleOne), 10))
+	frames = append(frames, widgets.NewFrameWithCanvas(engine.NewCanvasFromString(" -\n  ", &styleOne), 10))
+	frames = append(frames, widgets.NewFrameWithCanvas(engine.NewCanvasFromString("  \n- ", &styleOne), 10))
+	frames = append(frames, widgets.NewFrameWithCanvas(engine.NewCanvasFromString("  \n -", &styleOne), 10))
+	frames = append(frames, widgets.NewFrameWithCanvas(engine.NewCanvasFromString("- \n  ", &styleTwo), 5))
+	frames = append(frames, widgets.NewFrameWithCanvas(engine.NewCanvasFromString(" -\n  ", &styleTwo), 5))
+	frames = append(frames, widgets.NewFrameWithCanvas(engine.NewCanvasFromString("  \n- ", &styleTwo), 5))
+	frames = append(frames, widgets.NewFrameWithCanvas(engine.NewCanvasFromString("  \n -", &styleTwo), 5))
 	animWidget := widgets.NewAnimWidget("anim-widget", api.NewPoint(1, 1), api.NewSize(2, 2), frames, 0)
 	scene.AddEntity(animWidget)
 
@@ -627,14 +627,14 @@ func demoFourteen(dryRun bool) {
 	scene := engine.NewScene("scene", camera)
 
 	cell := engine.NewCell(&styleOne, '#')
-	frames := engine.CellFrames{}
-	frames = append(frames, engine.NewCellFrame(
+	frames := []widgets.IFrame{}
+	frames = append(frames, widgets.NewFrameWithCells(
 		[]*engine.Cell{
 			engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(0, 0)),
 			engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(1, 1)),
 			engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(2, 2)),
 		}, 20))
-	frames = append(frames, engine.NewCellFrame(
+	frames = append(frames, widgets.NewFrameWithCells(
 		[]*engine.Cell{
 			engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(0, 1)),
 			engine.NewCellAt(cell.Style, cell.Rune, api.NewPoint(1, 0)),
@@ -658,9 +658,9 @@ func demoFourteen(dryRun bool) {
 	for _, d := range diceCells {
 		diceSpriteCells = append(diceSpriteCells, engine.NewCellAt(d.Style, d.Rune, api.NewPoint(0, 0)))
 	}
-	diceFrames := engine.CellFrames{}
+	diceFrames := []widgets.IFrame{}
 	for _, d := range diceSpriteCells {
-		diceFrames = append(diceFrames, engine.NewCellFrame([]*engine.Cell{d}, 5))
+		diceFrames = append(diceFrames, widgets.NewFrameWithCells([]*engine.Cell{d}, 5))
 	}
 	diceAnimSprite := widgets.NewAnimSprite("anim-sprite/dice", api.NewPoint(10, 1), diceFrames, 0)
 	diceAnimSprite.Shuffle()

@@ -21,14 +21,14 @@ import (
 // animated widget.
 type AnimSprite struct {
 	*Sprite
-	frames        engine.CellFrames
+	frames        []IFrame
 	frameTraverse int
 	isfrozen      bool
 	isshuffle     bool
 }
 
 // NewAnimSprite function creates a new AnimSprite instance.
-func NewAnimSprite(name string, position *api.Point, frames engine.CellFrames, initFrame int) *AnimSprite {
+func NewAnimSprite(name string, position *api.Point, frames []IFrame, initFrame int) *AnimSprite {
 	widget := &AnimSprite{
 		Sprite:        NewSprite(name, position, nil),
 		frames:        frames,

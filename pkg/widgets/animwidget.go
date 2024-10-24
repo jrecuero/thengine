@@ -13,58 +13,6 @@ import (
 
 // -----------------------------------------------------------------------------
 //
-// Frame
-//
-// -----------------------------------------------------------------------------
-
-type IFrame interface {
-	GetCanvas() *engine.Canvas
-	Inc() bool
-	Reset()
-}
-
-// Frame structure defines the frame to be used and how many ticks has to
-// be mantained.
-type Frame struct {
-	canvas   *engine.Canvas
-	maxTicks int
-	ticks    int
-}
-
-// NewFrameInfo function creates a new Frame instance.
-func NewFrame(canvas *engine.Canvas, maxTicks int) *Frame {
-	return &Frame{
-		canvas:   canvas,
-		maxTicks: maxTicks,
-		ticks:    0,
-	}
-}
-
-// -----------------------------------------------------------------------------
-// Frame public methods
-// -----------------------------------------------------------------------------
-
-// GetCanvas method returns the canvas instance number.
-func (f *Frame) GetCanvas() *engine.Canvas {
-	return f.canvas
-}
-
-// Inc method increase the actual counter for the frame instance and returns if
-// that counter has reached the maxTicks.
-func (f *Frame) Inc() bool {
-	f.ticks++
-	return f.ticks >= f.maxTicks
-}
-
-// Reset method resets the frame counter value.
-func (f *Frame) Reset() {
-	f.ticks = 0
-}
-
-var _ IFrame = (*Frame)(nil)
-
-// -----------------------------------------------------------------------------
-//
 // AnimWidget
 //
 // -----------------------------------------------------------------------------

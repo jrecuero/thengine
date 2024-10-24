@@ -43,7 +43,7 @@ var (
 func NewAsciiFramesFromAllFaces(ticks int) []widgets.IFrame {
 	var frames []widgets.IFrame = make([]widgets.IFrame, len(AsciiCanvasAllFaces))
 	for i, face := range AsciiCanvasAllFaces {
-		frames[i] = widgets.NewFrame(face, ticks)
+		frames[i] = widgets.NewFrameWithCanvas(face, ticks)
 	}
 	return frames
 }

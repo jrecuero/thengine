@@ -56,7 +56,7 @@ func NewAsciiFrameForNumber(number int, ticks int) *widgets.Frame {
 		return nil
 	}
 	canvas := AsciiCanvasAllNumbers[number]
-	return widgets.NewFrame(canvas, ticks)
+	return widgets.NewFrameWithCanvas(canvas, ticks)
 }
 
 func NewAsciiFramesForAllNumbers(ticks int) []widgets.IFrame {
