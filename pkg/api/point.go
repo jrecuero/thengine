@@ -33,11 +33,14 @@ func NewPoint(x int, y int) *Point {
 
 // ClonePoint functions creates a new Point instances with same attributes as
 // the given Point.
-func ClonePoint(point *Point) *Point {
-	return &Point{
-		X: point.X,
-		Y: point.Y,
+func ClonePoint(point *Point) (result *Point) {
+	if point != nil {
+		result = &Point{
+			X: point.X,
+			Y: point.Y,
+		}
 	}
+	return result
 }
 
 // -----------------------------------------------------------------------------
