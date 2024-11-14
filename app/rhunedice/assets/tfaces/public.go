@@ -53,6 +53,10 @@ func NewRhuneFrame(rhune *api.Rhune, canvas *engine.Canvas, maxTicks int) *Rhune
 	}
 }
 
+func (r *RhuneFrame) GetRhune() *api.Rhune {
+	return r.rhune
+}
+
 const (
 	RhuneFrameMaxTicks int = 5
 )

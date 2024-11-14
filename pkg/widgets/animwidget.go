@@ -65,6 +65,14 @@ func (w *AnimWidget) FreezeAt(index int) {
 	}
 }
 
+func (w *AnimWidget) GetFrame() IFrame {
+	return w.frames[w.frameTraverse]
+}
+
+func (w *AnimWidget) GetFrames() []IFrame {
+	return w.frames
+}
+
 func (w *AnimWidget) Shuffle() {
 	w.isshuffle = true
 }

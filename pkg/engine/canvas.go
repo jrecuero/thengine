@@ -82,6 +82,10 @@ type Canvas struct {
 	iter *iterCanvas
 }
 
+// -----------------------------------------------------------------------------
+// package [Canvas] public functions
+// -----------------------------------------------------------------------------
+
 // NewCanvas function creates a new Canvas instance with the given number of
 // columns and rows.
 func NewCanvas(size *api.Size) *Canvas {
@@ -342,24 +346,60 @@ func (c *Canvas) SetCellAt(point *api.Point, cell ICell) bool {
 	return false
 }
 
-// SetColorAt method sets the given Color to the cell at the given row and
+// SetRineAt method sets the given Rune to the cell at the given row and
 // column.
-func (c *Canvas) SetStyleAt(point *api.Point, style *tcell.Style) bool {
-	if cell := c.GetCellAt(point); cell != nil {
-		cell.SetStyle(style)
-		return true
+// If point given is nil, it updates the rhune in all cells in the canvas.
+func (c *Canvas) SetRuneAt(point *api.Point, ch rune) bool {
+	if point != nil {
+		if cell := c.GetCellAt(point); cell != nil {
+			cell.SetRune(ch)
+			return true
+		} else {
+			for _, rows := range c.Rows {
+				for _, cell := range rows.Cols {
+					if cell != nil {
+						cell.SetRune(ch)
+					}
+				}
+			}
+		}
 	}
 	return false
 }
 
-// SetRineAt method sets the given Rune to the cell at the given row and
+// SetStyleAt method sets the given Style to the cell at the given row and
 // column.
-func (c *Canvas) SetRuneAt(point *api.Point, ch rune) bool {
-	if cell := c.GetCellAt(point); cell != nil {
-		cell.SetRune(ch)
-		return true
+// If point given is nil, it updates style in all cells in the canvas.
+func (c *Canvas) SetStyleAt(point *api.Point, style *tcell.Style) bool {
+	if point != nil {
+		if cell := c.GetCellAt(point); cell != nil {
+			cell.SetStyle(style)
+			return true
+		}
+	} else {
+		for _, rows := range c.Rows {
+			for _, cell := range rows.Cols {
+				if cell != nil {
+					cell.SetStyle(style)
+				}
+			}
+		}
 	}
 	return false
+}
+
+// SetStyleForRune method sets the given style for cells with the given rhune.
+// If the given run is 0 it updates all empty rhunes.
+func (c *Canvas) SetStyleForRune(ch rune, style *tcell.Style) {
+	for x, rows := range c.Rows {
+		for y, cell := range rows.Cols {
+			if cell != nil && cell.GetRune() == ch {
+				cell.SetStyle(style)
+			} else if cell == nil && ch == 0 {
+				c.SetCellAt(api.NewPoint(x, y), NewCell(style, ' '))
+			}
+		}
+	}
 }
 
 // Size method returns the canvas number of columns and the number of rows.

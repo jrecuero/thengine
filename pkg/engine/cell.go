@@ -62,7 +62,7 @@ func NewCell(style *tcell.Style, ch rune) *Cell {
 		payload:  nil,
 		position: nil,
 		rune:     ch,
-		style:    style,
+		style:    CloneStyle(style),
 	}
 }
 
@@ -84,9 +84,9 @@ func NewEmptyCell() *Cell {
 func CloneCell(cell ICell) *Cell {
 	return &Cell{
 		payload:  nil,
-		position: cell.GetPosition(),
+		position: api.ClonePoint(cell.GetPosition()),
 		rune:     cell.GetRune(),
-		style:    cell.GetStyle(),
+		style:    CloneStyle(cell.GetStyle()),
 	}
 }
 
@@ -96,9 +96,9 @@ func CloneCell(cell ICell) *Cell {
 
 // Clone method clones all attributes from the given Cell in to the instance.
 func (c *Cell) Clone(cell ICell) {
-	c.style = cell.GetStyle()
+	c.position = api.ClonePoint(cell.GetPosition())
 	c.rune = cell.GetRune()
-	c.position = cell.GetPosition()
+	c.style = CloneStyle(cell.GetStyle())
 }
 
 func (c *Cell) GetPayload() any {
@@ -151,7 +151,7 @@ func (c *Cell) SetPayload(payload any) {
 
 // SetPosition method sets the position in a Cell instance.
 func (c *Cell) SetPosition(position *api.Point) {
-	c.position = position
+	c.position = api.ClonePoint(position)
 }
 
 func (c *Cell) SetRune(r rune) {
@@ -159,7 +159,7 @@ func (c *Cell) SetRune(r rune) {
 }
 
 func (c *Cell) SetStyle(style *tcell.Style) {
-	c.style = style
+	c.style = CloneStyle(style)
 }
 
 // -----------------------------------------------------------------------------

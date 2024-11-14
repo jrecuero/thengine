@@ -12,30 +12,12 @@ import (
 // Package public methods
 // -----------------------------------------------------------------------------
 
-// NewStyle function creates a new tcell.Style instance.
-func NewStyle(fg tcell.Color, bg tcell.Color, attrs tcell.AttrMask) *tcell.Style {
-	style := tcell.StyleDefault.Foreground(fg).Background(bg).Attributes((attrs))
-	return &style
-}
-
-// GetForegroundFromStyle function returns the foreground color from the given
-// style.
-func GetForegroundFromStyle(s *tcell.Style) tcell.Color {
-	fg, _, _ := s.Decompose()
-	return fg
-}
-
-// GetBackgroundColorFromStyle function returns the background color from the
-// given style.
-func GetBackgroundColorFromStyle(s *tcell.Style) tcell.Color {
-	_, bg, _ := s.Decompose()
-	return bg
-}
-
-// GetAttrsFromStyle function returns color attributes from the given style.
-func GetAttrsFromStyle(s *tcell.Style) tcell.AttrMask {
-	_, _, attrs := s.Decompose()
-	return attrs
+// CloneStyle function clones the given tcell.Style to a new instance with same
+// values.
+func CloneStyle(style *tcell.Style) *tcell.Style {
+	fg, bg, attrs := style.Decompose()
+	newStyle := NewStyle(fg, bg, attrs)
+	return newStyle
 }
 
 // CompareStyle function checks if foreground, background and attribute colors
@@ -57,6 +39,32 @@ func CompareStyle(style1 *tcell.Style, style2 *tcell.Style) bool {
 func CompareStyleColor(style1 *tcell.Style, style2 *tcell.Style) bool {
 	return (GetForegroundFromStyle(style1) == GetForegroundFromStyle(style2)) &&
 		(GetBackgroundColorFromStyle(style1) == GetBackgroundColorFromStyle(style2))
+}
+
+// GetAttrsFromStyle function returns color attributes from the given style.
+func GetAttrsFromStyle(s *tcell.Style) tcell.AttrMask {
+	_, _, attrs := s.Decompose()
+	return attrs
+}
+
+// GetBackgroundColorFromStyle function returns the background color from the
+// given style.
+func GetBackgroundColorFromStyle(s *tcell.Style) tcell.Color {
+	_, bg, _ := s.Decompose()
+	return bg
+}
+
+// GetForegroundFromStyle function returns the foreground color from the given
+// style.
+func GetForegroundFromStyle(s *tcell.Style) tcell.Color {
+	fg, _, _ := s.Decompose()
+	return fg
+}
+
+// NewStyle function creates a new tcell.Style instance.
+func NewStyle(fg tcell.Color, bg tcell.Color, attrs tcell.AttrMask) *tcell.Style {
+	style := tcell.StyleDefault.Foreground(fg).Background(bg).Attributes((attrs))
+	return &style
 }
 
 func StyleToString(s *tcell.Style) string {

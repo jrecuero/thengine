@@ -28,6 +28,34 @@ type KeyboardAction struct {
 	Args     []any
 }
 
+func NewKeyboardActionForKey(key tcell.Key, callback func(...any), args []any) *KeyboardAction {
+	return &KeyboardAction{
+		Key:      key,
+		Rune:     0,
+		Callback: callback,
+		Args:     args,
+	}
+}
+
+func NewKeyboardActionForRune(ch rune, callback func(...any), args []any) *KeyboardAction {
+	return &KeyboardAction{
+		Key:      0,
+		Rune:     ch,
+		Callback: callback,
+		Args:     args,
+	}
+}
+
+// -----------------------------------------------------------------------------
+//
+// IWidget
+//
+// -----------------------------------------------------------------------------
+
+type IWidget interface {
+	engine.IEntity
+}
+
 // -----------------------------------------------------------------------------
 //
 // Widget
@@ -167,3 +195,4 @@ func (w *Widget) SetWidgetCallbackArgs(args ...any) {
 var _ engine.IObject = (*Widget)(nil)
 var _ engine.IFocus = (*Widget)(nil)
 var _ engine.IEntity = (*Widget)(nil)
+var _ IWidget = (*Widget)(nil)

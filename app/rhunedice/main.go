@@ -16,6 +16,7 @@ func main() {
 	buildDungeon(mainScene)
 
 	mainScene.AddEntity(gameHandler)
+	mainScene.AddEntity(gameHandler.GetDiceSelectWidget())
 
 	theEngine.InitResources()
 	theEngine.GetSceneManager().AddScene(mainScene)
