@@ -21,6 +21,7 @@ import (
 type IEntity interface {
 	IObjectUI
 	IFocus
+	IObserver
 	Consume()
 	Draw(IScene)
 	EndTick(IScene)
@@ -70,37 +71,41 @@ type IEntity interface {
 type Entity struct {
 	*ObjectUI
 	*Focus
-	cache        api.ICache
-	canvas       *Canvas
-	customInit   func()
-	customDraw   func(IScene)
-	customStart  func()
-	customStop   func()
-	customUpdate func(tcell.Event, IScene)
-	pLevel       int
-	screen       tcell.Screen
-	solid        bool
-	validator    IValidator
-	zLevel       int
+	cache         api.ICache
+	canvas        *Canvas
+	customConsume func()
+	customDraw    func(IScene)
+	customInit    func()
+	customNotify  func(any, any)
+	customStart   func()
+	customStop    func()
+	customUpdate  func(tcell.Event, IScene)
+	pLevel        int
+	screen        tcell.Screen
+	solid         bool
+	validator     IValidator
+	zLevel        int
 }
 
 // NewEntity function creates a new Entity instance with all given attributes.
 func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.Style) *Entity {
 	entity := &Entity{
-		ObjectUI:     NewObjectUI(name, position, size, style),
-		Focus:        NewDisableFocus(),
-		cache:        api.NewCache(),
-		canvas:       NewCanvas(size),
-		customDraw:   nil,
-		customInit:   nil,
-		customStart:  nil,
-		customStop:   nil,
-		customUpdate: nil,
-		pLevel:       0,
-		screen:       nil,
-		solid:        false,
-		validator:    nil,
-		zLevel:       0,
+		ObjectUI:      NewObjectUI(name, position, size, style),
+		Focus:         NewDisableFocus(),
+		cache:         api.NewCache(),
+		canvas:        NewCanvas(size),
+		customConsume: nil,
+		customDraw:    nil,
+		customInit:    nil,
+		customNotify:  nil,
+		customStart:   nil,
+		customStop:    nil,
+		customUpdate:  nil,
+		pLevel:        0,
+		screen:        nil,
+		solid:         false,
+		validator:     nil,
+		zLevel:        0,
 	}
 	return entity
 }
@@ -109,20 +114,22 @@ func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.St
 // as default values.
 func NewEmptyEntity() *Entity {
 	return &Entity{
-		ObjectUI:     NewObjectUI("", nil, nil, nil),
-		Focus:        NewDisableFocus(),
-		cache:        api.NewCache(),
-		canvas:       nil,
-		customDraw:   nil,
-		customInit:   nil,
-		customStart:  nil,
-		customStop:   nil,
-		customUpdate: nil,
-		pLevel:       0,
-		screen:       nil,
-		solid:        false,
-		validator:    nil,
-		zLevel:       0,
+		ObjectUI:      NewObjectUI("", nil, nil, nil),
+		Focus:         NewDisableFocus(),
+		cache:         api.NewCache(),
+		canvas:        nil,
+		customConsume: nil,
+		customDraw:    nil,
+		customInit:    nil,
+		customNotify:  nil,
+		customStart:   nil,
+		customStop:    nil,
+		customUpdate:  nil,
+		pLevel:        0,
+		screen:        nil,
+		solid:         false,
+		validator:     nil,
+		zLevel:        0,
 	}
 }
 
@@ -130,20 +137,22 @@ func NewEmptyEntity() *Entity {
 // attributes but the given name.
 func NewNamedEntity(name string) *Entity {
 	return &Entity{
-		ObjectUI:     NewObjectUI(name, nil, nil, nil),
-		Focus:        NewDisableFocus(),
-		canvas:       nil,
-		cache:        api.NewCache(),
-		customDraw:   nil,
-		customInit:   nil,
-		customStart:  nil,
-		customStop:   nil,
-		customUpdate: nil,
-		pLevel:       0,
-		screen:       nil,
-		solid:        false,
-		validator:    nil,
-		zLevel:       0,
+		ObjectUI:      NewObjectUI(name, nil, nil, nil),
+		Focus:         NewDisableFocus(),
+		canvas:        nil,
+		cache:         api.NewCache(),
+		customConsume: nil,
+		customDraw:    nil,
+		customInit:    nil,
+		customNotify:  nil,
+		customStart:   nil,
+		customStop:    nil,
+		customUpdate:  nil,
+		pLevel:        0,
+		screen:        nil,
+		solid:         false,
+		validator:     nil,
+		zLevel:        0,
 	}
 }
 
@@ -162,6 +171,7 @@ func NewHandler(name string) *Entity {
 // CanHaveFocus method checks if the entity can receive and have focus.
 func (e *Entity) CanHaveFocus() bool {
 	//tools.Logger.WithField("module", "entity").
+	//    WithField("struct", "Entity").
 	//    WithField("method", "CanHaveFocus").
 	//    Debugf("entity %s %d %t %t", e.GetName(), int(e.GetFocusType()), e.IsFocusEnable(), e.IsActive())
 	return e.IsFocusEnable() && e.IsActive()
@@ -193,6 +203,9 @@ func (e *Entity) GetCollider() *Collider {
 
 // Consume method consume all messages from the mailbox.
 func (e *Entity) Consume() {
+	if e.customConsume != nil {
+		defer e.customConsume()
+	}
 }
 
 // GetCanvas method returns the entity canvas instance.
@@ -296,6 +309,12 @@ func (e *Entity) MarshalCode(origin *api.Point) (string, error) {
 	return result, nil
 }
 
+func (e *Entity) Notify(subjectID any, message any) {
+	if e.customNotify != nil {
+		defer e.customNotify(subjectID, message)
+	}
+}
+
 // Refresh method refreshes the entity instance.
 func (e *Entity) Refresh() {
 }
@@ -309,6 +328,10 @@ func (e *Entity) SetCanvas(canvas *Canvas) {
 	e.canvas = canvas
 }
 
+func (e *Entity) SetCustomConsume(f func()) {
+	e.customConsume = f
+}
+
 func (e *Entity) SetCustomDraw(f func(IScene)) {
 	e.customDraw = f
 }
@@ -318,7 +341,11 @@ func (e *Entity) SetCustomInit(f func()) {
 	e.customInit = f
 }
 
-// SetCustomStart method sets a new value for the custon start function.
+func (e *Entity) SetCustomNotify(f func(any, any)) {
+	e.customNotify = f
+}
+
+// SetCustomStart method sets a new value for the custom start function.
 func (e *Entity) SetCustomStart(f func()) {
 	e.customStart = f
 }
@@ -436,4 +463,5 @@ func (e *Entity) Validate(data any, args ...any) error {
 var _ IObject = (*Entity)(nil)
 var _ IObjectUI = (*Entity)(nil)
 var _ IFocus = (*Entity)(nil)
+var _ IObserver = (*Entity)(nil)
 var _ IEntity = (*Entity)(nil)

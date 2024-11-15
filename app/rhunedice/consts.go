@@ -20,6 +20,7 @@ const (
 	// Boxes headers
 	TheStageBoxHeaderName       = "text/box/header/stage/1"
 	TheDiceBoxHeaderName        = "text/box/header/dice/1"
+	TheDicePlayerSelectName     = "text/box/header/select/1"
 	ThePlayerBoxHeaderName      = "text/box/header/player/1"
 	TheEnemyBoxHeaderName       = "text/box/header/enemy/1"
 	TheKeysBoxHeaderName        = "text/box/header/keys/1"

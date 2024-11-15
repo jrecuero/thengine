@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/jrecuero/thengine/app/rhunedice/assets/tdice"
 	"github.com/jrecuero/thengine/pkg/api"
 	"github.com/jrecuero/thengine/pkg/builder"
@@ -51,6 +53,21 @@ func buildBoxes(scene engine.IScene, gameHandler *GameHandler) {
 		scene.AddEntity(die)
 	}
 	gameHandler.SetPlayerDice(dice)
+
+	dicePlayerSelectionOffset := api.NewPoint(60, 2)
+	dicePlayerSelectionOrigin := api.ClonePoint(TheDiceBoxOrigin)
+	dicePlayerSelectionOrigin.Add(dicePlayerSelectionOffset)
+	dicePlayerSelectionText := widgets.NewText(TheDicePlayerSelectName,
+		dicePlayerSelectionOrigin, api.NewSize(32, 1), boxStyle, "dice selected:")
+	dicePlayerSelectionText.SetCustomNotify(func(subjectID any, message any) {
+		//tools.Logger.WithField("package", "main").
+		//    WithField("module", "private").
+		//    WithField("function", "buildBoxes").
+		//    Debugf("%s has a new selection %v", subjectID.(string), message)
+		dicePlayerSelectionText.SetText(fmt.Sprintf("dice selected: %v", message))
+	})
+	engine.GetEngine().GetObserverManager().RegisterObserver(gameHandler.GetDiceSelectWidget().GetName(), dicePlayerSelectionText)
+	scene.AddEntity(dicePlayerSelectionText)
 
 	diceBoxHeaderTextOrigin := api.ClonePoint(TheDiceBoxOrigin)
 	diceBoxHeaderTextOrigin.Add(headerTextOffset)

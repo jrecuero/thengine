@@ -31,7 +31,7 @@ func (o *TestObserver) Notify(subjectID any, message any) {
 
 func TestObserveManager(t *testing.T) {
 	// Create ObserverManager
-	m := engine.NewObserverManager("manager/observer/1")
+	m := engine.NewObserverManager()
 	if m == nil {
 		t.Errorf("NewObserverManager Error exp:*ObserveManager got:nil")
 		return

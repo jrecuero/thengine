@@ -1,5 +1,80 @@
-// mailbox.go contails all structures and logic required to create and handle a
-// multiple topics with consumers and producers.
+// mailbox.go
+//
+// The mailbox package provides a messaging and notification system
+// implemented through a mailbox model that supports multiple topics,
+// consumers, and producers. This package is designed to facilitate
+// communication between different components by enabling the publishing,
+// subscription, and consumption of messages across various topics.
+//
+// Key Components:
+//
+// - **Mailbox**: The central message hub that holds topics and their
+// registered consumers.
+//
+//	It is responsible for managing topics, tracking consumer subscriptions,
+//	and handling
+//	message publishing and consumption.
+//
+// - **Topic**: Represents a communication channel for messages. Each topic can
+// have multiple
+//
+//	consumers registered to receive messages published to that topic.
+//
+// - **Consumer**: Represents a message listener that subscribes to one or more
+// topics and
+//
+//	processes incoming messages in its queue.
+//
+// - **Message**: Defines the data structure for a message, including topic,
+// source, destination,
+//
+//	content, and timestamp. Messages are published to topics and consumed by
+//	registered consumers.
+//
+// Main Functions:
+//
+// - `GetMailbox()`: Returns a singleton instance of the Mailbox, providing
+// access to the central
+//
+//	messaging hub.
+//
+// - `NewMessage()`: Creates a new message instance, initialized with the
+// topic, source, destination,
+//
+//	and content information.
+//
+// - `NewTopic()`, `CreateTopic()`, and `DeleteTopic()`: Functions for creating
+// and managing topics within
+//
+//	the Mailbox.
+//
+// - `Subscribe()` and `Unsubscribe()`: Allow consumers to subscribe or
+// unsubscribe from topics.
+//
+// - `Publish()`: Publishes a message to a specific topic, notifying all
+// subscribed consumers.
+//
+// - `Consume()`: Allows consumers to retrieve messages from their message
+// queue.
+//
+// Usage Example:
+//
+//	mailbox := engine.GetMailbox()                 // Retrieve the singleton
+//	Mailbox instance
+//	topic := mailbox.CreateTopic("orders")         // Create a new topic
+//	"orders"
+//	consumer, _ := mailbox.Subscribe("orders", "consumer1") // Subscribe a
+//	consumer to "orders"
+//	message := engine.NewMessage("orders", "src", "dst", "New order placed") //
+//	Create a new message
+//	mailbox.Publish("orders", message)             // Publish the message to
+//	"orders" topic
+//	consumer.Consume()                             // Consume the message from
+//	the consumer's queue
+//
+// This package provides a flexible and decoupled messaging architecture for
+// projects requiring
+// multi-topic,
 package engine
 
 import (

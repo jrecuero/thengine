@@ -84,7 +84,6 @@ type ISubject interface {
 // serves as a central hub for subjects and observers, ensuring that observers
 // are notified when the state of a subject changes.
 type ObserverManager struct {
-	name      string
 	observers map[any][]IObserver // map subject IDs to observers
 }
 
@@ -94,9 +93,8 @@ type ObserverManager struct {
 
 // NewObserverManager function creates and initializes a new ObserverManager
 // instance.
-func NewObserverManager(name string) *ObserverManager {
+func NewObserverManager() *ObserverManager {
 	return &ObserverManager{
-		name:      name,
 		observers: make(map[any][]IObserver),
 	}
 }
@@ -120,11 +118,6 @@ func (m *ObserverManager) findObserver(subjectID any, observer IObserver) (int, 
 // -----------------------------------------------------------------------------
 // ObserverManager public methods.
 // -----------------------------------------------------------------------------
-
-// GetName method returns the ObserveManager instance name.
-func (m *ObserverManager) GetName() string {
-	return m.name
-}
 
 // NotifyObservers method notifies all observers registered to a given subject.
 func (m *ObserverManager) NotifyObservers(subjectID any, message any) {

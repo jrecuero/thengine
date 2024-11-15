@@ -105,6 +105,8 @@ func (w *SelectWidget) updateCanvasForSelect() {
 	//    Debugf("style is %s", tools.StyleToString(style))
 	reverseStyle := tools.ReverseStyle(style)
 	canvas.SetStyleAt(nil, reverseStyle)
+	observerManager := engine.GetEngine().GetObserverManager()
+	observerManager.NotifyObservers(w.GetName(), w.selected)
 }
 
 func (w *SelectWidget) updateCanvasForIndex(index int) {

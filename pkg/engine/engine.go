@@ -1,5 +1,68 @@
-// engine.go contains all structures and method required for handling the
-// application engine.
+// engine.go
+//
+// Package engine provides the core structures and methods to manage and run
+// the application engine, handling screen management, events, and scene
+// updates.
+//
+// Overview:
+// The engine is responsible for initializing resources, managing the main
+// event
+// loop, handling input, drawing content to the screen, and coordinating
+// updates and transitions within the application. The engine runs in a loop,
+// processing input events, updating scenes, and rendering frames at a
+// specified
+// frames-per-second (fps) rate.
+//
+// Main Components:
+// - Engine: Central struct that controls the application's core behavior,
+//   including screen display, event handling, and scene management.
+// - SceneManager: Manages scenes within the application, providing functions
+//   for adding, updating, and switching between scenes.
+// - ObserverManager: Manages observer instances for handling event
+// notifications.
+// - FocusManager: Manages focus for interactive elements within the scenes.
+//
+// Global Constants and Variables:
+// - EngineMainSceneName: Default scene name for the main engine scene.
+// - EngineSingleton: Singleton instance of the Engine, accessible via
+// GetEngine().
+//
+// Core Methods:
+// - Run(fps float64): Runs the engine in an infinite loop, processing events
+//   and updating scenes at the specified fps.
+// - Start(), Stop(): Methods to initialize and terminate engine resources.
+// - CreateEngineScene(): Creates a main scene for the engine with the screen's
+//   size as its dimensions.
+// - Draw(), Update(), Consume(): Core rendering, updating, and message
+//   consumption methods, respectively.
+//
+// Event Handling:
+// The engine listens for keyboard and mouse events using tcell, an ncurses
+// library for handling terminal-based graphical interfaces. Events like key
+// presses (Escape, Ctrl+C) and window resize events are captured and processed
+// during the event loop.
+//
+// Initialization and Resource Management:
+// - Init(): Initializes resources needed to run the engine, like the screen.
+// - InitResources(): Initializes low-level resources (like tcell screen).
+// - SetDryRun(bool): Configures the engine to run in dry mode, bypassing
+//   certain screen and input functionalities.
+//
+// Error Handling and Recovery:
+// The Run method includes a panic recovery mechanism, logging stack traces and
+// errors for debugging and safe application shutdown.
+//
+// Dependencies:
+// This package requires tcell for terminal rendering and an external tools
+// package for logging errors and debug information.
+//
+// Example Usage:
+// To create and run the engine in a new application:
+//     engine := engine.GetEngine()
+//     engine.Init()
+//     engine.Run(60.0) // Run at 60 FPS
+//
+
 package engine
 
 import (
@@ -52,23 +115,25 @@ func GetEngine() *Engine {
 // engine.
 // screen tcell.Screen instance used to display any application object.
 type Engine struct {
-	screen       tcell.Screen
-	sceneManager *SceneManager
-	focusManager *FocusManager
-	ctrlCh       chan bool
-	eventCh      chan tcell.Event
-	isRunning    bool
-	dryRun       bool
+	ctrlCh          chan bool
+	dryRun          bool
+	eventCh         chan tcell.Event
+	focusManager    *FocusManager
+	isRunning       bool
+	observerManager *ObserverManager
+	sceneManager    *SceneManager
+	screen          tcell.Screen
 }
 
 // newEngine function creates a new Engine instance.
 func newEngine() *Engine {
 	engine := &Engine{
-		sceneManager: NewSceneManager(),
-		focusManager: NewFocusManager(),
-		ctrlCh:       make(chan bool, 2),
-		eventCh:      make(chan tcell.Event),
-		isRunning:    true,
+		ctrlCh:          make(chan bool, 2),
+		eventCh:         make(chan tcell.Event),
+		focusManager:    NewFocusManager(),
+		isRunning:       true,
+		observerManager: NewObserverManager(),
+		sceneManager:    NewSceneManager(),
 	}
 	return engine
 }
@@ -153,6 +218,11 @@ func (e *Engine) GetScreen() tcell.Screen {
 // GetFocusManager method returns the focus manager instance.
 func (e *Engine) GetFocusManager() *FocusManager {
 	return e.focusManager
+}
+
+// GetObserverManager method returns the observer manager instance.
+func (e *Engine) GetObserverManager() *ObserverManager {
+	return e.observerManager
 }
 
 // GetSceneManager method returns the scene manager instance.
