@@ -59,11 +59,7 @@ func buildBoxes(scene engine.IScene, gameHandler *GameHandler) {
 	dicePlayerSelectionOrigin.Add(dicePlayerSelectionOffset)
 	dicePlayerSelectionText := widgets.NewText(TheDicePlayerSelectName,
 		dicePlayerSelectionOrigin, api.NewSize(32, 1), boxStyle, "dice selected:")
-	dicePlayerSelectionText.SetCustomNotify(func(subjectID any, message any) {
-		//tools.Logger.WithField("package", "main").
-		//    WithField("module", "private").
-		//    WithField("function", "buildBoxes").
-		//    Debugf("%s has a new selection %v", subjectID.(string), message)
+	dicePlayerSelectionText.SetBehaviorFor(engine.BehaviorNotify, func(subjectID any, message any) {
 		dicePlayerSelectionText.SetText(fmt.Sprintf("dice selected: %v", message))
 	})
 	engine.GetEngine().GetObserverManager().RegisterObserver(gameHandler.GetDiceSelectWidget().GetName(), dicePlayerSelectionText)

@@ -37,13 +37,9 @@ type IEntity interface {
 	MarshalMap(*api.Point) (map[string]any, error)
 	MarshalCode(*api.Point) (string, error)
 	Refresh()
+	SetBehaviorFor(string, any)
 	SetCache(api.ICache)
 	SetCanvas(*Canvas)
-	SetCustomDraw(func(IScene))
-	SetCustomInit(func())
-	SetCustomStart(func())
-	SetCustomStop(func())
-	SetCustomUpdate(func(tcell.Event, IScene))
 	SetPLevel(int)
 	SetSolid(bool)
 	SetValidator(IValidator)
@@ -71,41 +67,33 @@ type IEntity interface {
 type Entity struct {
 	*ObjectUI
 	*Focus
-	cache         api.ICache
-	canvas        *Canvas
-	customConsume func()
-	customDraw    func(IScene)
-	customInit    func()
-	customNotify  func(any, any)
-	customStart   func()
-	customStop    func()
-	customUpdate  func(tcell.Event, IScene)
-	pLevel        int
-	screen        tcell.Screen
-	solid         bool
-	validator     IValidator
-	zLevel        int
+	behavior  IBehavior
+	cache     api.ICache
+	canvas    *Canvas
+	pLevel    int
+	screen    tcell.Screen
+	solid     bool
+	validator IValidator
+	zLevel    int
 }
+
+// -----------------------------------------------------------------------------
+// New Entity functions
+// -----------------------------------------------------------------------------
 
 // NewEntity function creates a new Entity instance with all given attributes.
 func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.Style) *Entity {
 	entity := &Entity{
-		ObjectUI:      NewObjectUI(name, position, size, style),
-		Focus:         NewDisableFocus(),
-		cache:         api.NewCache(),
-		canvas:        NewCanvas(size),
-		customConsume: nil,
-		customDraw:    nil,
-		customInit:    nil,
-		customNotify:  nil,
-		customStart:   nil,
-		customStop:    nil,
-		customUpdate:  nil,
-		pLevel:        0,
-		screen:        nil,
-		solid:         false,
-		validator:     nil,
-		zLevel:        0,
+		ObjectUI:  NewObjectUI(name, position, size, style),
+		Focus:     NewDisableFocus(),
+		behavior:  NewBehavior(),
+		cache:     api.NewCache(),
+		canvas:    NewCanvas(size),
+		pLevel:    0,
+		screen:    nil,
+		solid:     false,
+		validator: nil,
+		zLevel:    0,
 	}
 	return entity
 }
@@ -114,22 +102,16 @@ func NewEntity(name string, position *api.Point, size *api.Size, style *tcell.St
 // as default values.
 func NewEmptyEntity() *Entity {
 	return &Entity{
-		ObjectUI:      NewObjectUI("", nil, nil, nil),
-		Focus:         NewDisableFocus(),
-		cache:         api.NewCache(),
-		canvas:        nil,
-		customConsume: nil,
-		customDraw:    nil,
-		customInit:    nil,
-		customNotify:  nil,
-		customStart:   nil,
-		customStop:    nil,
-		customUpdate:  nil,
-		pLevel:        0,
-		screen:        nil,
-		solid:         false,
-		validator:     nil,
-		zLevel:        0,
+		ObjectUI:  NewObjectUI("", nil, nil, nil),
+		Focus:     NewDisableFocus(),
+		behavior:  NewBehavior(),
+		cache:     api.NewCache(),
+		canvas:    nil,
+		pLevel:    0,
+		screen:    nil,
+		solid:     false,
+		validator: nil,
+		zLevel:    0,
 	}
 }
 
@@ -137,22 +119,16 @@ func NewEmptyEntity() *Entity {
 // attributes but the given name.
 func NewNamedEntity(name string) *Entity {
 	return &Entity{
-		ObjectUI:      NewObjectUI(name, nil, nil, nil),
-		Focus:         NewDisableFocus(),
-		canvas:        nil,
-		cache:         api.NewCache(),
-		customConsume: nil,
-		customDraw:    nil,
-		customInit:    nil,
-		customNotify:  nil,
-		customStart:   nil,
-		customStop:    nil,
-		customUpdate:  nil,
-		pLevel:        0,
-		screen:        nil,
-		solid:         false,
-		validator:     nil,
-		zLevel:        0,
+		ObjectUI:  NewObjectUI(name, nil, nil, nil),
+		Focus:     NewDisableFocus(),
+		behavior:  NewBehavior(),
+		cache:     api.NewCache(),
+		canvas:    nil,
+		pLevel:    0,
+		screen:    nil,
+		solid:     false,
+		validator: nil,
+		zLevel:    0,
 	}
 }
 
@@ -179,8 +155,10 @@ func (e *Entity) CanHaveFocus() bool {
 
 // Draw method renders the entity in the screen.
 func (e *Entity) Draw(scene IScene) {
-	if e.customDraw != nil {
-		defer e.customDraw(scene)
+	if b := e.behavior.GetBehaviorFor(BehaviorDraw); b != nil {
+		if behavior, ok := b.(func(IScene)); ok {
+			defer behavior(scene)
+		}
 	}
 	if e.IsVisible() && e.GetCanvas() != nil {
 		e.canvas.RenderAt(scene.GetCamera(), e.position)
@@ -203,8 +181,10 @@ func (e *Entity) GetCollider() *Collider {
 
 // Consume method consume all messages from the mailbox.
 func (e *Entity) Consume() {
-	if e.customConsume != nil {
-		defer e.customConsume()
+	if b := e.behavior.GetBehaviorFor(BehaviorConsume); b != nil {
+		if behavior, ok := b.(func()); ok {
+			defer behavior()
+		}
 	}
 }
 
@@ -248,8 +228,10 @@ func (e *Entity) GetZLevel() int {
 
 // Init methos initialize the entity instance.
 func (e *Entity) Init(screen tcell.Screen) {
-	if e.customInit != nil {
-		defer e.customInit()
+	if b := e.behavior.GetBehaviorFor(BehaviorInit); b != nil {
+		if behavior, ok := b.(func()); ok {
+			defer behavior()
+		}
 	}
 	e.screen = screen
 }
@@ -310,8 +292,10 @@ func (e *Entity) MarshalCode(origin *api.Point) (string, error) {
 }
 
 func (e *Entity) Notify(subjectID any, message any) {
-	if e.customNotify != nil {
-		defer e.customNotify(subjectID, message)
+	if b := e.behavior.GetBehaviorFor(BehaviorNotify); b != nil {
+		if behavior, ok := b.(func(any, any)); ok {
+			defer behavior(subjectID, message)
+		}
 	}
 }
 
@@ -323,40 +307,13 @@ func (e *Entity) SetCache(cache api.ICache) {
 	e.cache = cache
 }
 
+func (e *Entity) SetBehaviorFor(name string, f any) {
+	e.behavior.SetBehaviorFor(name, f)
+}
+
 // SetCanvas method sets a new value for the entity canvas.
 func (e *Entity) SetCanvas(canvas *Canvas) {
 	e.canvas = canvas
-}
-
-func (e *Entity) SetCustomConsume(f func()) {
-	e.customConsume = f
-}
-
-func (e *Entity) SetCustomDraw(f func(IScene)) {
-	e.customDraw = f
-}
-
-// SetCustomInit method sets a new value for the custom init function.
-func (e *Entity) SetCustomInit(f func()) {
-	e.customInit = f
-}
-
-func (e *Entity) SetCustomNotify(f func(any, any)) {
-	e.customNotify = f
-}
-
-// SetCustomStart method sets a new value for the custom start function.
-func (e *Entity) SetCustomStart(f func()) {
-	e.customStart = f
-}
-
-// SetCustomStop method sets a new value for the custom stop function.
-func (e *Entity) SetCustomStop(f func()) {
-	e.customStop = f
-}
-
-func (e *Entity) SetCustomUpdate(f func(tcell.Event, IScene)) {
-	e.customUpdate = f
 }
 
 // SetPLevel method sets a new value for the entity p-level.
@@ -395,8 +352,10 @@ func (e *Entity) SetZLevel(level int) {
 
 // Start method starts the entity instance.
 func (e *Entity) Start() {
-	if e.customStart != nil {
-		defer e.customStart()
+	if b := e.behavior.GetBehaviorFor(BehaviorStart); b != nil {
+		if behavior, ok := b.(func()); ok {
+			defer behavior()
+		}
 	}
 }
 
@@ -405,8 +364,10 @@ func (e *Entity) StartTick(IScene) {
 
 // Stop method stops the entity instance.
 func (e *Entity) Stop() {
-	if e.customStop != nil {
-		defer e.customStop()
+	if b := e.behavior.GetBehaviorFor(BehaviorStop); b != nil {
+		if behavior, ok := b.(func()); ok {
+			defer behavior()
+		}
 	}
 }
 
@@ -446,8 +407,10 @@ func (e *Entity) UnmarshalMap(content map[string]any, origin *api.Point) error {
 
 // Update method updates the entity instance.
 func (e *Entity) Update(event tcell.Event, scene IScene) {
-	if e.customUpdate != nil {
-		defer e.customUpdate(event, scene)
+	if b := e.behavior.GetBehaviorFor(BehaviorUpdate); b != nil {
+		if behavior, ok := b.(func(tcell.Event, IScene)); ok {
+			defer behavior(event, scene)
+		}
 	}
 	if e.IsActive() {
 	}
