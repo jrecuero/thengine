@@ -759,10 +759,42 @@ func demoFifteen(dryRun bool) {
 	appEngine.Run(60.0)
 }
 
+func demoSixteen(dryRun bool) {
+	tools.Logger.WithField("module", "main").
+		WithField("dry-mode", dryRun).
+		Infof("ThEngine demo-sixteeen")
+	fmt.Println("ThEngine demo-sixteeen")
+	camera := engine.NewCamera(api.NewPoint(0, 0), api.NewSize(90, 30))
+	scene := engine.NewScene("scene", camera)
+
+	textOne := widgets.NewText("widget/text/1", api.NewPoint(1, 1), api.NewSize(1, 10), &constants.WhiteOverBlack, "text one")
+	textTwo := widgets.NewText("widget/text/2", api.NewPoint(1, 2), api.NewSize(1, 10),
+		&constants.RedOverBlack, "text two")
+	group := widgets.NewGroup("widget/group/1", textOne, textTwo)
+	scene.AddEntity(group)
+
+	textThree := widgets.NewText("widget/text/3", api.NewPoint(1, 3), api.NewSize(1, 10), &constants.WhiteOverBlack, "Hello, ")
+	textFour := widgets.NewText("widget/text/4", api.NewPoint(0, 0), api.NewSize(1, 10),
+		&constants.RedOverBlack, "Jose Carlos")
+	anchoredText := widgets.NewAnchoredText("widget/anchored-text/1", textThree, textFour)
+	scene.AddEntity(anchoredText)
+
+	appEngine := engine.GetEngine()
+	appEngine.InitResources()
+	appEngine.GetSceneManager().AddScene(scene)
+	appEngine.GetSceneManager().SetSceneAsActive(scene)
+	appEngine.GetSceneManager().SetSceneAsVisible(scene)
+	appEngine.Init()
+	appEngine.Start()
+
+	appEngine.Run(60.0)
+}
+
 func main() {
 	//demoEleven(false)
 	//demoTwelve(false)
-	demoFourteen(false)
+	//demoFourteen(false)
 	//demoFifteen(false)
+	demoSixteen(false)
 	//demoSnake(false)
 }
