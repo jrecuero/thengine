@@ -16,7 +16,7 @@ func (m *MockCondition) Evaluate() bool {
 }
 
 // Test for Node, Question, ConditionalText, and ConditionalNext interaction
-func TestStoryBoard(t *testing.T) {
+func TestStoryBoardOne(t *testing.T) {
 	// Create a mock condition that evaluates to true
 	conditionTrue := &MockCondition{ConditionValue: true}
 	conditionFalse := &MockCondition{ConditionValue: false}
@@ -77,4 +77,47 @@ func TestStoryBoard(t *testing.T) {
 	if conditionFalse.Evaluate() != false {
 		t.Errorf("[Condition] Expected condition to evaluate to false, got %v", conditionFalse.Evaluate())
 	}
+}
+
+func TestStoryBoardTwo(t *testing.T) {
+	// Create a mock condition that evaluates to true
+	//conditionTrue := &MockCondition{ConditionValue: true}
+	//conditionFalse := &MockCondition{ConditionValue: false}
+
+	// Create Start Node and set the speaker
+	start := storyboard.NewNode("Start")
+	start.SetSpeaker("Narrator")
+
+	// Create a Node with two questions and set the speaker
+	questionNode := storyboard.NewNode("Question")
+	questionNode.SetSpeaker("Narrator")
+
+	// Create Node for every answer to the question
+	answerYes := storyboard.NewNode("AnswerYes")
+	answerNo := storyboard.NewNode("AnswerNo")
+
+	// Create End Node
+	end := storyboard.NewNode("End")
+
+	// Add some text to the Start Node.
+	start.AddText("Hello, this is a test node")
+
+	// Add some text to the Question Node and questions.
+	questionNode.AddText("Are you happy?")
+	questionYes := storyboard.NewQuestion()
+	questionYes.AddText("YES")
+	questionYes.AddNext("AnswerYes")
+	questionNode.AddQuestion(questionYes)
+
+	questionNo := storyboard.NewQuestion()
+	questionNo.AddText("NO")
+	questionNo.AddNext("AnswerNo")
+	questionNode.AddQuestion(questionNo)
+
+	// Add some text to the anwsers Node
+	answerYes.AddText("I'm glad")
+	answerNo.AddText("Sorry for that")
+
+	// Add some text to the End Node
+	end.AddText("OK, this is the end")
 }

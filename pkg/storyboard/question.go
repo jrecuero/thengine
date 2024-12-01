@@ -9,11 +9,8 @@ package storyboard
 // -----------------------------------------------------------------------------
 
 type IQuestion interface {
-	AddNext(...IConditionalNext)
-	AddText(...IConditionalText)
+	IBaseNode
 	GetCondition() ICondition
-	GetNext() []IConditionalNext
-	GetText() []IConditionalText
 	SetCondition(ICondition)
 }
 
@@ -24,17 +21,12 @@ type IQuestion interface {
 // -----------------------------------------------------------------------------
 
 type Question struct {
+	// BaseNode contains base and common Question information with Node.
+	*BaseNode
+
 	// condition is a string or a function to be used to decide is the
 	// question has to be displayed or not.
 	condition ICondition
-
-	// next is a slice with possible next node where the storyboard will
-	// continue. Next Node could be a fixed one or there could be some
-	// conditions about what could be the next Node.
-	next []IConditionalNext
-
-	// texts are a slice of strings to be displyes for the Question.
-	text []IConditionalText
 }
 
 // -----------------------------------------------------------------------------
@@ -43,9 +35,8 @@ type Question struct {
 
 func NewQuestion() *Question {
 	return &Question{
+		BaseNode:  NewBaseNode(""),
 		condition: nil,
-		next:      nil,
-		text:      make([]IConditionalText, 0),
 	}
 }
 
@@ -53,28 +44,13 @@ func NewQuestion() *Question {
 // Question public methods
 // -----------------------------------------------------------------------------
 
-func (q *Question) AddNext(next ...IConditionalNext) {
-	q.next = append(q.next, next...)
-}
-
-func (q *Question) AddText(text ...IConditionalText) {
-	q.text = append(q.text, text...)
-}
-
 func (q *Question) GetCondition() ICondition {
 	return q.condition
-}
-
-func (q *Question) GetNext() []IConditionalNext {
-	return q.next
-}
-
-func (q *Question) GetText() []IConditionalText {
-	return q.text
 }
 
 func (q *Question) SetCondition(condition ICondition) {
 	q.condition = condition
 }
 
+var _ IBaseNode = (*Question)(nil)
 var _ IQuestion = (*Question)(nil)
