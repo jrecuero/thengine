@@ -8,11 +8,13 @@ import (
 
 func TestQuestionAddNext(t *testing.T) {
 	// Create a new Question instance
-	question := storyboard.NewQuestion()
+	question := storyboard.NewQuestion("Question")
 
+	nodeOne := storyboard.NewNode("NodeOne")
+	nodeTwo := storyboard.NewNode("NodeTwo")
 	// Create mock ConditionalNext instances
-	condNext1 := storyboard.NewConditionalNext("NodeOne", nil)
-	condNext2 := storyboard.NewConditionalNext("NodeTwo", nil)
+	condNext1 := storyboard.NewConditionalNext(nodeOne, nil)
+	condNext2 := storyboard.NewConditionalNext(nodeTwo, nil)
 
 	// Add next nodes to the question
 	question.AddNext(condNext1, condNext2)
@@ -21,17 +23,17 @@ func TestQuestionAddNext(t *testing.T) {
 	if len(question.GetNext()) != 2 {
 		t.Errorf("[Question] Expected 2 next nodes, got %d", len(question.GetNext()))
 	}
-	if question.GetNext()[0].GetNode() != "NodeOne" {
+	if question.GetNext()[0].GetNode() != nodeOne {
 		t.Errorf("[Question] Expected next node 'NodeOne', got '%s'", question.GetNext()[0].GetNode())
 	}
-	if question.GetNext()[1].GetNode() != "NodeTwo" {
+	if question.GetNext()[1].GetNode() != nodeTwo {
 		t.Errorf("[Question] Expected next node 'NodeTwo', got '%s'", question.GetNext()[1].GetNode())
 	}
 }
 
 func TestQuestionAddText(t *testing.T) {
 	// Create a new Question instance
-	question := storyboard.NewQuestion()
+	question := storyboard.NewQuestion("Question")
 
 	// Create mock ConditionalText instances
 	condText1 := storyboard.NewConditionalText("What do you want to do?", nil)
@@ -54,7 +56,7 @@ func TestQuestionAddText(t *testing.T) {
 
 func TestQuestionGetCondition(t *testing.T) {
 	// Create a new Question instance
-	question := storyboard.NewQuestion()
+	question := storyboard.NewQuestion("Question")
 
 	// Create a mock condition instance and set it on the question
 	condition := &Condition{conditionMet: true}

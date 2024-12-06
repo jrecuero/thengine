@@ -23,10 +23,11 @@ func TestNewConditionalNext(t *testing.T) {
 	// Create a condition instance
 	condition := &Condition{conditionMet: true}
 	// Create a new ConditionalNext instance
-	conditionalNext := storyboard.NewConditionalNext("NodeA", condition)
+	n := storyboard.NewNode("NodeA")
+	conditionalNext := storyboard.NewConditionalNext(n, condition)
 
 	// Test the initial values
-	if conditionalNext.GetNode() != "NodeA" {
+	if conditionalNext.GetNode() != n {
 		t.Errorf("Expected node to be 'NodeA', got '%s'", conditionalNext.GetNode())
 	}
 	if conditionalNext.GetCondition() != condition {
@@ -38,7 +39,8 @@ func TestConditinalNextSetCondition(t *testing.T) {
 	// Create an initial condition instance
 	condition := &Condition{conditionMet: false}
 	// Create a new ConditionalNext instance
-	conditionalNext := storyboard.NewConditionalNext("NodeA", condition)
+	n := storyboard.NewNode("NodeA")
+	conditionalNext := storyboard.NewConditionalNext(n, condition)
 
 	// Set a new condition
 	newCondition := &Condition{conditionMet: true}
@@ -54,13 +56,15 @@ func TestConditinalNextSetNode(t *testing.T) {
 	// Create a condition instance
 	condition := &Condition{conditionMet: true}
 	// Create a new ConditionalNext instance
-	conditionalNext := storyboard.NewConditionalNext("NodeA", condition)
+	nodeA := storyboard.NewNode("NodeA")
+	conditionalNext := storyboard.NewConditionalNext(nodeA, condition)
 
 	// Set a new node
-	conditionalNext.SetNode("NodeB")
+	nodeB := storyboard.NewNode("NodeB")
+	conditionalNext.SetNode(nodeB)
 
 	// Test if the node was updated
-	if conditionalNext.GetNode() != "NodeB" {
+	if conditionalNext.GetNode() != nodeB {
 		t.Errorf("Expected node to be updated to 'NodeB', got '%s'", conditionalNext.GetNode())
 	}
 }

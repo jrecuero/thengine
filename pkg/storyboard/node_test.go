@@ -38,10 +38,12 @@ func TestNodeAddText(t *testing.T) {
 func TestNodeAddNext(t *testing.T) {
 	// Create a new Node instance
 	node := storyboard.NewNode("Node1")
+	node2 := storyboard.NewNode("Node2")
+	node3 := storyboard.NewNode("Node3")
 
 	// Create mock ConditionalNext instances
-	condNext1 := storyboard.NewConditionalNext("Node2", nil)
-	condNext2 := storyboard.NewConditionalNext("Node3", nil)
+	condNext1 := storyboard.NewConditionalNext(node2, nil)
+	condNext2 := storyboard.NewConditionalNext(node3, nil)
 
 	// Add next nodes to the node
 	node.AddNext(condNext1, condNext2)
@@ -50,10 +52,10 @@ func TestNodeAddNext(t *testing.T) {
 	if len(node.GetNext()) != 2 {
 		t.Errorf("[Node] Expected 2 next nodes, got %d", len(node.GetNext()))
 	}
-	if node.GetNext()[0].GetNode() != "Node2" {
+	if node.GetNext()[0].GetNode() != node2 {
 		t.Errorf("[Node] Expected next node 'Node2', got '%s'", node.GetNext()[0].GetNode())
 	}
-	if node.GetNext()[1].GetNode() != "Node3" {
+	if node.GetNext()[1].GetNode() != node3 {
 		t.Errorf("[Node] Expected next node 'Node3', got '%s'", node.GetNext()[1].GetNode())
 	}
 }
@@ -64,7 +66,7 @@ func TestNodeAddQuestion(t *testing.T) {
 	node := storyboard.NewNode("Node1")
 
 	// Create mock Question instances (for simplicity, using the same struct as in the previous tests)
-	question := storyboard.NewQuestion()
+	question := storyboard.NewQuestion("Question")
 
 	// Add questions to the node
 	node.AddQuestion(question)

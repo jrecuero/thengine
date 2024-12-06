@@ -15,6 +15,26 @@ func (m *MockCondition) Evaluate() bool {
 	return m.ConditionValue
 }
 
+func TestStoryBoardNodes(t *testing.T) {
+	sb := storyboard.NewStoryBoard("storyboard/test")
+
+	node := storyboard.NewNode("StartNode")
+	node1 := storyboard.NewNode("Node1")
+	node.AddNext(node1)
+	question1 := storyboard.NewQuestion("Question1")
+	question2 := storyboard.NewQuestion("Question2")
+	node1.AddQuestion(question1, question2)
+
+	sb.SetStart(node)
+
+	if sb.GetCurrent() == nil {
+		t.Errorf("SetCurrent error exp:%s got:nil", sb.GetCurrent().GetText())
+	}
+	if len(sb.GetNodes()) != 4 {
+		t.Errorf("GetNodes error exp:%d got:%d", 4, len(sb.GetNodes()))
+	}
+}
+
 // Test for Node, Question, ConditionalText, and ConditionalNext interaction
 func TestStoryBoardOne(t *testing.T) {
 	// Create a mock condition that evaluates to true
@@ -22,13 +42,15 @@ func TestStoryBoardOne(t *testing.T) {
 	conditionFalse := &MockCondition{ConditionValue: false}
 
 	// Create ConditionalNext and ConditionalText instances
-	condNext1 := storyboard.NewConditionalNext("NextNode1", nil)
-	condNext2 := storyboard.NewConditionalNext("NextNode2", nil)
+	nextNode1 := storyboard.NewNode("NextNode1")
+	nextNode2 := storyboard.NewNode("NextNode2")
+	condNext1 := storyboard.NewConditionalNext(nextNode1, nil)
+	condNext2 := storyboard.NewConditionalNext(nextNode2, nil)
 	condText1 := storyboard.NewConditionalText("Text for True Condition", nil)
 	condText2 := storyboard.NewConditionalText("Text for False Condition", nil)
 
 	// Create a Question and associate it with ConditionalText and ConditionalNext
-	question := storyboard.NewQuestion()
+	question := storyboard.NewQuestion("Question")
 	question.AddText(condText1)
 	question.AddText(condText2)
 	question.AddNext(condNext1)
@@ -66,7 +88,7 @@ func TestStoryBoardOne(t *testing.T) {
 	if len(node.GetNext()) != 1 {
 		t.Errorf("[Node] Expected 1 next node, got %d", len(node.GetNext()))
 	}
-	if node.GetNext()[0].GetNode() != "NextNode1" {
+	if node.GetNext()[0].GetNode() != nextNode1 {
 		t.Errorf("[Node] Expected next node 'NextNode1', got '%s'", node.GetNext()[0].GetNode())
 	}
 
@@ -104,15 +126,19 @@ func TestStoryBoardTwo(t *testing.T) {
 
 	// Add some text to the Question Node and questions.
 	questionNode.AddText("Are you happy?")
-	questionYes := storyboard.NewQuestion()
+	questionYes := storyboard.NewQuestion("Question")
 	questionYes.AddText("YES")
 	questionYes.AddNext("AnswerYes")
 	questionNode.AddQuestion(questionYes)
 
-	questionNo := storyboard.NewQuestion()
+	questionNo := storyboard.NewQuestion("Question")
 	questionNo.AddText("NO")
 	questionNo.AddNext("AnswerNo")
 	questionNode.AddQuestion(questionNo)
+
+	if len(questionNode.GetQuestions()) != 2 {
+		t.Errorf("GetQuestions error exp:%d got:%d", 2, len(questionNode.GetQuestions()))
+	}
 
 	// Add some text to the anwsers Node
 	answerYes.AddText("I'm glad")

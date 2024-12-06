@@ -13,6 +13,7 @@ type IBaseNode interface {
 	AddText(...any)
 	GetID() string
 	GetNext() []IConditionalNext
+	GetNextNodes() []IBaseNode
 	GetSpeaker() string
 	GetText() []IConditionalText
 	SetSpeaker(string)
@@ -61,7 +62,7 @@ func (n *BaseNode) AddNext(nexts ...any) {
 	for _, entry := range nexts {
 		var input IConditionalNext
 		switch next := entry.(type) {
-		case string:
+		case INode:
 			input = NewConditionalNext(next, nil)
 		case IConditionalNext:
 			input = next
@@ -97,6 +98,14 @@ func (n *BaseNode) GetID() string {
 
 func (n *BaseNode) GetNext() []IConditionalNext {
 	return n.next
+}
+
+func (n *BaseNode) GetNextNodes() []IBaseNode {
+	var nodes []IBaseNode
+	for _, conditionalNext := range n.GetNext() {
+		nodes = append(nodes, conditionalNext.GetNode())
+	}
+	return nodes
 }
 
 func (n *BaseNode) GetSpeaker() string {

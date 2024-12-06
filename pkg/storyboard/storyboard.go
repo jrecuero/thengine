@@ -18,7 +18,7 @@ type StoryBoard struct {
 	name string
 
 	// node slice of INode with all nodes in the story board.
-	nodes []INode
+	nodes []IBaseNode
 
 	// start INode instance to the initial node in the story board.
 	start INode
@@ -38,6 +38,32 @@ func NewStoryBoard(name string) *StoryBoard {
 }
 
 // -----------------------------------------------------------------------------
+// StoryBoard private functions
+// -----------------------------------------------------------------------------
+
+// getAllNodes method returns all children nodes for the given node. All
+// children include INode and IQuestion instances.
+func (s *StoryBoard) getAllNodes(basenode IBaseNode) []IBaseNode {
+	nodes := []IBaseNode{basenode}
+	for _, n := range basenode.GetNext() {
+		// nodes = append(nodes, n.GetNode())
+		nodes = append(nodes, s.getAllNodes(n.GetNode())...)
+	}
+	if node, ok := basenode.(INode); ok {
+		for _, question := range node.GetQuestions() {
+			// nodes = append(nodes, question)
+			nodes = append(nodes, s.getAllNodes(question)...)
+		}
+	}
+	return nodes
+}
+
+func (s *StoryBoard) populateNodes(node INode) {
+	s.start = node
+	s.nodes = s.getAllNodes(node)
+}
+
+// -----------------------------------------------------------------------------
 // StoryBoard public functions
 // -----------------------------------------------------------------------------
 
@@ -49,7 +75,7 @@ func (s *StoryBoard) GetName() string {
 	return s.name
 }
 
-func (s *StoryBoard) GetNodes() []INode {
+func (s *StoryBoard) GetNodes() []IBaseNode {
 	return s.nodes
 }
 
@@ -58,15 +84,18 @@ func (s StoryBoard) GetStart() INode {
 }
 
 func (s *StoryBoard) GetNodeWithID(id string) INode {
-	if result, found := tools.RetrieveGenericAny(s.nodes, id, func(a INode, b string) bool {
+	if result, found := tools.RetrieveGenericAny(s.nodes, id, func(a IBaseNode, b string) bool {
 		return a.GetID() == b
 	}); found {
-		return result
+		return result.(INode)
 	}
 	return nil
 }
 
 func (s *StoryBoard) SetCurrent(node INode) {
+	if s.current == nil {
+		s.populateNodes(node)
+	}
 	s.current = node
 }
 
@@ -75,5 +104,6 @@ func (s *StoryBoard) SetName(name string) {
 }
 
 func (s *StoryBoard) SetStart(node INode) {
-	s.start = node
+	s.current = nil
+	s.SetCurrent(node)
 }

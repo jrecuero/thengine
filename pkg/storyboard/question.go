@@ -33,9 +33,9 @@ type Question struct {
 // New Question functions
 // -----------------------------------------------------------------------------
 
-func NewQuestion() *Question {
+func NewQuestion(id string) *Question {
 	return &Question{
-		BaseNode:  NewBaseNode(""),
+		BaseNode:  NewBaseNode(id),
 		condition: nil,
 	}
 }
