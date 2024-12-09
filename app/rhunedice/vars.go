@@ -6,22 +6,19 @@ import (
 )
 
 // -----------------------------------------------------------------------------
-// Module private constants
+// Module private variables
 // -----------------------------------------------------------------------------
 
 var (
 	theCamera = engine.NewCamera(TheGameBoxOrigin, TheGameBoxSize)
 	theEngine = engine.GetEngine()
-	theFPS    = 60.0
 )
 
 // -----------------------------------------------------------------------------
-// Module public constants
+// Module public variables
 // -----------------------------------------------------------------------------
 
 var (
-	TheScreenWidth          = 180
-	TheScreenHeight         = 48
 	TheGameBoxOrigin        = api.NewPoint(0, 0)
 	TheGameBoxSize          = api.NewSize(TheScreenWidth, TheScreenHeight)
 	TheStageBoxOrigin       = api.NewPoint(1, 1)
