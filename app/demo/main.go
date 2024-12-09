@@ -779,6 +779,9 @@ func demoSixteen(dryRun bool) {
 	anchoredText := widgets.NewAnchoredText("widget/anchored-text/1", textThree, textFour)
 	scene.AddEntity(anchoredText)
 
+	choose := widgets.NewChoose("choose/1", api.NewPoint(1, 10), api.NewSize(20, 5), &constants.WhiteOverBlack, []string{"ok", "cancel", "help"}, 0)
+	scene.AddEntity(choose)
+
 	appEngine := engine.GetEngine()
 	appEngine.InitResources()
 	appEngine.GetSceneManager().AddScene(scene)
