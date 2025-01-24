@@ -1,6 +1,10 @@
 package main
 
-import "github.com/jrecuero/thengine/pkg/engine"
+import (
+	"github.com/jrecuero/thengine/app/story/book"
+	"github.com/jrecuero/thengine/pkg/engine"
+	"github.com/jrecuero/thengine/pkg/storyboard"
+)
 
 // -----------------------------------------------------------------------------
 //
@@ -10,6 +14,7 @@ import "github.com/jrecuero/thengine/pkg/engine"
 
 type StoryHandler struct {
 	*engine.Entity
+	book *storyboard.StoryBoard
 }
 
 // -----------------------------------------------------------------------------
@@ -20,5 +25,10 @@ func NewStoryHandler() *StoryHandler {
 	name := "handler/story/1"
 	return &StoryHandler{
 		Entity: engine.NewHandler(name),
+		book:   book.TheBook,
 	}
 }
+
+// -----------------------------------------------------------------------------
+// StoryHandler public methods
+// -----------------------------------------------------------------------------
